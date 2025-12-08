@@ -1,27 +1,25 @@
-let express = require('express');
-let app = express();
-let bodyParser = require('body-parser');
-let student = require('./routes/students');
-let course = require('./routes/courses');
-let grade = require('./routes/grades');
+// Inject environment variables from .env file
+require("dotenv").config();
 
-let mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-//mongoose.set('debug', true);
+const express = require('express');
+const mongoose = require('mongoose');
 
-// TODO remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud
-//const uri = 'mongodb+srv://<username>:<password>@cluster0.mongodb.net/student_management?retryWrites=true&w=majority';
-const uri = "mongodb://127.0.0.1:27017/student_management";
+// Enable mongoose debug mode in development environment
+if (process.env.NODE_ENV === "development") {
+    mongoose.set("debug", true);
+}
 
-const options = {};
+const productRoutes = require('./routes/student.route.js');
 
-mongoose.connect(uri, options)
-    .then(() => {
-            console.log("Connexion à la base OK");
-        },
-        err => {
-            console.log('Erreur de connexion: ', err);
-        });
+const app = express();
+
+// Set the port and MongoDB URI from environment variables .env
+const port = process.env.PORT || 8010;
+const mongodbUri = process.env.MONGODB_URI;
+
+// Middleware to parse JSON bodies and URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Pour accepter les connexions cross-domain (CORS)
 app.use(function (req, res, next) {
@@ -31,30 +29,26 @@ app.use(function (req, res, next) {
     next();
 });
 
-// Pour les formulaires
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+// routes 
+app.use("/api/students", productRoutes);
 
-let port = process.env.PORT || 8010;
 
-// les routes
-const prefix = '/api';
+mongoose.connect(mongodbUri)
+    .then(() => {
+        console.log("Connected to MongoDB");
+        app.listen(port,()=>{
+            console.log(`Server is running on port ${port}`);
+        });  
+    })
+    .catch(err => {
+        console.error("Error connecting to MongoDB: ", err);
+    }); 
+    
 
-app.route(prefix + '/students')
-    .get(student.getAll)
-    .post(student.create);
 
-app.route(prefix + '/courses')
-    .get(course.getAll)
-    .post(course.create);
 
-app.route(prefix + '/grades')
-    .get(grade.getAll)
-    .post(grade.create);
 
-// On démarre le serveur
-app.listen(port, "0.0.0.0");
-console.log('Serveur démarré sur http://localhost:' + port);
+
 
 module.exports = app;
 
