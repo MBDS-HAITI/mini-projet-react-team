@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === "development") {
 
 const studentroutes = require('./routes/student.route.js');
 const courseRoutes = require('./routes/course.route.js');
+const gradesRoutes = require('./routes/grades.route.js');
 
 const app = express();
 
@@ -33,7 +34,7 @@ app.use(function (req, res, next) {
 // routes 
 app.use("/api/students", studentroutes);
 app.use("/api/courses", courseRoutes);
-
+app.use('/api/grades', gradesRoutes);
 
 mongoose.connect(mongodbUri)
     .then(() => {
