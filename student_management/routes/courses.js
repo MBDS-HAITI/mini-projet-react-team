@@ -1,3 +1,4 @@
+
 let {Course} = require('../model/schemas');
 
 function getAll(req, res) {

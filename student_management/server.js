@@ -10,6 +10,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const productRoutes = require('./routes/student.route.js');
+const courseRoutes = require('./routes/course.route.js');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(function (req, res, next) {
 
 // routes 
 app.use("/api/students", productRoutes);
+app.use("/api/courses", courseRoutes);
 
 
 mongoose.connect(mongodbUri)
