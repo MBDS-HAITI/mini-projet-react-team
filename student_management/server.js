@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "development") {
     mongoose.set("debug", true);
 }
 
-const productRoutes = require('./routes/student.route.js');
+const studentroutes = require('./routes/student.route.js');
 const courseRoutes = require('./routes/course.route.js');
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 });
 
 // routes 
-app.use("/api/students", productRoutes);
+app.use("/api/students", studentroutes);
 app.use("/api/courses", courseRoutes);
 
 
