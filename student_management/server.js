@@ -1,17 +1,19 @@
 // Inject environment variables from .env file
-require("dotenv").config();
+import dotenv from 'dotenv';
+import express from 'express';
+import mongoose from'mongoose';
+import studentroutes from './routes/student.route.js';
+import courseRoutes from './routes/course.route.js';
+import gradesRoutes from './routes/grades.route.js';
 
-const express = require('express');
-const mongoose = require('mongoose');
+
+dotenv.config();
 
 // Enable mongoose debug mode in development environment
 if (process.env.NODE_ENV === "development") {
     mongoose.set("debug", true);
 }
 
-const studentroutes = require('./routes/student.route.js');
-const courseRoutes = require('./routes/course.route.js');
-const gradesRoutes = require('./routes/grades.route.js');
 
 const app = express();
 
@@ -53,6 +55,6 @@ mongoose.connect(mongodbUri)
 
 
 
-module.exports = app;
+export default app;
 
 

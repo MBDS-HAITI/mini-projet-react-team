@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
+//const mongoose = require('mongoose');
 
 const StudentSchema = mongoose.Schema({
     firstName: { type: String, required: [true, "Please enter the firstName"], minLength: 3},
@@ -11,4 +12,5 @@ const StudentSchema = mongoose.Schema({
 
 const Student = mongoose.model('Student', StudentSchema);
 
-module.exports = Student;
+export default Student;
+
