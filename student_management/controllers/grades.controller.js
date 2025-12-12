@@ -1,6 +1,6 @@
-const Grades = require('../models/grades.model.js');
+import Grades from '../models/grades.model.js';
 
-const postGrades = async (req, res) => {
+export const postGrades = async (req, res) => {
    try {
       const grades = await Grades.create(req.body);
       res.status(201).json(grades);
@@ -9,7 +9,7 @@ const postGrades = async (req, res) => {
    }
 };
 
-const getAllgrades = async (req, res) => {
+export const getAllgrades = async (req, res) => {
    try {
       const grades = await Grades.find()
          .populate('student')
@@ -21,7 +21,7 @@ const getAllgrades = async (req, res) => {
    }
 };
 
-const getGrades = async (req, res) => {
+export const getGrades = async (req, res) => {
    try {
       const { id } = req.params;
       const grades = await Grades.findById(id)
@@ -38,7 +38,7 @@ const getGrades = async (req, res) => {
    }
 };
 
-const putGrades = async (req, res) => {
+export const putGrades = async (req, res) => {
    try {
       const { id } = req.params;
       const grades = await Grades.findByIdAndUpdate(id, req.body);
@@ -57,7 +57,7 @@ const putGrades = async (req, res) => {
    }
 };
 
-const deleteGrades = async (req, res) => {
+export const deleteGrades = async (req, res) => {
    try {
       const grades = await Grades.findByIdAndDelete(req.params.id);
 
@@ -71,4 +71,3 @@ const deleteGrades = async (req, res) => {
    }
 };
 
-module.exports = { postGrades, getAllgrades, getGrades, putGrades, deleteGrades };
