@@ -95,7 +95,7 @@ export const putStudent = async (req,res)=>{
 export const deleteStudent = async (req,res)=>{
     try {
         const student = await Student.findByIdAndDelete(req.params.id);
-        res.status(200).json(student);
+        res.status(204).json(student);
     } catch (error) {
         res.status(404).json({isSuccess: false, message: `Student not found`});
     }
