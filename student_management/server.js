@@ -1,25 +1,23 @@
-// Inject environment variables from .env file
-import dotenv from 'dotenv';
+
 import express from 'express';
 import mongoose from'mongoose';
 import studentroutes from './routes/student.route.js';
 import courseRoutes from './routes/course.route.js';
 import gradesRoutes from './routes/grades.route.js';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from './config/swagger.js';
+import { MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
 
-
-dotenv.config();
 
 // Enable mongoose debug mode in development environment
-if (process.env.NODE_ENV === "development") {
+if (NODE_ENV === "development") {
     mongoose.set("debug", true);
 }
 
 
 const app = express();
 
-// Set the port and MongoDB URI from environment variables .env
-const port = process.env.PORT || 8010;
-const mongodbUri = process.env.MONGODB_URI;
+app.use("/swagger/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware to parse JSON bodies and URL-encoded data
 app.use(express.json());
@@ -34,15 +32,15 @@ app.use(function (req, res, next) {
 });
 
 // routes 
-app.use("/api/students", studentroutes);
-app.use("/api/courses", courseRoutes);
-app.use('/api/grades', gradesRoutes);
+app.use("/api/v1/students", studentroutes);
+app.use("/api/v1/courses", courseRoutes);
+app.use('/api/v1/grades', gradesRoutes);
 
-mongoose.connect(mongodbUri)
+mongoose.connect(MONGODB_URI)
     .then(() => {
         console.log("Connected to MongoDB");
-        app.listen(port,()=>{
-            console.log(`Server is running on port ${port}`);
+        app.listen(PORT,()=>{
+            console.log(`Server is running on port ${PORT}`);
         });  
     })
     .catch(err => {
