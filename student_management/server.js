@@ -34,9 +34,9 @@ app.use(function (req, res, next) {
 });
 
 // routes 
-app.use("/api/students", studentroutes);
-app.use("/api/courses", courseRoutes);
-app.use('/api/grades', gradesRoutes);
+app.use("/api/v1/students", studentroutes);
+app.use("/api/v1/courses", courseRoutes);
+app.use('/api/v1/grades', gradesRoutes);
 
 mongoose.connect(mongodbUri)
     .then(() => {
