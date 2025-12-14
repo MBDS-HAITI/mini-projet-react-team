@@ -6,6 +6,7 @@ const menuItems = [
     { label: "Home", link: "/home", tag: "home" },
     { label: "Notes", link: "/grades", tag: "grades" },
     { label: "Etudiants", link: "/students", tag: "students" },
+    { label: "Etudiants2", link: "/students2", tag: "students2" },
     { label: "Matières", link: "/courses", tag: "courses" },
     { label: "A propos", link: "/about", tag: "about" },
 ];
