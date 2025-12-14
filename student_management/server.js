@@ -7,6 +7,9 @@ import gradesRoutes from './routes/grades.route.js';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
 import { MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
+import fs from "fs";
+import https from "https";
+
 
 
 // Enable mongoose debug mode in development environment
@@ -16,6 +19,8 @@ if (NODE_ENV === "development") {
 
 
 const app = express();
+const key = fs.readFileSync("./data/react_team.key");
+const cert = fs.readFileSync("./data/react_team.crt");
 
 app.use("/swagger/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -37,16 +42,17 @@ app.use("/api/v1/courses", courseRoutes);
 app.use('/api/v1/grades', gradesRoutes);
 
 mongoose.connect(MONGODB_URI)
-    .then(() => {
-        console.log("Connected to MongoDB");
-        app.listen(PORT,()=>{
-            console.log(`Server is running on port ${PORT}`);
-        });  
-    })
-    .catch(err => {
-        console.error("Error connecting to MongoDB: ", err);
-    }); 
-    
+  .then(() => {
+    console.log("Connected to MongoDB");
+
+    https.createServer({ key, cert }, app).listen(PORT, () => {
+      console.log(`HTTPS server is running on https://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB: ", err);
+    process.exit(1);
+  });
 
 
 
