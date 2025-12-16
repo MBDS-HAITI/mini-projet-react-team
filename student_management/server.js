@@ -7,6 +7,7 @@ import gradesRoutes from './routes/grades.route.js';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
 import { MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
+import { passport, session, secret, configureGooglePassport, requireLogin } from "./auth/auth.js";
 import fs from "fs";
 import https from "https";
 
@@ -40,6 +41,41 @@ app.use(function (req, res, next) {
 app.use("/api/v1/students", studentroutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use('/api/v1/grades', gradesRoutes);
+
+//Test authentication route
+const authenticaton_base = "/api/vx"; // évite les typos et garde ça simple
+
+// Configure passport strategy (à faire une seule fois)
+configureGooglePassport();
+
+
+app.use(authenticaton_base, session({
+  secret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true, // OK car tu es en https.createServer
+  },
+}));
+
+app.use(authenticaton_base, passport.initialize());
+app.use(authenticaton_base, passport.session());
+
+// OAuth routes
+app.get(`${authenticaton_base}/auth/google`,
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(`${authenticaton_base}/auth/google/callback`,
+  passport.authenticate("google", { failureRedirect: `${authenticaton_base}/auth/fail` }),
+  (req, res) => res.redirect(`${authenticaton_base}/authenticated`)
+);
+
+app.get(`${authenticaton_base}/auth/fail`, (req, res) => res.status(401).send("Auth failed"));
+
+app.get(`${authenticaton_base}/authenticated`, requireLogin, (req, res) => res.json({ user: req.user }));
 
 mongoose.connect(MONGODB_URI)
   .then(() => {
