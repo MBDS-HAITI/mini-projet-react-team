@@ -17,7 +17,7 @@ export const swaggerSpec = swaggerJSDoc({
       version: "1.0.0",
       description: "Documentation OpenAPI",
     },
-    servers: [{ url: `http://localhost:${PORT}` }],
+    servers: [{ url: `https://localhost:${PORT}` }],
   },
   apis: [routesGlob],
 });
