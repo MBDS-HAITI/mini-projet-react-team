@@ -1,3 +1,4 @@
+// config/swagger.js
 import swaggerJSDoc from "swagger-jsdoc";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,7 @@ export const swaggerSpec = swaggerJSDoc({
       version: "1.0.0",
       description: "Documentation OpenAPI",
     },
-    servers: [{ url: `http://localhost:${PORT}` }],
+    servers: [{ url: `https://localhost:${PORT}` }],
   },
   apis: [routesGlob],
 });
