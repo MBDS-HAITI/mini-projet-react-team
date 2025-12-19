@@ -14,6 +14,8 @@ export function configureGooglePassport() {
       },
       async (accessToken, refreshToken, profile, done) => {
         // TODO: upsert user in Mongo si tu veux
+        console.log({profile});
+        
         return done(null, {
           id: profile.id,
           displayName: profile.displayName,

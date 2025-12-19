@@ -1,3 +1,4 @@
+// config/env.js
 import { config } from 'dotenv';
 
 config({path: '.env'});
@@ -7,5 +8,6 @@ export const { PORT,
     MONGODB_URI,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    GOOGLE_CLIENT_CALLBACK_URL
+    GOOGLE_CLIENT_CALLBACK_URL,
+    FRONT_URL
  }=  process.env

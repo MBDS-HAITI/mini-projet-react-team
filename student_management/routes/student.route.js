@@ -1,4 +1,4 @@
-
+// routes/student.route.js
 import express from 'express'
 import {postStudent, getAllStudents, getStudent, putStudent, deleteStudent,getStudents} from '../controllers/student.controller.js';
 
@@ -55,6 +55,7 @@ const router = express.Router();
  */
 router.post("/", postStudent);
 
+
 /**
  * @openapi
  * /api/v1/students:
@@ -71,6 +72,7 @@ router.post("/", postStudent);
  *               items:
  *                 $ref: '#/components/schemas/Student'
  */
+
 router.get('/', getAllStudents);
 
 /**

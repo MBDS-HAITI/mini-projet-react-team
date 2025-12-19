@@ -1,8 +1,12 @@
 
-import express from 'express';
+import express from "express";
+import cors from "cors";
 import mongoose from'mongoose';
-import studentroutes from './routes/student.route.js';
+import academicYearRoutes from './routes/academic-year.route.js';
+import semesterRoutes from './routes/semester.route.js';
+import studentRoutes from './routes/student.route.js';
 import courseRoutes from './routes/course.route.js';
+import enrollmentRoutes from './routes/enrollment.route.js';
 import gradesRoutes from './routes/grades.route.js';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
@@ -10,6 +14,7 @@ import { MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
 import { passport, session, secret, configureGooglePassport, requireLogin } from "./auth/auth.js";
 import fs from "fs";
 import https from "https";
+import { CORS_OPTIONS } from './config/cors.js';
 
 
 
@@ -30,16 +35,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Pour accepter les connexions cross-domain (CORS)
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    next();
-});
+app.use( cors(CORS_OPTIONS)
+);
 
 // routes 
-app.use("/api/v1/students", studentroutes);
+app.use("/api/v1/academicyears", academicYearRoutes);
+app.use("/api/v1/semesters", semesterRoutes);
+app.use("/api/v1/students", studentRoutes);
 app.use("/api/v1/courses", courseRoutes);
+app.use("/api/v1/enrollments", enrollmentRoutes);
 app.use('/api/v1/grades', gradesRoutes);
 
 //Test authentication route
