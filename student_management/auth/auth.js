@@ -1,8 +1,16 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
+import mongoose from "mongoose";
 
 const secret = process.env.SESSION_SECRET || "change_me_in_env";
+const UserSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  role: { type: String, enum: ["admin", "student","scolarite"], default: "student" },
+});
+
+
+export const User = mongoose.model("User", UserSchema);
 
 export function configureGooglePassport() {
   passport.use(
@@ -34,3 +42,9 @@ export function requireLogin(req, res, next) {
 }
 
 export { passport, session, secret };
+
+export function createUser(email,role)
+{
+UserSchema.create({email:email,role:role});
+
+}

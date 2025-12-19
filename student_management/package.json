@@ -12,7 +12,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
-  "author": "Amosse EDOUARD",
+  "author": "react-team",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.2.1",
