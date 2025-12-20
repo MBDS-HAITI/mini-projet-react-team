@@ -6,6 +6,7 @@ import {
   getEnrollment,
   putEnrollment,
   deleteEnrollment,
+  getAllEnrollmentsByStudentId,
   getAllEnrollmentsBySemesterId,
   getAllEnrollmentsByAcademicYearId,
 } from "../controllers/enrollment.controller.js";
@@ -172,6 +173,36 @@ router.get("/semester/:semesterId", getAllEnrollmentsBySemesterId);
  *         description: academicYearId invalide
  */
 router.get("/academicyear/:academicYearId", getAllEnrollmentsByAcademicYearId);
+
+/**
+ * @openapi
+ * /api/v1/enrollments/student/{studentId}:
+ *   get:
+ *     summary: Récupérer les inscriptions d'un semestre
+ *     description: |
+ *       Retourne toutes les inscriptions du semestre.
+ *     tags: [Enrollments]
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID du semestre
+ *     responses:
+ *       200:
+ *         description: Liste des inscriptions du semestre
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Enrollment'
+ *       400:
+ *         description: studentId invalide
+ */
+router.get("/student/:studentId", getAllEnrollmentsByStudentId);
+
 
 /**
  * @openapi

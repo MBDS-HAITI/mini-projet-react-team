@@ -1,8 +1,10 @@
 
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser"
 import mongoose from'mongoose';
 import academicYearRoutes from './routes/academic-year.route.js';
+import userRoutes from './routes/user.route.js';
 import semesterRoutes from './routes/semester.route.js';
 import studentRoutes from './routes/student.route.js';
 import courseRoutes from './routes/course.route.js';
@@ -15,6 +17,7 @@ import { passport, session, secret, configureGooglePassport, requireLogin } from
 import fs from "fs";
 import https from "https";
 import { CORS_OPTIONS } from './config/cors.js';
+import errorMiddleware from "./middleware/error.middleware.js";
 
 
 
@@ -32,13 +35,17 @@ app.use("/swagger/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware to parse JSON bodies and URL-encoded data
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use(errorMiddleware);
 
 // Pour accepter les connexions cross-domain (CORS)
 app.use( cors(CORS_OPTIONS)
 );
 
 // routes 
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/academicyears", academicYearRoutes);
 app.use("/api/v1/semesters", semesterRoutes);
 app.use("/api/v1/students", studentRoutes);

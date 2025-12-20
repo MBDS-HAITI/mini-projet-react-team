@@ -16,24 +16,11 @@ export const getAllEnrollments = async(req, res) => {
    try {
         const enrollments = await Enrollment.find()
                                     .populate('student')
-                                    .populate('course');
-        res.status(200).json(enrollments);
-   } catch (error) {
-        res.status(500).json({message: error.message});
-   }
-};
-
-export const getAllEnrollmentsBySemesterId = async(req, res) => {
-   try {
-        const {semesterId} = req.params;
-        
-        if (!mongoose.Types.ObjectId.isValid(semesterId)) {
-            return res.status(400).json({ message: "semester invalide" });
-        }
-
-        const enrollments = await Enrollment.find({ semester: semesterId })
-                                    .populate('student')
-                                    .populate('course');
+                                    .populate('course')
+                                    .populate({
+                                        path: "semester",
+                                        populate: { path: "academicYear" },
+                                    });
         res.status(200).json(enrollments);
    } catch (error) {
         res.status(500).json({message: error.message});
@@ -54,6 +41,64 @@ export const getAllEnrollmentsByAcademicYearId = async(req, res) => {
 
     // récupérer les enrollments liés à ces semestres
     const enrollments = await Enrollment.find({ semester: { $in: semesterIds } })
+                                .populate("semester")
+                                .populate("student")
+                                .populate("course");
+        res.status(200).json(enrollments);
+   } catch (error) {
+        res.status(500).json({message: error.message});
+   }
+};
+
+export const getAllEnrollmentsBySemesterId = async(req, res) => {
+   try {
+        const {semesterId} = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(semesterId)) {
+      return res.status(400).json({ message: "Semester invalide" });
+    }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ semester: semesterId })
+                                .populate("student")
+                                .populate("course");
+        res.status(200).json(enrollments);
+   } catch (error) {
+        res.status(500).json({message: error.message});
+   }
+};
+
+export const getAllEnrollmentsByStudentId = async(req, res) => {
+   try {
+        const {studentId} = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Student invalide" });
+    }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ student: studentId })
+                                .populate({
+                                    path: "semester",
+                                    populate: { path: "academicYear" },
+                                })
+                                .populate("course");
+        res.status(200).json(enrollments);
+   } catch (error) {
+        res.status(500).json({message: error.message});
+   }
+};
+
+export const getAllEnrollmentsByCourseId = async(req, res) => {
+   try {
+        const {courseId} = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: "Course invalide" });
+    }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ course: courseId })
                                 .populate({
                                     path: "semester",
                                     populate: { path: "academicYear" },

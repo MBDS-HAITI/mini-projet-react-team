@@ -3,11 +3,14 @@ import { config } from 'dotenv';
 
 config({path: '.env'});
 
+// All dependencies in file .env
 export const { PORT,
     NODE_ENV,
     MONGODB_URI,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_CLIENT_CALLBACK_URL,
-    FRONT_URL
+    FRONT_URL,
+    JWT_SECRET,
+    JWT_EXPIRES_IN
  }=  process.env
