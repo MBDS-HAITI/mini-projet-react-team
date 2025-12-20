@@ -1,13 +1,11 @@
 import User from "../models/user.model.js";
-import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
+
 
 export const postUser = async (req, res) => {
 
   try {
-    const { email, username, password, role, user, student } = req.body;
+    const { email, username, password, role, student } = req.body;
 
     const filter = {
       $or: [{ email }, { username }, { "providers.email": email }],
@@ -22,14 +20,7 @@ export const postUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
-    const newUser = await User.create({ email, username, password: hashedPassword, role, user, student: student||null });
-
-    // token: payload doit être un objet
-    const token = jwt.sign(
-      { id: newUser._id, role: newUser.role, email: newUser.email, username: newUser.username },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN } 
-    );
+    const newUser = await User.create({ email, username, password: hashedPassword, role, student: student||null });
 
 
     // renvoyer un objet propre (sans password)
@@ -101,7 +92,7 @@ export const getUsers = async (req,res)=>{
 export const getUser = async (req,res)=>{
     try {
         const {id} = req.params;
-        const user = await User.findById(id);
+        const user = await User.findById(id).select("-password");
         if (!user) {
             return res.status(404).json({message: `User not found`});
         }

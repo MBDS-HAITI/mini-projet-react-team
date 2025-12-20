@@ -9,6 +9,7 @@ import {
   putUser,
   deleteUser,
 } from "../controllers/user.controller.js";
+import { adminAuthorize, authorize } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

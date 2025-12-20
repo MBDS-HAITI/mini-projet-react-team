@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser"
 import mongoose from'mongoose';
 import academicYearRoutes from './routes/academic-year.route.js';
+import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import semesterRoutes from './routes/semester.route.js';
 import studentRoutes from './routes/student.route.js';
@@ -18,6 +19,7 @@ import fs from "fs";
 import https from "https";
 import { CORS_OPTIONS } from './config/cors.js';
 import errorMiddleware from "./middleware/error.middleware.js";
+import { adminAuthorize, authorize } from "./middleware/auth.middleware.js";
 
 
 
@@ -45,13 +47,14 @@ app.use( cors(CORS_OPTIONS)
 );
 
 // routes 
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/academicyears", academicYearRoutes);
-app.use("/api/v1/semesters", semesterRoutes);
-app.use("/api/v1/students", studentRoutes);
-app.use("/api/v1/courses", courseRoutes);
-app.use("/api/v1/enrollments", enrollmentRoutes);
-app.use('/api/v1/grades', gradesRoutes);
+app.use("/api/v1/auths", authRoutes);
+app.use("/api/v1/users", authorize, adminAuthorize, userRoutes);
+app.use("/api/v1/academicyears", authorize, academicYearRoutes);
+app.use("/api/v1/semesters", authorize, semesterRoutes);
+app.use("/api/v1/students", authorize, studentRoutes);
+app.use("/api/v1/courses", authorize, courseRoutes);
+app.use("/api/v1/enrollments", authorize, enrollmentRoutes);
+app.use('/api/v1/grades', authorize, gradesRoutes);
 
 //Test authentication route
 const authenticaton_base = "/api/vx"; // évite les typos et garde ça simple
