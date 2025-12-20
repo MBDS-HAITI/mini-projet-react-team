@@ -9,12 +9,45 @@ const ProviderSchema = new mongoose.Schema({
 
 
 const UserSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  username: { type: String, unique: true, sparse: true, trim: true },
-  passwordHash: { type: String , required: true}, 
-  role: { type: String, enum: ["ADMIN","SCOLARITE","STUDENT"], required: true },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    lowercase: true, 
+    trim: true,
+    match: [/\S+@\S+\.\S+/, 'Please fill a valid email adress']
+  },
+  mailVerified:{
+    type: Boolean,
+    default: false 
+  },
+  username: { type: String,
+    lowercase: true, 
+    unique: true, 
+    sparse: true, 
+    trim: true 
+  },
+  password: { 
+    type: String , 
+    required: true,
+    minLength: 6,
+  }, 
+  role: { type: String, enum: ["ADMIN","SCOLARITE","STUDENT"], required: true, default: "STUDENT" },
 
-  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student", default: null },
+  student: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Student", 
+    validate:{
+            validator: function (v) {
+            // si STUDENT => doit avoir un studentId
+            if (this.role === "STUDENT") return v != null;
+            // si pas STUDENT => doit être null
+            return v == null;
+          },
+          message: "Le champ student est requis."
+        },
+    default: null
+  },
   providers: { type: [ProviderSchema], default: [] },
 
   isActive: { type: Boolean, default: true },
