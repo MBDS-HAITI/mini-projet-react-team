@@ -19,6 +19,16 @@ export const swaggerSpec = swaggerJSDoc({
       description: "Documentation OpenAPI",
     },
     servers: [{ url: `https://localhost:${PORT}` }],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
   },
   apis: [routesGlob],
 });
