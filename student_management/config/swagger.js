@@ -2,7 +2,7 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { PORT } from "./env.js";
+import { HOST_BASE_URL, PORT } from "./env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +18,7 @@ export const swaggerSpec = swaggerJSDoc({
       version: "1.0.0",
       description: "Documentation OpenAPI",
     },
-    servers: [{ url: `https://localhost:${PORT}` }],
+    servers: [{ url: `${HOST_BASE_URL}:${PORT}` }],
     components: {
       securitySchemes: {
         bearerAuth: {

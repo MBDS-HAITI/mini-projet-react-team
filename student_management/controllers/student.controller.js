@@ -80,7 +80,7 @@ export const getStudent = async (req,res)=>{
 export const putStudent = async (req,res)=>{
     try {
         const {id} = req.params;
-        const student = await Student.findByIdAndUpdate(id, req.body);
+        const student = await Student.findByIdAndUpdate(id, req.body,{ new: true, runValidators: true });
 
         if (!student) {
             return res.status(404).json({isSuccess: false, message: `Student not found`});

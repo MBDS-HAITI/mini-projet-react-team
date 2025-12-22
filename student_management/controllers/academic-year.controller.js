@@ -6,7 +6,6 @@ export const postAcademicYear = async(req, res) => {
    }
    catch(error) {
     res.status(500).json({message: error.message});
-
    }
 };
 
@@ -34,7 +33,7 @@ export const getAcademicYear = async (req,res)=>{
 export const putAcademicYear = async (req,res)=>{
     try {
         const {id} = req.params;
-        const academicYear = await AcademicYear.findByIdAndUpdate(id, req.body);
+        const academicYear = await AcademicYear.findByIdAndUpdate(id, req.body,{ new: true, runValidators: true });
 
         if (!academicYear) {
             return res.status(404).json({message: `AcademicYear not found`});
