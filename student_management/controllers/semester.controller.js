@@ -52,7 +52,7 @@ export const getSemester = async (req,res)=>{
 export const putSemester = async (req,res)=>{
     try {
         const {id} = req.params;
-        const semester = await Semester.findByIdAndUpdate(id, req.body);
+        const semester = await Semester.findByIdAndUpdate(id, req.body,{ new: true, runValidators: true });
 
         if (!semester) {
             return res.status(404).json({message: `Semester not found`});

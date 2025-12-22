@@ -12,5 +12,6 @@ export const { PORT,
     GOOGLE_CLIENT_CALLBACK_URL,
     FRONT_URL,
     JWT_SECRET,
-    JWT_EXPIRES_IN
+    JWT_EXPIRES_IN,
+    HOST_BASE_URL
  }=  process.env

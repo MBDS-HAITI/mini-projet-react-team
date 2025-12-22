@@ -10,6 +10,7 @@ import {
   getAllEnrollmentsBySemesterId,
   getAllEnrollmentsByAcademicYearId,
 } from "../controllers/enrollment.controller.js";
+import { scolariteAuthorize } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -98,7 +99,7 @@ const router = express.Router();
  *       409:
  *         description: Conflit (même student + course + semester déjà existant)
  */
-router.post("/", postEnrollment);
+router.post("/", scolariteAuthorize, postEnrollment);
 
 /**
  * @openapi
@@ -116,7 +117,7 @@ router.post("/", postEnrollment);
  *               items:
  *                 $ref: '#/components/schemas/Enrollment'
  */
-router.get("/", getAllEnrollments);
+router.get("/", scolariteAuthorize, getAllEnrollments);
 
 /**
  * @openapi
@@ -143,7 +144,7 @@ router.get("/", getAllEnrollments);
  *       400:
  *         description: semesterId invalide
  */
-router.get("/semester/:semesterId", getAllEnrollmentsBySemesterId);
+router.get("/semester/:semesterId", scolariteAuthorize, getAllEnrollmentsBySemesterId);
 
 /**
  * @openapi
@@ -172,7 +173,7 @@ router.get("/semester/:semesterId", getAllEnrollmentsBySemesterId);
  *       400:
  *         description: academicYearId invalide
  */
-router.get("/academicyear/:academicYearId", getAllEnrollmentsByAcademicYearId);
+router.get("/academicyear/:academicYearId", scolariteAuthorize, getAllEnrollmentsByAcademicYearId);
 
 /**
  * @openapi
@@ -201,7 +202,7 @@ router.get("/academicyear/:academicYearId", getAllEnrollmentsByAcademicYearId);
  *       400:
  *         description: studentId invalide
  */
-router.get("/student/:studentId", getAllEnrollmentsByStudentId);
+router.get("/student/:studentId",  getAllEnrollmentsByStudentId);
 
 
 /**
@@ -226,7 +227,7 @@ router.get("/student/:studentId", getAllEnrollmentsByStudentId);
  *       404:
  *         description: Inscription introuvable
  */
-router.get("/:id", getEnrollment);
+router.get("/:id", scolariteAuthorize, getEnrollment);
 
 /**
  * @openapi
@@ -260,7 +261,7 @@ router.get("/:id", getEnrollment);
  *       409:
  *         description: Conflit (même student + course + semester déjà existant)
  */
-router.put("/:id", putEnrollment);
+router.put("/:id", scolariteAuthorize, putEnrollment);
 
 /**
  * @openapi
@@ -280,6 +281,6 @@ router.put("/:id", putEnrollment);
  *       404:
  *         description: Inscription introuvable
  */
-router.delete("/:id", deleteEnrollment);
+router.delete("/:id", scolariteAuthorize, deleteEnrollment);
 
 export default router;

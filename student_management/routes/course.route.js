@@ -7,6 +7,7 @@ import {
   putCourse,
   deleteCourse,
 } from "../controllers/course.controller.js";
+import { scolariteAuthorize } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -81,7 +82,7 @@ const router = express.Router();
  *       409:
  *         description: Conflit (code déjà existant)
  */
-router.post("/", postCourse);
+router.post("/", scolariteAuthorize, postCourse);
 
 /**
  * @openapi
@@ -157,7 +158,7 @@ router.get("/:id", getCourse);
  *       409:
  *         description: Conflit (code déjà existant)
  */
-router.put("/:id", putCourse);
+router.put("/:id", scolariteAuthorize, putCourse);
 
 /**
  * @openapi
@@ -177,6 +178,6 @@ router.put("/:id", putCourse);
  *       404:
  *         description: Cours introuvable
  */
-router.delete("/:id", deleteCourse);
+router.delete("/:id", scolariteAuthorize, deleteCourse);
 
 export default router;

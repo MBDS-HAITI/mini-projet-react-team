@@ -3,7 +3,6 @@ import express from "express";
 import {
   signIn
 } from "../controllers/auth.controller.js";
-import { authorize } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

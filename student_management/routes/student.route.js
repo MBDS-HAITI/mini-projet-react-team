@@ -1,6 +1,6 @@
 // routes/student.route.js
 import express from 'express'
-import {postStudent, getAllStudents, getStudent, putStudent, deleteStudent,getStudents} from '../controllers/student.controller.js';
+import { postStudent, getAllStudents, getStudent, putStudent, deleteStudent, getStudents } from '../controllers/student.controller.js';
 
 const router = express.Router();
 
