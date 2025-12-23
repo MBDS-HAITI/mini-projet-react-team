@@ -4,8 +4,8 @@ import mongoose from "mongoose";
 const StudentSchema = mongoose.Schema({
     firstName: { type: String, required: [true, "Please enter the firstName"], minLength: 3},
     lastName: { type: String, required: [true, "Please enter the lastName"], minLength: 3 },
-    dateOfBith: Date,
-    sex: { type: String, enum: ["M","F"],uppercase: true},
+    dateOfBith: { type: Date , default: null },
+    sex: { type: String, enum: ["M","F"],uppercase: true, required: true },
     phone: String,
     address: String,
     studentCode: { type: String, uppercase: true, unique: true, sparse: true }

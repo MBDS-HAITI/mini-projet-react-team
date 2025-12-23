@@ -13,5 +13,7 @@ export const { PORT,
     FRONT_URL,
     JWT_SECRET,
     JWT_EXPIRES_IN,
+    JWT_REFRESH_SECRET,
+    JWT_REFRESH_EXPIRES_IN,
     HOST_BASE_URL
  }=  process.env
