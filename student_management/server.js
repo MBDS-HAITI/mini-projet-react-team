@@ -57,6 +57,15 @@ app.use("/api/v1/courses", authorize, courseRoutes);
 app.use("/api/v1/enrollments", authorize, enrollmentRoutes);
 app.use('/api/v1/grades', authorize, gradeRoutes);
 
+app.use("/api/v0/auths", authRoutes);
+app.use("/api/v0/users",  userRoutes);
+app.use("/api/v0/academicyears", academicYearRoutes);
+app.use("/api/v0/semesters", semesterRoutes);
+app.use("/api/v0/students", studentRoutes);
+app.use("/api/v0/courses",  courseRoutes);
+app.use("/api/v0/enrollments", enrollmentRoutes);
+app.use('/api/v0/grades',  gradeRoutes);
+
 app.use(errorMiddleware);
 app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
