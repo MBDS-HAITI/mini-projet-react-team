@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { postStudent } from "../services/student";
 
-export default function AddStudent() {
+export default function AddStudentPage() {
   const navigate = useNavigate();
   const [student, setStudent] = useState({
     firstName: "",

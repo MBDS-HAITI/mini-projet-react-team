@@ -1,13 +1,16 @@
 
-import User from "../models/user.model.js";
+
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
-import { JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_SECRET } from "../config/env.js";
+import { JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_SECRET, NODE_ENV } from "../config/env.js";
+import User from "../models/user.model.js";
 
 export const signIn = async (req, res, next) => {
     try {
         const { username, password } = req.body;
 
+        
+        
         const user = await User.findOne({ username });
 
         if (!user) {
@@ -22,6 +25,8 @@ export const signIn = async (req, res, next) => {
             error.statusCode = 401;
             throw error;
         }
+
+        console.log("Bonjour from signIn: "+JWT_SECRET);
 
         // Access token (court)
         const token = jwt.sign(
@@ -43,11 +48,14 @@ export const signIn = async (req, res, next) => {
         );
 
         // Cookie HttpOnly envoyé seulement sur /api/v1/auths/refresh
-        res.cookie("refreshToken", refreshToken, {
+        const isProd = NODE_ENV === "production";
+
+        res.cookie("stdrefresh", refreshToken, {
             httpOnly: true,
-            secure: true, //NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,                 // prod: true, dev: false
+            sameSite: "None", // prod: none, dev: lax
             path: "/api/v1/auths/refresh",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
         return res.status(200).json({
@@ -65,21 +73,20 @@ export const signIn = async (req, res, next) => {
     }
 }
 
-export const refreshToken = async (req, res, next) => {
+export const refreshAccessToken = async (req, res, next) => {
     try {
-        
-        
-        const refreshToken = req.cookies?.refreshToken;
+
+        const refreshToken = req.cookies?.stdrefresh;
         if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
 
         const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
-       
+
 
         const user = await User.findOne({ _id: decoded.id });
 
         if (!user) return res.status(401).json({ message: "Unauthorized" });
-        
+
         const accessToken = jwt.sign(
             {
                 id: user._id,
@@ -90,7 +97,7 @@ export const refreshToken = async (req, res, next) => {
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES_IN }
         );
-        
+
         return res.status(200).json({ token: accessToken });
     } catch (error) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -99,7 +106,12 @@ export const refreshToken = async (req, res, next) => {
 
 export const signOut = async (req, res, next) => {
     try {
-        res.clearCookie("refreshToken", { path: "/api/v1/auths/refresh" });
+        res.clearCookie("stdrefresh",
+            {
+                path: "/api/v1/auths/refresh",
+                sameSite: NODE_ENV === "production" ? "none" : "lax",
+                secure: NODE_ENV === "production",
+            });
         return res.status(200).json({ success: true, message: "Logged out" });
     } catch (error) {
         next(error);

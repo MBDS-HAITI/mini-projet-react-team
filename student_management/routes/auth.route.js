@@ -3,7 +3,7 @@ import express from "express";
 import {
   changePassword,
   me,
-  refreshToken,
+  refreshAccessToken,
   signIn,
   signOut
 } from "../controllers/auth.controller.js";
@@ -92,7 +92,7 @@ router.post("/signin", signIn);
  *                   type: string
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  */
-router.post("/refresh",  refreshToken);
+router.post("/refresh",  refreshAccessToken);
 
 
 /**

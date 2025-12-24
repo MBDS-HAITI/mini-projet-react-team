@@ -6,9 +6,9 @@ const StudentSchema = mongoose.Schema({
     lastName: { type: String, required: [true, "Please enter the lastName"], minLength: 3 },
     dateOfBith: { type: Date , default: null },
     sex: { type: String, enum: ["M","F"],uppercase: true, required: true },
-    phone: String,
-    address: String,
-    studentCode: { type: String, uppercase: true, unique: true, sparse: true }
+    phone: { type: String , default: "",  sparse: true,  minLength: 8, maxLength: 15 },
+    address: { type: String , default: ""},
+    studentCode: { type: String, uppercase: true, unique: true, sparse: true, required: [true, "Please enter the lastName"] }
 }, { timestamps: true });
 
 StudentSchema.index({ lastName: 1, firstName: 1 });

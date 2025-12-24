@@ -27,7 +27,7 @@ export const postUser = async (req, res) => {
     const userObj = newUser.toObject();
     delete userObj.password;
 
-    return res.status(201).json({ success: true, token, user: userObj });
+    return res.status(201).json({ success: true, user: userObj });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });

@@ -1,7 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "../BaseUrls/baseUrls";
 import { Link } from "react-router-dom";
 import { getCourses } from "../services/course";
 

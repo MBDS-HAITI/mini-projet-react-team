@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { postCourse } from "../services/course";
 
-export default function AddCourse() {
+export default function AddCoursePage() {
     const navigate = useNavigate();
   const [course, setCourse] = useState({
     name: "",
