@@ -1,4 +1,5 @@
-import { API_BASE_URL } from "../BaseUrls/baseUrls";
+// src/services/course.js
+import { API_BASE_URL } from "../config/env.js";
 
 export function postCourse(course) {
   return fetch(`${API_BASE_URL}/courses`, {

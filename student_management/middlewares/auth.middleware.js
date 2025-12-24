@@ -17,14 +17,13 @@ export const authorize = async (req, res, next)=>{
         }
 
         const decoded = jwt.verify(token, JWT_SECRET)
-        const user = await User.findById(decoded.id)
+        const user = await User.findById(decoded.id).select('-password');
         
         if(!user || !user.isActive){
             return res.status(401).json({message: "Unauthorized"})
         }
 
         req.user=user;
-        
         next();
 
     } catch (error) {
@@ -65,3 +64,4 @@ export const scolariteAuthorize = async (req, res, next)=>{
         return res.status(401).json({message: "Unauthorized"})
     }
 }
+

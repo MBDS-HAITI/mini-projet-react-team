@@ -1,11 +1,11 @@
 import Student from '../models/student.model.js';
 
-export const postStudent = async (req,res)=>{
+export const postStudent = async (req,res,next)=>{
     try {
         const student = await Student.create(req.body);
         res.status(201).json(student);
     } catch (error) {
-        res.status(404).json({isSuccess: false, message: `Student not found`});
+        next(error);
     }
 };
 

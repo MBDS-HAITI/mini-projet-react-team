@@ -66,8 +66,10 @@ export const getAllGradesByStudentId = async (req, res) => {
     try {
         const { studentId } = req.params;
 
-        if (req.user.role === "STUDENT" && req.user.student !== studentId) {
-            return res.status(401).json({ message: "Unauthorized" })
+
+
+        if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
+            return res.status(403).json({ message: "Forbidden" })
         }
 
         if (!mongoose.Types.ObjectId.isValid(studentId)) {

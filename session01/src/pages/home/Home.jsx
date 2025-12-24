@@ -1,19 +1,24 @@
 import DisplayGradeRecord from "../components/DisplayGradeRecord";
 import data from "../assets/data.json";
 import { useEffect, useState } from "react";
-import { getGrades } from "../services/grades";
+import { getAllGrades } from "../api/routes/grades.api.js";
 
 export default function Home() {
 
   const [grades, setGrades] = useState([]);
       
         useEffect(() => {
-          getGrades().then(
-                (data) => {
-                  setGrades(data)
-                }
-              )
-            .catch((error) => console.error("Error fetching grades:", error));
+          const fetchGrades = async () => {
+            try {
+              const data = await getAllGrades();
+              
+              setGrades(data);
+            } catch (error) {
+              console.error("Error fetching grades:", error);
+            }
+          };
+          fetchGrades();
+
         }, []);
 
   return (
@@ -23,6 +28,7 @@ export default function Home() {
         {data.length === 0 ? (
           <p>Pas de données disponibles.</p>
         ) : (
+          grades.length === 0 &&
           grades.map((gradeRecord,index) => (
             <DisplayGradeRecord
               key={index}

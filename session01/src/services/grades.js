@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../BaseUrls/baseUrls";
+import { API_BASE_URL } from "../config/env.js";
 
 export function postGrade(grade) {
     return fetch(`${API_BASE_URL}/grades`, {

@@ -5,33 +5,66 @@ import { postStudent, getAllStudents, getStudent, putStudent, deleteStudent, get
 const router = express.Router();
 
 // Define routes and link to controller functions
+
 /**
  * @openapi
  * components:
  *   schemas:
- *     Student:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         firstName:
- *           type: string
- *         lastName:
- *           type: string
- *       required:
- *         - firstName
- *         - lastName
  *     StudentCreate:
  *       type: object
- *       properties:
- *         firstName:
- *           type: string
- *         lastName:
- *           type: string
  *       required:
  *         - firstName
  *         - lastName
+ *         - sex
+ *         - studentCode
+ *       properties:
+ *         firstName:
+ *           type: string
+ *           minLength: 3
+ *           example: "Stanley"
+ *         lastName:
+ *           type: string
+ *           minLength: 3
+ *           example: "Lafleur"
+ *         dateOfBith:
+ *           type: string
+ *           format: date
+ *           nullable: true
+ *           example: "2002-05-01"
+ *         sex:
+ *           type: string
+ *           enum: [M, F]
+ *           example: "M"
+ *         phone:
+ *           type: string
+ *           minLength: 8
+ *           maxLength: 15
+ *           example: "50937000000"
+ *         address:
+ *           type: string
+ *           example: "Delmas 33, Port-au-Prince"
+ *         studentCode:
+ *           type: string
+ *           example: "STD-2025-0001"
+ *
+ *     Student:
+ *       allOf:
+ *         - $ref: "#/components/schemas/StudentCreate"
+ *         - type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *               example: "6946090562f02dbb47d30a25"
+ *             createdAt:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-12-23T10:15:30.000Z"
+ *             updatedAt:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-12-23T10:16:10.000Z"
  */
+
 
 /**
  * @openapi
@@ -44,14 +77,18 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/StudentCreate'
+ *             $ref: "#/components/schemas/StudentCreate"
  *     responses:
  *       201:
  *         description: Étudiant créé
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Student'
+ *               $ref: "#/components/schemas/Student"
+ *       400:
+ *         description: Données invalides
+ *       409:
+ *         description: Conflit (studentCode déjà utilisé)
  */
 router.post("/", postStudent);
 
