@@ -1,34 +1,52 @@
-import { useState } from "react";
+import { useAuth } from "../auth/AuthProvider";
 import MenuItem from "./MenuItem";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const menuItems = [
-    { label: "Home", link: "/home", tag: "home" },
-    { label: "Notes", link: "/grades", tag: "grades" },
-    { label: "Etudiants", link: "/students", tag: "students" },
-    // { label: "Etudiants2", link: "/students2", tag: "students2" },
-    { label: "Matières", link: "/courses", tag: "courses" },
-    { label: "A propos", link: "/about", tag: "about" },
+  { label: "Home", link: "/home" },
+  { label: "Notes", link: "/grades" },
+  { label: "Etudiants", link: "/students" },
+  { label: "Matières", link: "/courses" },
+  { label: "A propos", link: "/about" },
 ];
-
 
 export default function Menu() {
   const { pathname } = useLocation();
+  const { logout } = useAuth();
   
 
   return (
-    <div className="w-full bg-[#432866] text-white sticky top-0 z-50">
-      <nav className="bg-neutral-secondary-soft border-y border-default border-default">
-        <div className="px-4 py-1 mx-auto">
-          <div className="flex items-center">
-            <ul className="flex flex-row w-full justify-center font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
-              {menuItems.map((item,index) => (
-                <MenuItem key={index} label={item.label} link={item.link} isActive={pathname.includes(item.link)}/>
-                ))}
+    <header className="w-full sticky top-0 z-50">
+      <nav className="bg-[#432866]/95 backdrop-blur border-b border-white/10 shadow-md">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="h-12 flex items-center justify-between">
+            {/* Left: Menu items */}
+            <ul className="flex items-center gap-2 sm:gap-3">
+              {menuItems.map((item, index) => (
+                <MenuItem
+                  key={index}
+                  label={item.label}
+                  link={item.link}
+                  isActive={pathname === item.link || pathname.startsWith(item.link + "/")}
+                />
+              ))}
             </ul>
+
+            {/* Right: Logout */}
+            <button
+              onClick={logout}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium
+                         bg-white/10 hover:bg-white/15 active:bg-white/20
+                         border border-white/15 hover:border-white/25
+                         transition"
+              title="Se déconnecter"
+            >
+              <span className="text-lg leading-none">⏻</span>
+              Déconnexion
+            </button>
           </div>
         </div>
       </nav>
-    </div>
+    </header>
   );
 }

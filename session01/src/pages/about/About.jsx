@@ -1,9 +1,10 @@
+// src/pages/about/About.jsx
 import { useMemo } from "react";
-import { Stat } from "../components/Stat";
-import { Badge } from "../components/Badge";
-import { Feature } from "../components/Feature";
+import { Stat } from "../../components/Stat";
+import { Badge } from "../../components/Badge";
+import { Feature } from "../../components/Feature";
 
-export default function About() {
+export default function AboutPage() {
   const stack = useMemo(
     () => [
       { name: "React", desc: "UI moderne & composants réutilisables" },

@@ -48,7 +48,7 @@ export const putAcademicYear = async (req,res)=>{
 export const deleteAcademicYear = async (req,res)=>{
     try {
         const academicYear = await AcademicYear.findByIdAndDelete(req.params.id);
-        res.status(200).json(AcademicYear);
+        res.status(200).json();
     } catch (error) {
         res.status(500).json({message: error.message});
     }

@@ -10,7 +10,7 @@ const EnrollmentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Un étudiant ne s’inscrit qu’une fois par cours et semestre
-EnrollmentSchema.index({ studentId: 1, courseId: 1, semesterId: 1 }, { unique: true });
+EnrollmentSchema.index({ student: 1, course: 1, semester: 1 }, { unique: true });
 
 const Enrollment =mongoose.model("Enrollment", EnrollmentSchema);
 export default Enrollment;

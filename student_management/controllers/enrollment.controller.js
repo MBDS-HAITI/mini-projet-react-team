@@ -71,7 +71,7 @@ export const getAllEnrollmentsBySemesterId = async (req, res) => {
 export const getAllEnrollmentsByStudentId = async (req, res) => {
     try {
         const { studentId } = req.params;
-        
+
         if (!mongoose.Types.ObjectId.isValid(studentId)) {
             return res.status(400).json({ message: "Student invalide" });
         }
@@ -137,7 +137,7 @@ export const getEnrollment = async (req, res) => {
 export const putEnrollment = async (req, res) => {
     try {
         const { id } = req.params;
-        const enrollment = await Enrollment.findByIdAndUpdate(id, req.body,{ new: true, runValidators: true });
+        const enrollment = await Enrollment.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
 
         if (!enrollment) {
             return res.status(404).json({ message: `Enrollment not found` });
@@ -152,7 +152,8 @@ export const putEnrollment = async (req, res) => {
 export const deleteEnrollment = async (req, res) => {
     try {
         const enrollment = await Enrollment.findByIdAndDelete(req.params.id);
-        res.status(200).json(Enrollment);
+        if (!enrollment) return res.status(404).json({ message: "Enrollment not found" });
+        return res.status(204).send();
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

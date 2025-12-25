@@ -1,4 +1,4 @@
-// src/api/endpoints/routes/auth.api.js
+// src/api/routes/auth.api.js
 import { apiClient } from "../client";
 
 /**
