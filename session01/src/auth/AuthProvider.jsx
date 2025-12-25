@@ -54,23 +54,18 @@ export function AuthProvider({ children }) {
 
   // Au démarrage: refresh silencieux (cookie HttpOnly)
   useEffect(() => {
-    console.log("[AuthProvider] useEffect fired");
 
     const manageAuth = async () => {
-      console.log("[AuthProvider] manageAuth start");
       try {
         const res = await refreshAccessToken();
-        console.log("[AuthProvider] refresh response:", res);
 
         const accessToken = res?.token;
-        console.log("[AuthProvider] Refresh access token:", accessToken);
 
         if (accessToken) {
           setToken(accessToken);
           applyTokenToClient(accessToken);
 
           const me = await getMe();
-          console.log("[AuthProvider] me:", me);
           setUser(me?.data ?? me);
         } else {
           setToken(null);

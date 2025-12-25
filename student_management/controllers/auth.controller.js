@@ -109,8 +109,8 @@ export const signOut = async (req, res, next) => {
         res.clearCookie("stdrefresh",
             {
                 path: "/api/v1/auths/refresh",
-                sameSite: NODE_ENV === "production" ? "none" : "lax",
-                secure: NODE_ENV === "production",
+                sameSite: "None" ,
+                secure: true,
             });
         return res.status(200).json({ success: true, message: "Logged out" });
     } catch (error) {

@@ -1,4 +1,4 @@
-// src/api/endpoints/grades.api.js
+// src/api/routes/grades.api.js
 import { apiClient } from "../client";
 
 /**

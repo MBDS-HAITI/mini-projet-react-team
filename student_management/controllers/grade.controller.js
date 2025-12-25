@@ -67,7 +67,6 @@ export const getAllGradesByStudentId = async (req, res) => {
         const { studentId } = req.params;
 
 
-
         if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
             return res.status(403).json({ message: "Forbidden" })
         }
@@ -150,7 +149,8 @@ export const putGrade = async (req, res) => {
 export const deleteGrade = async (req, res) => {
     try {
         const grade = await Grade.findByIdAndDelete(req.params.id);
-        res.status(200).json(grade);
+        if (!grade) return res.status(404).json({ message: "Grade not found" });
+        return res.status(204).send();
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -1,10 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
 
-import Grades from "../pages/Grades";
-import Home from "../pages/Home";
-import About from "../pages/About";
-import Students from "../pages/Students";
-import Courses from "../pages/Courses";
 
 function MaintContent({ activePage }) {
   const date = new Date();
