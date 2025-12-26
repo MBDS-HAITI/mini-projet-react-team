@@ -18,7 +18,7 @@ export default function MenuItem({ label, link, isActive }) {
         <span
           className={[
             "absolute left-1/2 -translate-x-1/2 bottom-0 h-0.5 rounded-full transition-all duration-200",
-            isActive ? "w-8 bg-white" : "w-0 bg-white/70 group-hover:w-8",
+            isActive ? "w-[60%] bg-white" : "w-0 bg-white/70 group-hover:w-8",
           ].join(" ")}
         />
       </Link>

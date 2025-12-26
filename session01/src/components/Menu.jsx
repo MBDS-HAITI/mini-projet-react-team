@@ -3,7 +3,8 @@ import MenuItem from "./MenuItem";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const menuItems = [
-  { label: "Home", link: "/home" },
+  { label: "Acceuil", link: "/home" },
+  { label: "Années Académiques", link: "/academicyear" },
   { label: "Notes", link: "/grades" },
   { label: "Etudiants", link: "/students" },
   { label: "Matières", link: "/courses" },
