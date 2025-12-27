@@ -1,16 +1,78 @@
 import Enrollment from "../models/enrollment.model.js";
+import Student from "../models/student.model.js";
+import Course from "../models/course.model.js";
 import Semester from "../models/semester.model.js";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export const postEnrollment = async (req, res) => {
-    try {
-        const enrollment = await Enrollment.create(req.body);
-        res.status(201).json(enrollment);
+  try {
+    const { student, course, semester } = req.body;
+
+    // 1️⃣ Champs obligatoires
+    if (!student || !course || !semester) {
+      return res.status(400).json({
+        message: "student, course et semester sont obligatoires",
+      });
     }
-    catch (error) {
-        res.status(500).json({ message: error.message });
+
+    // 2️⃣ ObjectId valides
+    if (
+      !mongoose.Types.ObjectId.isValid(student) ||
+      !mongoose.Types.ObjectId.isValid(course) ||
+      !mongoose.Types.ObjectId.isValid(semester)
+    ) {
+      return res.status(400).json({
+        message: "student, course ou semester invalide (ObjectId attendu)",
+      });
     }
+
+    // 3️⃣ Vérifier existence réelle
+    const [studentExists, courseExists, semesterExists] = await Promise.all([
+      Student.findById(student),
+      Course.findById(course),
+      Semester.findById(semester),
+    ]);
+
+    if (!studentExists) {
+      return res.status(400).json({ message: "Étudiant inexistant" });
+    }
+
+    if (!courseExists) {
+      return res.status(400).json({ message: "Cours inexistant" });
+    }
+
+    if (!semesterExists) {
+      return res.status(400).json({ message: "Semestre inexistant" });
+    }
+
+    // 4️⃣ (Optionnel mais recommandé) éviter doublon
+    const alreadyEnrolled = await Enrollment.findOne({
+      student,
+      course,
+      semester,
+    });
+
+    if (alreadyEnrolled) {
+      return res.status(409).json({
+        message: "L'étudiant est déjà inscrit à ce cours pour ce semestre",
+      });
+    }
+
+    // 5️⃣ Création de l'inscription
+    const enrollment = await Enrollment.create(req.body);
+
+    // 6️⃣ Retour peuplé (propre pour le frontend)
+    const populatedEnrollment = await Enrollment.findById(enrollment._id)
+      .populate("student", "name firstName")
+      .populate("course", "name")
+      .populate("semester", "name");
+
+    res.status(201).json(populatedEnrollment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
+
 
 export const getAllEnrollments = async (req, res) => {
     try {
@@ -135,18 +197,95 @@ export const getEnrollment = async (req, res) => {
 };
 
 export const putEnrollment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const enrollment = await Enrollment.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+  try {
+    const { id } = req.params;
+    const { student, course, semester } = req.body;
 
-        if (!enrollment) {
-            return res.status(404).json({ message: `Enrollment not found` });
-        }
-        const updatedEnrollment = await Enrollment.findById(id);
-        res.status(200).json(updatedEnrollment);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    // 1️⃣ Vérifier l'ID de l'inscription
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "ID d'inscription invalide",
+      });
     }
+
+    const existingEnrollment = await Enrollment.findById(id);
+    if (!existingEnrollment) {
+      return res.status(404).json({ message: "Enrollment not found" });
+    }
+
+    // 2️⃣ Vérifier les champs modifiés (si présents)
+    if (student) {
+      if (!mongoose.Types.ObjectId.isValid(student)) {
+        return res.status(400).json({
+          message: "student invalide (ObjectId attendu)",
+        });
+      }
+
+      const studentExists = await Student.findById(student);
+      if (!studentExists) {
+        return res.status(400).json({ message: "Étudiant inexistant" });
+      }
+    }
+
+    if (course) {
+      if (!mongoose.Types.ObjectId.isValid(course)) {
+        return res.status(400).json({
+          message: "course invalide (ObjectId attendu)",
+        });
+      }
+
+      const courseExists = await Course.findById(course);
+      if (!courseExists) {
+        return res.status(400).json({ message: "Cours inexistant" });
+      }
+    }
+
+    if (semester) {
+      if (!mongoose.Types.ObjectId.isValid(semester)) {
+        return res.status(400).json({
+          message: "semester invalide (ObjectId attendu)",
+        });
+      }
+
+      const semesterExists = await Semester.findById(semester);
+      if (!semesterExists) {
+        return res.status(400).json({ message: "Semestre inexistant" });
+      }
+    }
+
+    // 3️⃣ Empêcher doublon (si combinaison modifiée)
+    const finalStudent = student || existingEnrollment.student;
+    const finalCourse = course || existingEnrollment.course;
+    const finalSemester = semester || existingEnrollment.semester;
+
+    const duplicate = await Enrollment.findOne({
+      _id: { $ne: id },
+      student: finalStudent,
+      course: finalCourse,
+      semester: finalSemester,
+    });
+
+    if (duplicate) {
+      return res.status(409).json({
+        message:
+          "Une inscription identique existe déjà (étudiant, cours, semestre)",
+      });
+    }
+
+    // 4️⃣ Mise à jour autorisée
+    const updatedEnrollment = await Enrollment.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    )
+      .populate("student", "name firstName")
+      .populate("course", "name")
+      .populate("semester", "name");
+
+    res.status(200).json(updatedEnrollment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const deleteEnrollment = async (req, res) => {
