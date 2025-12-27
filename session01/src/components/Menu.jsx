@@ -6,10 +6,11 @@ import MyAccount from "./widgets/NavProfile";
 const menuItems = [
   { label: "Acceuil", link: "/home" },
   { label: "Etudiants", link: "/students" },
+  { label: "Inscriptions", link: "/enrollments" },
+  { label: "Notes", link: "/grades" },
   { label: "Matières", link: "/courses" },
   { label: "Semestres", link: "/semester" },
   { label: "Années Académiques", link: "/academicyear" },
-  { label: "Notes", link: "/grades" },
   { label: "A propos", link: "/about" },
 ];
 
