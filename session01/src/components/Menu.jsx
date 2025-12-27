@@ -10,6 +10,7 @@ const menuItems = [
   { label: "Etudiants", link: "/students" },
   { label: "Matières", link: "/courses" },
   { label: "A propos", link: "/about" },
+  { label: "Inscriptions", link: "/enrollment" },
 ];
 
 export default function Menu() {

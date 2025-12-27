@@ -8,14 +8,14 @@ export const postEnrollment = async (req, res) => {
   try {
     const { student, course, semester } = req.body;
 
-    // 1️⃣ Champs obligatoires
+    // Champs obligatoires
     if (!student || !course || !semester) {
       return res.status(400).json({
         message: "student, course et semester sont obligatoires",
       });
     }
 
-    // 2️⃣ ObjectId valides
+    // ObjectId valides
     if (
       !mongoose.Types.ObjectId.isValid(student) ||
       !mongoose.Types.ObjectId.isValid(course) ||
@@ -26,7 +26,7 @@ export const postEnrollment = async (req, res) => {
       });
     }
 
-    // 3️⃣ Vérifier existence réelle
+    // Vérifier existence réelle
     const [studentExists, courseExists, semesterExists] = await Promise.all([
       Student.findById(student),
       Course.findById(course),
@@ -45,7 +45,7 @@ export const postEnrollment = async (req, res) => {
       return res.status(400).json({ message: "Semestre inexistant" });
     }
 
-    // 4️⃣ (Optionnel mais recommandé) éviter doublon
+    // Eviter doublon
     const alreadyEnrolled = await Enrollment.findOne({
       student,
       course,
@@ -58,10 +58,10 @@ export const postEnrollment = async (req, res) => {
       });
     }
 
-    // 5️⃣ Création de l'inscription
+    // Création de l'inscription
     const enrollment = await Enrollment.create(req.body);
 
-    // 6️⃣ Retour peuplé (propre pour le frontend)
+    // Retour peuplé (propre pour le frontend)
     const populatedEnrollment = await Enrollment.findById(enrollment._id)
       .populate("student", "name firstName")
       .populate("course", "name")
@@ -201,7 +201,7 @@ export const putEnrollment = async (req, res) => {
     const { id } = req.params;
     const { student, course, semester } = req.body;
 
-    // 1️⃣ Vérifier l'ID de l'inscription
+    // Vérifier l'ID de l'inscription
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         message: "ID d'inscription invalide",
@@ -213,7 +213,7 @@ export const putEnrollment = async (req, res) => {
       return res.status(404).json({ message: "Enrollment not found" });
     }
 
-    // 2️⃣ Vérifier les champs modifiés (si présents)
+    // Vérifier les champs modifiés (si présents)
     if (student) {
       if (!mongoose.Types.ObjectId.isValid(student)) {
         return res.status(400).json({
@@ -253,7 +253,7 @@ export const putEnrollment = async (req, res) => {
       }
     }
 
-    // 3️⃣ Empêcher doublon (si combinaison modifiée)
+    // Empêcher doublon
     const finalStudent = student || existingEnrollment.student;
     const finalCourse = course || existingEnrollment.course;
     const finalSemester = semester || existingEnrollment.semester;
@@ -272,7 +272,7 @@ export const putEnrollment = async (req, res) => {
       });
     }
 
-    // 4️⃣ Mise à jour autorisée
+    // Mise à jour
     const updatedEnrollment = await Enrollment.findByIdAndUpdate(
       id,
       req.body,

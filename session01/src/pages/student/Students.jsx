@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSemesters } from "../../api/routes/semester.api.js";
+import { getAllStudents } from "../../api/routes/student.api";
 import {
   Table,
   TableBody,
@@ -12,9 +12,9 @@ import {
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
 
-export default function SemestersPage() {
+export default function StudentsPage() {
   // ===== STATE PRINCIPAL =====
-  const [semesters, setSemesters] = useState([]);
+  const [students, setStudents] = useState([]);
 
   // ===== PAGINATION =====
   const [page, setPage] = useState(0);
@@ -24,38 +24,48 @@ export default function SemestersPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  // ===== ERREUR =====
+  const [error, setError] = useState(null);
+
   // ===== FETCH DATA =====
   useEffect(() => {
-    const fetchSemesters = async () => {
-      const result = await getSemesters();
-      setSemesters(result);
-      console.log(result);
+    const fetchStudents = async () => {
+      try {
+        const result = await getAllStudents(); 
+        setStudents(result);
+      } catch (err) {
+        setError("Erreur lors du chargement des étudiants");
+        console.error(err);
+      }
     };
 
-    fetchSemesters();
+    fetchStudents();
   }, []);
 
   // ===== FILTRAGE + TRI =====
-  const filteredSemesters = semesters
-    .filter((semester) =>
-      semester.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
+  const filteredStudents = students
+    .filter((student) => {
+      const fullName = `${student.firstName || ""} ${student.lastName || ""}`;
+      return fullName.toLowerCase().includes(search.toLowerCase());
+    })
+    .sort((a, b) => {
+      const nameA = `${a.firstName || ""} ${a.lastName || ""}`;
+      const nameB = `${b.firstName || ""} ${b.lastName || ""}`;
+
+      return sortAsc
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
+    });
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
     <div className="p-8 bg-gradient-to-br from-[#0b0b3b] via-[#1b145c] to-[#050523] flex items-center justify-center px-4">
-      
-      {/* ===== CARD CENTRALE ===== */}
-      <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
+      {/* ===== CARD ===== */}
+      <div className="w-full max-w-5xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
         
         {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Semestres
+          Liste des étudiants
         </h1>
 
         {/* ===== BARRE ACTIONS ===== */}
@@ -64,7 +74,7 @@ export default function SemestersPage() {
           {/* Recherche */}
           <input
             type="text"
-            placeholder="Rechercher par nom..."
+            placeholder="Rechercher par nom ou prénom..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -83,10 +93,8 @@ export default function SemestersPage() {
             "
           />
 
-          {/* Actions droite */}
+          {/* Actions */}
           <div className="flex items-center gap-3">
-            
-            {/* Tri */}
             <button
               onClick={() => setSortAsc(!sortAsc)}
               className="
@@ -102,9 +110,8 @@ export default function SemestersPage() {
               Trier {sortAsc ? "↑" : "↓"}
             </button>
 
-            {/* Ajouter */}
             <button
-              onClick={() => console.log("Ajouter un semestre")}
+              onClick={() => console.log("Ajouter étudiant")}
               className="
                 px-4 py-2
                 rounded-lg
@@ -120,34 +127,36 @@ export default function SemestersPage() {
           </div>
         </div>
 
+        {/* ===== ERREUR ===== */}
+        {error && (
+          <p className="text-red-400 text-center mb-4">{error}</p>
+        )}
+
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
+          sx={{ backgroundColor: "transparent", color: "white" }}
         >
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Année Academique",
+                  {["Prénom", 
                     "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Actif",
+                    "Date de naissance",
+                    "Sexe",
+                    "Phone",
+                    "Adresse",
+                    "Code de l'étudiant",
                     "Création",
-                    "Modification",
-                    "Actions",
-                  ].map((head) => (
+                    "Modification"].map((head) => (
                     <TableCell
                       key={head}
                       sx={{
                         color: "#cbd5f5",
                         fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        borderBottom:
+                          "1px solid rgba(255,255,255,0.2)",
                       }}
                     >
                       {head}
@@ -157,59 +166,48 @@ export default function SemestersPage() {
               </TableHead>
 
               <TableBody>
-                {filteredSemesters
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((semester) => (
+                {filteredStudents
+                  .slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                  .map((student) => (
                     <TableRow
-                      key={semester._id}
+                      key={student._id}
                       hover
                       sx={{
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          backgroundColor:
+                            "rgba(255,255,255,0.05)",
                         },
                       }}
                     >
-                     
                       <TableCell sx={{ color: "white" }}>
-                        {semester.academicYear?.name || "-"}
+                        {student.firstName || "—"}
                       </TableCell>
-                      
                       <TableCell sx={{ color: "white" }}>
-                        {semester.name}
+                        {student.lastName || "—"}
                       </TableCell>
-
-                      <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.startDate)}
-                      </TableCell>
-
-                      <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.endDate)}
-                      </TableCell>
-
-                      <TableCell sx={{ color: "white" }}>
-                        {semester.isActive ? "Oui" : "Non"}
-                      </TableCell>
-
                        <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.createdAt)}
+                        {formatDate(student.dateOfBith) || "—"}
                       </TableCell>
-
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.updatedAt)}
+                        {student.sex || "—"}
                       </TableCell>
-
-                      <TableCell sx={{ color: "#a78bfa" }}>
-                        <span className="cursor-pointer hover:underline">
-                          Modifier
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer hover:underline">
-                          Détails
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer text-red-400 hover:underline">
-                          Supprimer
-                        </span>
+                       <TableCell sx={{ color: "white" }}>
+                        {student.phone || "—"}
+                      </TableCell>
+                      <TableCell sx={{ color: "white" }}>
+                        {student.address || "—"}
+                      </TableCell>
+                       <TableCell sx={{ color: "white" }}>
+                        {student.studentCode || "—"}
+                      </TableCell>
+                      <TableCell sx={{ color: "white" }}>
+                        {formatDate(student.createdAt) || "—"}
+                      </TableCell>
+                      <TableCell sx={{ color: "white" }}>
+                        {formatDate(student.updatedAt) || "—"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -220,7 +218,7 @@ export default function SemestersPage() {
           {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredSemesters.length}
+            count={filteredStudents.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}
@@ -231,8 +229,12 @@ export default function SemestersPage() {
             }}
             sx={{
               color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              ".MuiTablePagination-selectIcon": {
+                color: "white",
+              },
+              ".MuiTablePagination-actions button": {
+                color: "white",
+              },
             }}
           />
         </Paper>
