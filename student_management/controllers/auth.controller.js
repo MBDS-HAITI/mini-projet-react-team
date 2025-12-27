@@ -26,8 +26,6 @@ export const signIn = async (req, res, next) => {
             throw error;
         }
 
-        console.log("Bonjour from signIn: "+JWT_SECRET);
-
         // Access token (court)
         const token = jwt.sign(
             {

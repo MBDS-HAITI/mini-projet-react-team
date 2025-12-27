@@ -4,7 +4,7 @@ import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 // import { MONGODB_URI } from "../config/env.js";
 
-await mongoose.connect("MONGODB_URI as string");
+await mongoose.connect("mongodb+srv://bsachyedvaelle_db_user:Master_password1@cluster0.4dpceyw.mongodb.net/?appName=Cluster0");
 
 console.log("DB:", mongoose.connection.name);
 console.log("Collection:", User.collection.name);
