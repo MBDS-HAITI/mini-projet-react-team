@@ -85,6 +85,19 @@ export async function updateUser(id, payload) {
 }
 
 /**
+ * PATCH /api/v1/users/:id/reset-password
+ * Body: { newPassword: string }
+ * Response: { success: boolean, message: string }
+ */
+export async function resetUserPassword(id, newPassword) {
+  if (!id) throw new Error("resetUserPassword: id requis");
+  if (!newPassword) throw new Error("resetUserPassword: new Password requis");
+
+  const res = await apiClient.patch(`/users/${id}/reset-password`, { newPassword });
+  return res.data;
+}
+
+/**
  * DELETE /api/v1/users/:id
  * Response: (selon backend: 200 json ou 204)
  */
