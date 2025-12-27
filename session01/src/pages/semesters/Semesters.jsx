@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAcademicYears } from "../../api/routes/academic-year.api.js";
+import { getSemesters } from "../../api/routes/semester.api.js";
 import {
   Table,
   TableBody,
@@ -12,29 +12,33 @@ import {
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
 
-export default function AcademicYearPage() {
-  const [academicYears, setAcademicYears] = useState([]);
+export default function SemestersPage() {
+  // ===== STATE PRINCIPAL =====
+  const [semesters, setSemesters] = useState([]);
 
-  // Pagination
+  // ===== PAGINATION =====
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Recherche & tri
+  // ===== RECHERCHE & TRI =====
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  // ===== FETCH DATA =====
   useEffect(() => {
-    const fetchAcademicYear = async () => {
-      const result = await getAcademicYears();
-      setAcademicYears(result);
+    const fetchSemesters = async () => {
+      const result = await getSemesters();
+      setSemesters(result);
+      console.log(result);
     };
-    fetchAcademicYear();
+
+    fetchSemesters();
   }, []);
 
-  // Filtrage + tri
-  const filteredAcademicYears = academicYears
-    .filter((year) =>
-      year.name.toLowerCase().includes(search.toLowerCase())
+  // ===== FILTRAGE + TRI =====
+  const filteredSemesters = semesters
+    .filter((semester) =>
+      semester.name.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
       sortAsc
@@ -44,14 +48,14 @@ export default function AcademicYearPage() {
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
-    <div className="my-8">
+    <div className="p-8 bg-gradient-to-br from-[#0b0b3b] via-[#1b145c] to-[#050523] flex items-center justify-center px-4">
       
       {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
         
         {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Années académiques
+          Semestres
         </h1>
 
         {/* ===== BARRE ACTIONS ===== */}
@@ -100,7 +104,7 @@ export default function AcademicYearPage() {
 
             {/* Ajouter */}
             <button
-              onClick={() => console.log("Ajouter une année académique")}
+              onClick={() => console.log("Ajouter un semestre")}
               className="
                 px-4 py-2
                 rounded-lg
@@ -113,7 +117,6 @@ export default function AcademicYearPage() {
             >
               + Ajouter
             </button>
-
           </div>
         </div>
 
@@ -130,10 +133,11 @@ export default function AcademicYearPage() {
               <TableHead>
                 <TableRow>
                   {[
+                    "Année Academique",
                     "Nom",
                     "Date Début",
                     "Date Fin",
-                    "Active",
+                    "Actif",
                     "Création",
                     "Modification",
                     "Actions",
@@ -153,11 +157,11 @@ export default function AcademicYearPage() {
               </TableHead>
 
               <TableBody>
-                {filteredAcademicYears
+                {filteredSemesters
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((academicYear) => (
+                  .map((semester) => (
                     <TableRow
-                      key={academicYear._id}
+                      key={semester._id}
                       hover
                       sx={{
                         "&:hover": {
@@ -166,27 +170,31 @@ export default function AcademicYearPage() {
                       }}
                     >
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.name}
+                        {semester.academicYear?.name || "-"}
+                      </TableCell>
+                      
+                      <TableCell sx={{ color: "white" }}>
+                        {semester.name}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.startDate)}
+                        {formatDate(semester.startDate)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.endDate)}
+                        {formatDate(semester.endDate)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.isActive ? "Oui" : "Non"}
+                        {semester.isActive ? "Oui" : "Non"}
+                      </TableCell>
+
+                       <TableCell sx={{ color: "white" }}>
+                        {formatDate(semester.createdAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.createdAt, true)}
-                      </TableCell>
-
-                      <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.updatedAt, true)}
+                        {formatDate(semester.updatedAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -211,7 +219,7 @@ export default function AcademicYearPage() {
           {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredAcademicYears.length}
+            count={filteredSemesters.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}

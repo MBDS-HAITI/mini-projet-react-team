@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const menuItems = [
   { label: "Acceuil", link: "/home" },
   { label: "Années Académiques", link: "/academicyear" },
+  { label: "Semestres", link: "/semester" },
   { label: "Notes", link: "/grades" },
   { label: "Etudiants", link: "/students" },
   { label: "Matières", link: "/courses" },
