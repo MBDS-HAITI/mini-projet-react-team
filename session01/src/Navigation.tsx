@@ -8,6 +8,7 @@ import NotFoundPage from "./pages/not-found.jsx/NotFound";
 import Unauthorized from "./pages/unauthorized/Unauthorized";
 import AcademicYearPage from "./pages/academic-year/AcademicYear";
 import SemestresPage from "./pages/semesters/Semesters";
+import Enrollments from "./pages/enrollments/Enrollments";
 
 export default function Navigation() {
   return (
@@ -24,7 +25,8 @@ export default function Navigation() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/academicyear" element={<AcademicYearPage />} />
           <Route path="/semester" element={<SemestresPage />} />
-          {/* <Route path="/courses" element={<Courses />} />
+          <Route path="/enrollment" element={<Enrollments />} />
+          {/* <Route path="/courses" element={<Courses >} />
           <Route path="/courses/add" element={<AddCoursePage />} />
           <Route path="/students" element={<Students />} />
           <Route path="/students/add" element={<AddStudentPage />} />

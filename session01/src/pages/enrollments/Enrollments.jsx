@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSemesters } from "../../api/routes/semester.api.js";
+import { getEnrollments } from "../../api/routes/enrollment.api";
 import {
   Table,
   TableBody,
@@ -12,9 +12,9 @@ import {
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
 
-export default function SemestersPage() {
+export default function EnrollmentsPage() {
   // ===== STATE PRINCIPAL =====
-  const [semesters, setSemesters] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
 
   // ===== PAGINATION =====
   const [page, setPage] = useState(0);
@@ -26,45 +26,52 @@ export default function SemestersPage() {
 
   // ===== FETCH DATA =====
   useEffect(() => {
-    const fetchSemesters = async () => {
-      const result = await getSemesters();
-      setSemesters(result);
-      console.log(result);
+    const fetchEnrollments = async () => {
+      try {
+        const result = await getEnrollments();
+        setEnrollments(result);
+        console.log(result);
+      } catch (error) {
+        console.error("Erreur lors du chargement des inscriptions", error);
+      }
     };
 
-    fetchSemesters();
+    fetchEnrollments();
   }, []);
 
   // ===== FILTRAGE + TRI =====
-  const filteredSemesters = semesters
-    .filter((semester) =>
-      semester.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
+  const filteredEnrollments = enrollments
+    .filter((enrollment) => {
+      const studentName =
+        enrollment.student?.name ||
+        enrollment.student?.firstName ||
+        "";
+      return studentName.toLowerCase().includes(search.toLowerCase());
+    })
+    .sort((a, b) => {
+      const nameA = a.student?.name || "";
+      const nameB = b.student?.name || "";
+      return sortAsc
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
+    });
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
     <div className="p-8 bg-gradient-to-br from-[#0b0b3b] via-[#1b145c] to-[#050523] flex items-center justify-center px-4">
-      
       {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        
         {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Semestres
+          Inscriptions
         </h1>
 
         {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          
           {/* Recherche */}
           <input
             type="text"
-            placeholder="Rechercher par nom..."
+            placeholder="Rechercher par étudiant..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -85,8 +92,6 @@ export default function SemestersPage() {
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
-            
-            {/* Tri */}
             <button
               onClick={() => setSortAsc(!sortAsc)}
               className="
@@ -102,9 +107,8 @@ export default function SemestersPage() {
               Trier {sortAsc ? "↑" : "↓"}
             </button>
 
-            {/* Ajouter */}
             <button
-              onClick={() => console.log("Ajouter un semestre")}
+              onClick={() => console.log("Nouvelle inscription")}
               className="
                 px-4 py-2
                 rounded-lg
@@ -115,7 +119,7 @@ export default function SemestersPage() {
                 transition
               "
             >
-              + Ajouter
+              + S’inscrire
             </button>
           </div>
         </div>
@@ -123,21 +127,17 @@ export default function SemestersPage() {
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
+          sx={{ backgroundColor: "transparent", color: "white" }}
         >
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   {[
-                    "Année Academique",
-                    "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Actif",
+                    "Étudiant",
+                    "Cours",
+                    "Semestre",
+                    "Statut",
                     "Création",
                     "Modification",
                     "Actions",
@@ -147,7 +147,8 @@ export default function SemestersPage() {
                       sx={{
                         color: "#cbd5f5",
                         fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        borderBottom:
+                          "1px solid rgba(255,255,255,0.2)",
                       }}
                     >
                       {head}
@@ -157,45 +158,46 @@ export default function SemestersPage() {
               </TableHead>
 
               <TableBody>
-                {filteredSemesters
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((semester) => (
+                {filteredEnrollments
+                  .slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                  .map((enrollment) => (
                     <TableRow
-                      key={semester._id}
+                      key={enrollment._id}
                       hover
                       sx={{
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          backgroundColor:
+                            "rgba(255,255,255,0.05)",
                         },
                       }}
                     >
-                     
                       <TableCell sx={{ color: "white" }}>
-                        {semester.academicYear?.name || "-"}
-                      </TableCell>
-                      
-                      <TableCell sx={{ color: "white" }}>
-                        {semester.name}
+                        {enrollment.student?.name ||
+                          enrollment.student?.firstName ||
+                          "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.startDate)}
+                        {enrollment.course?.name || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.endDate)}
+                        {enrollment.semester?.name || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {semester.isActive ? "Oui" : "Non"}
-                      </TableCell>
-
-                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.createdAt)}
+                        {enrollment.status || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.updatedAt)}
+                        {formatDate(enrollment.createdAt)}
+                      </TableCell>
+
+                      <TableCell sx={{ color: "white" }}>
+                        {formatDate(enrollment.updatedAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -220,7 +222,7 @@ export default function SemestersPage() {
           {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredSemesters.length}
+            count={filteredEnrollments.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}
@@ -231,8 +233,12 @@ export default function SemestersPage() {
             }}
             sx={{
               color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              ".MuiTablePagination-selectIcon": {
+                color: "white",
+              },
+              ".MuiTablePagination-actions button": {
+                color: "white",
+              },
             }}
           />
         </Paper>

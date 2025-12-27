@@ -1,15 +1,43 @@
 import Semester from "../models/semester.model.js";
+import AcademicYear from "../models/academic-year.model.js";
 import mongoose from 'mongoose';
 
 export const postSemester = async (req, res) => {
-    try {
-        const semester = await Semester.create(req.body);
-        res.status(201).json(semester);
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const { academicYear } = req.body;
 
+        // 1. academicYear obligatoire
+    if (!academicYear) {
+      return res.status(400).json({
+        message: "academicYear est obligatoire",
+      });
     }
+
+    // 2. ObjectId valide
+    if (!mongoose.Types.ObjectId.isValid(academicYear)) {
+      return res.status(400).json({
+        message: "academicYear invalide (ObjectId attendu)",
+      });
+    }
+
+    // 3. Vérifier existence réelle
+    const academicYearExists = await AcademicYear.findById(academicYear);
+    if (!academicYearExists) {
+      return res.status(400).json({
+        message: "academicYear inexistant",
+      });
+    }
+
+    // 4. Création autorisée
+    const semester = await Semester.create(req.body);
+
+    const populatedSemester = await Semester.findById(semester._id)
+      .populate("academicYear", "name");
+
+    res.status(201).json(populatedSemester);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getAllSemesters = async (req, res) => {
@@ -55,6 +83,22 @@ export const getSemester = async (req, res) => {
 export const putSemester = async (req, res) => {
   try {
     const { id } = req.params;
+    const { academicYear } = req.body;
+
+    if (academicYear) {
+      if (!mongoose.Types.ObjectId.isValid(academicYear)) {
+        return res.status(400).json({
+          message: "academicYear invalide (ObjectId attendu)",
+        });
+      }
+
+      const academicYearExists = await AcademicYear.findById(academicYear);
+      if (!academicYearExists) {
+        return res.status(400).json({
+          message: "academicYear inexistant",
+        });
+      }
+    }
 
     const semester = await Semester.findByIdAndUpdate(
       id,
