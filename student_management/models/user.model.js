@@ -55,6 +55,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 UserSchema.index({ "providers.type": 1, "providers.providerId": 1 }, { unique: true, sparse: true });
+UserSchema.index({ student: 1 }, { unique: true, sparse: true });
 
 const User = mongoose.model("User", UserSchema);
 export default User 
