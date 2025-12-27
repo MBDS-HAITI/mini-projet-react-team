@@ -1,44 +1,45 @@
+import mongoose from "mongoose";
 import Semester from "../models/semester.model.js";
 import AcademicYear from "../models/academic-year.model.js";
-import mongoose from 'mongoose';
 
-export const postSemester = async (req, res) => {
+export const postSemester = async (req, res, next) => {
+  const session = await mongoose.startSession();
+
   try {
-    const { academicYear } = req.body;
+    let createdSemester;
 
-        // 1. academicYear obligatoire
-    if (!academicYear) {
-      return res.status(400).json({
-        message: "academicYear est obligatoire",
-      });
-    }
+    await session.withTransaction(async () => {
+      const { academicYear } = req.body;
 
-    // 2. ObjectId valide
-    if (!mongoose.Types.ObjectId.isValid(academicYear)) {
-      return res.status(400).json({
-        message: "academicYear invalide (ObjectId attendu)",
-      });
-    }
+      // 1) Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(academicYear)) {
+        const err = new Error("Invalid academicYear id");
+        err.statusCode = 400;
+        throw err;
+      }
 
-    // 3. Vérifier existence réelle
-    const academicYearExists = await AcademicYear.findById(academicYear);
-    if (!academicYearExists) {
-      return res.status(400).json({
-        message: "academicYear inexistant",
-      });
-    }
+      // 2) Check existence (FK-like)
+      const exists = await AcademicYear.exists({ _id: academicYear }).session(session);
+      if (!exists) {
+        const err = new Error("AcademicYear not found");
+        err.statusCode = 404;
+        throw err;
+      }
 
-    // 4. Création autorisée
-    const semester = await Semester.create(req.body);
+      // 3) Create Semester inside transaction
+      const [semester] = await Semester.create([req.body], { session });
+      createdSemester = semester;
+    });
 
-    const populatedSemester = await Semester.findById(semester._id)
-      .populate("academicYear", "name");
-
-    res.status(201).json(populatedSemester);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(201).json(createdSemester);
+  } catch (err) {
+    return next(err); // handled by your errorMiddleware
+  } finally {
+    await session.endSession();
   }
 };
+
+
 
 export const getAllSemesters = async (req, res) => {
     try {
@@ -80,9 +81,14 @@ export const getSemester = async (req, res) => {
     }
 };
 
-export const putSemester = async (req, res) => {
+export const putSemester = async (req, res, next) => {
+  const session = await mongoose.startSession();
+
   try {
     const { id } = req.params;
+
+    let updatedSemester;
+
     const { academicYear } = req.body;
 
     if (academicYear) {
@@ -100,19 +106,54 @@ export const putSemester = async (req, res) => {
       }
     }
 
-    const semester = await Semester.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true, runValidators: true }
-    ).populate("academicYear", "name");
+    await session.withTransaction(async () => {
+      // 1) Validate semester id
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        const err = new Error("Invalid semester id");
+        err.statusCode = 400;
+        throw err;
+      }
 
-    if (!semester) {
-      return res.status(404).json({ message: "Semester not found" });
-    }
+      // 2) If academicYear is being updated, validate it + check existence
+      if (req.body.academicYear !== undefined) {
+        if (!mongoose.Types.ObjectId.isValid(req.body.academicYear)) {
+          const err = new Error("Invalid academicYear id");
+          err.statusCode = 400;
+          throw err;
+        }
 
-    res.status(200).json(semester);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+        const exists = await AcademicYear.exists({ _id: req.body.academicYear }).session(session);
+        if (!exists) {
+          const err = new Error("AcademicYear not found");
+          err.statusCode = 404;
+          throw err;
+        }
+      }
+
+      // 3) Update inside transaction (runValidators works with update)
+      updatedSemester = await Semester.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true, runValidators: true, session }
+      );
+
+      if (!updatedSemester) {
+        const err = new Error("Semester not found");
+        err.statusCode = 404;
+        throw err;
+      }
+    });
+
+    // populate outside transaction is OK here
+    const populated = await Semester.findById(updatedSemester._id)
+      .populate("academicYear", "name")
+      .exec();
+
+    return res.status(200).json(populated);
+  } catch (err) {
+    return next(err);
+  } finally {
+    await session.endSession();
   }
 };
 

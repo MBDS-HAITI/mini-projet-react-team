@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSemesters } from "../../api/routes/semester.api.js";
+import { getCourses } from "../../api/routes/course.api.js";
 import {
   Table,
   TableBody,
@@ -14,29 +14,31 @@ import { formatDate } from "../../utils/fdate";
 import SortButton from "../../components/widgets/SortButton.jsx";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
 
-export default function SemestersPage() {
+export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
 
-  const [semesters, setSemesters] = useState([]);
+  // Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  
+
+  // Recherche & tri
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
-  
-  useEffect(() => {
-    const fetchSemesters = async () => {
-      const result = await getSemesters();
-      setSemesters(result);
-    };
 
-    fetchSemesters();
+  useEffect(() => {
+    const fetchCourse = async () => {
+      const result = await getCourses();
+      
+      setCourses(result);
+    };
+    fetchCourse();
   }, []);
 
-  const filteredSemesters = semesters
-    .filter((semester) =>
-      semester.name.toLowerCase().includes(search.toLowerCase())
-      || 
-      semester.academicYear?.name.toLowerCase().includes(search.toLowerCase())
+  // Filtrage + tri
+  const filteredCourses = courses
+    .filter((course) =>
+      course.name.toLowerCase().includes(search.toLowerCase())
+        || course.code.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
       sortAsc
@@ -45,27 +47,32 @@ export default function SemestersPage() {
     );
 
   return (
-    <div className="p-4 md:p-8 ">
+    /* ===== BACKGROUND GLOBAL ===== */
+    <div className="my-8">
       
+      {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
         
+        {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Semestres
+          Liste des cours
         </h1>
 
+        {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        
+          
           {/* Recherche */}
           <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
             
+            {/* Tri */}
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
             {/* Ajouter */}
             <button
-              onClick={() => console.log("Ajouter un semestre")}
+              onClick={() => console.log("Ajouter une année académique")}
               className="
                 px-4 py-2
                 rounded-lg
@@ -78,9 +85,11 @@ export default function SemestersPage() {
             >
               + Ajouter
             </button>
+
           </div>
         </div>
 
+        {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
           sx={{
@@ -93,11 +102,9 @@ export default function SemestersPage() {
               <TableHead>
                 <TableRow>
                   {[
-                    "Année Academique",
+                    "Code",
                     "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Actif",
+                    "Crédits",
                     "Création",
                     "Modification",
                     "Actions",
@@ -117,11 +124,11 @@ export default function SemestersPage() {
               </TableHead>
 
               <TableBody>
-                {filteredSemesters
+                {filteredCourses
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((semester) => (
+                  .map((course) => (
                     <TableRow
-                      key={semester._id}
+                      key={course._id}
                       hover
                       sx={{
                         "&:hover": {
@@ -129,33 +136,24 @@ export default function SemestersPage() {
                         },
                       }}
                     >
-                     
                       <TableCell sx={{ color: "white" }}>
-                        {semester.academicYear?.name || "-"}
-                      </TableCell>
-                      
-                      <TableCell sx={{ color: "white" }}>
-                        {semester.name}
+                        {course.code}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.startDate)}
+                        {course.name}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.endDate)}
+                        {course.credits}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {semester.isActive ? "Oui" : "Non"}
-                      </TableCell>
-
-                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.createdAt)}
+                        {formatDate(course.createdAt, true)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(semester.updatedAt)}
+                        {formatDate(course.updatedAt, true)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -177,9 +175,10 @@ export default function SemestersPage() {
             </Table>
           </TableContainer>
 
+          {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredSemesters.length}
+            count={filteredCourses.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}

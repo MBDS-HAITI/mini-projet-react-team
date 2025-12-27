@@ -11,6 +11,8 @@ import {
   TablePagination,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
+import SortButton from "../../components/widgets/SortButton.jsx";
+import SearchInput from "../../components/widgets/SearchInput.jsx";
 
 export default function AcademicYearPage() {
   const [academicYears, setAcademicYears] = useState([]);
@@ -58,45 +60,13 @@ export default function AcademicYearPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           
           {/* Recherche */}
-          <input
-            type="text"
-            placeholder="Rechercher par nom..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(0);
-            }}
-            className="
-              w-full md:w-72
-              px-4 py-2
-              rounded-lg
-              bg-white/10
-              border border-white/20
-              text-white
-              placeholder:text-gray-300
-              focus:outline-none
-              focus:ring-2 focus:ring-purple-500
-            "
-          />
+          <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
             
             {/* Tri */}
-            <button
-              onClick={() => setSortAsc(!sortAsc)}
-              className="
-                px-4 py-2
-                rounded-lg
-                bg-white/10
-                border border-white/20
-                text-white
-                hover:bg-white/20
-                transition
-              "
-            >
-              Trier {sortAsc ? "↑" : "↓"}
-            </button>
+            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
             {/* Ajouter */}
             <button
@@ -104,7 +74,7 @@ export default function AcademicYearPage() {
               className="
                 px-4 py-2
                 rounded-lg
-                bg-gradient-to-r from-purple-500 to-indigo-500
+                bg-linear-to-r from-purple-500 to-indigo-500
                 text-white
                 font-semibold
                 hover:opacity-90

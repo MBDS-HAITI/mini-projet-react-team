@@ -8,7 +8,9 @@ import NotFoundPage from "./pages/not-found.jsx/NotFound";
 import Unauthorized from "./pages/unauthorized/Unauthorized";
 import AcademicYearPage from "./pages/academic-year/AcademicYear";
 import SemestresPage from "./pages/semesters/Semesters";
-import Enrollments from "./pages/enrollments/Enrollments";
+import StudentsPage from "./pages/students/Students";
+import CoursesPage from "./pages/courses/Courses";
+import ProfilePage from "./pages/profile/Profile";
 
 export default function Navigation() {
   return (
@@ -23,15 +25,12 @@ export default function Navigation() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/academicyear" element={<AcademicYearPage />} />
+          <Route path="/students" element={<StudentsPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
           <Route path="/semester" element={<SemestresPage />} />
-          <Route path="/enrollment" element={<Enrollments />} />
-          {/* <Route path="/courses" element={<Courses >} />
-          <Route path="/courses/add" element={<AddCoursePage />} />
-          <Route path="/students" element={<Students />} />
-          <Route path="/students/add" element={<AddStudentPage />} />
-          <Route path="/grades" element={<Grades />} /> */}
+          <Route path="/academicyear" element={<AcademicYearPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
         </Route>
