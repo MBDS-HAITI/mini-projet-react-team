@@ -129,6 +129,7 @@ export default function SemestersPage() {
                         },
                       }}
                     >
+                     
                       <TableCell sx={{ color: "white" }}>
                         {semester.academicYear?.name || "-"}
                       </TableCell>

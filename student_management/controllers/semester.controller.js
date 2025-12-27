@@ -86,7 +86,25 @@ export const putSemester = async (req, res, next) => {
 
   try {
     const { id } = req.params;
+
     let updatedSemester;
+
+    const { academicYear } = req.body;
+
+    if (academicYear) {
+      if (!mongoose.Types.ObjectId.isValid(academicYear)) {
+        return res.status(400).json({
+          message: "academicYear invalide (ObjectId attendu)",
+        });
+      }
+
+      const academicYearExists = await AcademicYear.findById(academicYear);
+      if (!academicYearExists) {
+        return res.status(400).json({
+          message: "academicYear inexistant",
+        });
+      }
+    }
 
     await session.withTransaction(async () => {
       // 1) Validate semester id
