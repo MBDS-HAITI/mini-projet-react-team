@@ -4,7 +4,7 @@ import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 // import { MONGODB_URI } from "../config/env.js";
 
-await mongoose.connect("mongodb+srv://bsachyedvaelle_db_user:Master_password1@cluster0.4dpceyw.mongodb.net/?appName=Cluster0");
+await mongoose.connect("mongodb+srv://pdawens78_db_user:Sefyetem2023@cluster0.byvsbzk.mongodb.net/?appName=Cluster0");
 
 console.log("DB:", mongoose.connection.name);
 console.log("Collection:", User.collection.name);
@@ -16,7 +16,7 @@ const plainPassword = "Admin123#";
 const salt = await bcrypt.genSalt(10);
 const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
-const adminCount = await User.countDocuments({role: "ADMIN"});
+const adminCount = await User.countDocuments({username: "admin"});
 if(adminCount == 0){
 
 
