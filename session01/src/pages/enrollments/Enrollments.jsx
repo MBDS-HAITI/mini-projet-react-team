@@ -58,7 +58,7 @@ export default function EnrollmentsPage() {
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
-    <div className="p-8 bg-gradient-to-br from-[#0b0b3b] via-[#1b145c] to-[#050523] flex items-center justify-center px-4">
+    <div className="p-4 md:p-8">
       {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
         {/* ===== TITRE ===== */}
@@ -112,7 +112,7 @@ export default function EnrollmentsPage() {
               className="
                 px-4 py-2
                 rounded-lg
-                bg-gradient-to-r from-purple-500 to-indigo-500
+                bg-linear-to-r from-purple-500 to-indigo-500
                 text-white
                 font-semibold
                 hover:opacity-90

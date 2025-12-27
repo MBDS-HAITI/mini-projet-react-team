@@ -11,6 +11,7 @@ import SemestresPage from "./pages/semesters/Semesters";
 import StudentsPage from "./pages/students/Students";
 import CoursesPage from "./pages/courses/Courses";
 import ProfilePage from "./pages/profile/Profile";
+import EnrollmentsPage from "./pages/enrollments/Enrollments";
 
 export default function Navigation() {
   return (
@@ -26,6 +27,7 @@ export default function Navigation() {
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/students" element={<StudentsPage />} />
+          <Route path="/enrollments" element={<EnrollmentsPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/semester" element={<SemestresPage />} />
           <Route path="/academicyear" element={<AcademicYearPage />} />
