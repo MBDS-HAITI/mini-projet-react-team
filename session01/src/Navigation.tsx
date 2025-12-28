@@ -12,6 +12,7 @@ import StudentsPage from "./pages/students/Students";
 import CoursesPage from "./pages/courses/Courses";
 import ProfilePage from "./pages/profile/Profile";
 import EnrollmentsPage from "./pages/enrollments/Enrollments";
+import GradesPage from "./pages/grades/Grades";
 
 export default function Navigation() {
   return (
@@ -29,6 +30,7 @@ export default function Navigation() {
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/enrollments" element={<EnrollmentsPage />} />
           <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/grades" element={<GradesPage />} />
           <Route path="/semester" element={<SemestresPage />} />
           <Route path="/academicyear" element={<AcademicYearPage />} />
           <Route path="/about" element={<AboutPage />} />
