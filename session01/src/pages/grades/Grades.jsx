@@ -11,6 +11,7 @@ import {
   TablePagination,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
+import SearchInput from "../../components/widgets/SearchInput";
 
 export default function GradesPage() {
   // ===== STATE PRINCIPAL =====
@@ -56,7 +57,7 @@ export default function GradesPage() {
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
-    <div className="p-8 bg-gradient-to-br from-[#0b0b3b] via-[#1b145c] to-[#050523] flex items-center justify-center px-4">
+    <div className="p-4 md:p-8">
       
       {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
@@ -70,7 +71,9 @@ export default function GradesPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           
           {/* Recherche */}
-          <input
+          <SearchInput placeholder="Recherche code, nom, sexe, adr..." search={search} setSearch={setSearch} setPage={setPage} />
+          
+          {/* <input
             type="text"
             placeholder="Rechercher par note..."
             value={search}
@@ -89,7 +92,7 @@ export default function GradesPage() {
               focus:outline-none
               focus:ring-2 focus:ring-purple-500
             "
-          />
+          /> */}
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
