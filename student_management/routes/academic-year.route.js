@@ -6,6 +6,7 @@ import {
   getAcademicYear,
   putAcademicYear,
   deleteAcademicYear,
+  getAcademicYearDetails,
 } from "../controllers/academic-year.controller.js";
 
 const router = express.Router();
@@ -132,6 +133,62 @@ router.get("/", getAllAcademicYears);
  *         description: Année académique introuvable
  */
 router.get("/:id", getAcademicYear);
+
+/**
+ * @openapi
+ * /api/v1/academicyears/{id}/details:
+ *   get:
+ *     summary: Détails d'une année académique (semestres + stats)
+ *     description: |
+ *       Retourne l'année académique, la liste de ses semestres, et des statistiques:
+ *       - enrollmentsCount: nombre d'inscriptions par semestre
+ *       - gradesCount: nombre de notes par semestre (ou notes publiées si vous filtrez côté API)
+ *     tags: [AcademicYears]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Identifiant MongoDB de l'année académique
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Détails de l'année académique
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 academicYear:
+ *                   $ref: '#/components/schemas/AcademicYear'
+ *                 semesters:
+ *                   type: array
+ *                   items:
+ *                     allOf:
+ *                       - $ref: '#/components/schemas/Semester'
+ *                       - type: object
+ *                         properties:
+ *                           enrollmentsCount:
+ *                             type: integer
+ *                             example: 120
+ *                           gradesCount:
+ *                             type: integer
+ *                             example: 95
+ *                 totals:
+ *                   type: object
+ *                   properties:
+ *                     enrollments:
+ *                       type: integer
+ *                       example: 240
+ *                     grades:
+ *                       type: integer
+ *                       example: 180
+ *       404:
+ *         description: Année académique introuvable
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get("/:id/details", getAcademicYearDetails);
 
 /**
  * @openapi
