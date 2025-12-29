@@ -5,6 +5,14 @@ import jwt from 'jsonwebtoken';
 import { JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_SECRET, NODE_ENV } from "../config/env.js";
 import User from "../models/user.model.js";
 
+const confCookieOptions = {
+      httpOnly: true,
+      secure: true, //NODE_ENV === "production", 
+      sameSite: "None", // NODE_ENV === "production" ? "None" : "Lax",
+      path: "/api/v1/auths/refresh",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+
 export const signIn = async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -55,13 +63,7 @@ export const signIn = async (req, res, next) => {
     );
 
     // 5) Cookie refresh
-    res.cookie("stdrefresh", refreshToken, {
-      httpOnly: true,
-      secure: NODE_ENV === "production", // <-- important
-      sameSite: NODE_ENV === "production" ? "None" : "Lax",
-      path: "/api/v1/auths/refresh",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("stdrefresh", refreshToken, confCookieOptions);
 
     // 6) Ne pas renvoyer password
     const userObj = user.toObject();
@@ -114,12 +116,7 @@ export const refreshAccessToken = async (req, res, next) => {
 
 export const signOut = async (req, res, next) => {
     try {
-        res.clearCookie("stdrefresh",
-            {
-                path: "/api/v1/auths/refresh",
-                sameSite: "None" ,
-                secure: true,
-            });
+        res.clearCookie("stdrefresh",confCookieOptions);
         return res.status(200).json({ success: true, message: "Logged out" });
     } catch (error) {
         next(error);

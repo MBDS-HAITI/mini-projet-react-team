@@ -34,7 +34,10 @@ export default function Navigation() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/grades" element={<GradesPage />} />
           <Route path="/semester" element={<SemestresPage />} />
-          <Route path="/academicyear" element={<AcademicYearPage />} />
+
+          {/* Academic Year Routes */}
+          <Route path="/academicyears" element={<AcademicYearPage />} />
+
           <Route path="/about" element={<AboutPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />

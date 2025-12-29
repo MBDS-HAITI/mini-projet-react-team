@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getAcademicYears } from "../../api/routes/academic-year.api.js";
+import {
+  deleteAcademicYear,
+  getAcademicYears,
+} from "../../api/routes/academic-year.api.js";
 import {
   Table,
   TableBody,
@@ -9,13 +12,33 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  IconButton,
 } from "@mui/material";
+import { Pencil, Eye, Trash2, Plus } from "lucide-react";
 import { formatDate } from "../../utils/fdate";
 import SortButton from "../../components/widgets/SortButton.jsx";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
+import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
+import UpsertAcademicYearModal from "./UpsertAcademicYearModal";
+import AddButton from "../../components/widgets/AddButton.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import AcademicYearDetailsModal from "./AcademiYeardetailsModal.jsx";
 
 export default function AcademicYearPage() {
   const [academicYears, setAcademicYears] = useState([]);
+
+  //upsert modal state
+  const [openUpsert, setOpenUpsert] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(null);
+
+  // Details modal state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState(null);
+
+  // Delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -25,65 +48,78 @@ export default function AcademicYearPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  const fetchAcademicYear = async () => {
+    const result = await getAcademicYears();
+    setAcademicYears(result);
+  };
+
   useEffect(() => {
-    const fetchAcademicYear = async () => {
-      const result = await getAcademicYears();
-      setAcademicYears(result);
-    };
     fetchAcademicYear();
   }, []);
 
   // Filtrage + tri
   const filteredAcademicYears = academicYears
-    .filter((year) =>
-      year.name.toLowerCase().includes(search.toLowerCase())
-    )
+    .filter((year) => year.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     );
 
+  const onEdit = (row) => {
+    setSelectedYear(row);
+    setOpenUpsert(true);
+  };
+
+  const onAdd = () => {
+    setSelectedYear(null);
+    setOpenUpsert(true);
+  };
+
+  const onDetails = (row) => {
+    setDetailsId(row._id);
+    setDetailsOpen(true);
+  };
+
+  const askDelete = (row) => {
+    setToDelete(row);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete?._id) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteAcademicYear(toDelete._id);
+      await fetchAcademicYear();
+      setConfirmOpen(false);
+      setToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    /* ===== BACKGROUND GLOBAL ===== */
     <div className="my-8">
-      
-      {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        
-        {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
           Années académiques
         </h1>
 
-        {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          
           {/* Recherche */}
-          <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
+          <SearchInput
+            search={search}
+            setSearch={setSearch}
+            setPage={setPage}
+          />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
-            
             {/* Tri */}
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
             {/* Ajouter */}
-            <button
-              onClick={() => console.log("Ajouter une année académique")}
-              className="
-                px-4 py-2
-                rounded-lg
-                bg-linear-to-r from-purple-500 to-indigo-500
-                text-white
-                font-semibold
-                hover:opacity-90
-                transition
-              "
-            >
-              + Ajouter
-            </button>
-
+            <AddButton onAdd={onAdd} />
           </div>
         </div>
 
@@ -160,17 +196,47 @@ export default function AcademicYearPage() {
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
-                        <span className="cursor-pointer hover:underline">
-                          Modifier
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer hover:underline">
-                          Détails
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer text-red-400 hover:underline">
-                          Supprimer
-                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <StyledTooltip title="Modifier" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onEdit(academicYear)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Pencil size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Détails" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onDetails(academicYear)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Eye size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Supprimer" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => askDelete(academicYear)}
+                              sx={{ color: "#f87171" }} // red-400
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -198,6 +264,32 @@ export default function AcademicYearPage() {
           />
         </Paper>
       </div>
+      {/* Modal Section */}
+      <UpsertAcademicYearModal
+        open={openUpsert}
+        onClose={() => setOpenUpsert(false)}
+        mode={selectedYear ? "edit" : "create"}
+        data={selectedYear}
+        onSuccess={fetchAcademicYear}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirmer la suppression"
+        message={
+          <>
+            Voulez-vous vraiment supprimer l’année <b>{toDelete?.name}</b> ?
+          </>
+        }
+        confirmText="Supprimer"
+        onClose={() => !isDeleting && setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+      />
+      <AcademicYearDetailsModal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        academicYearId={detailsId}
+      />
     </div>
   );
 }

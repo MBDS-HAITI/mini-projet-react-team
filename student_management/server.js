@@ -33,19 +33,18 @@ if (NODE_ENV === "development") {
 const app = express();
 const key = fs.readFileSync("./data/react_team.key");
 const cert = fs.readFileSync("./data/react_team.crt");
+// Pour accepter les connexions cross-domain (CORS)
+app.use(cors(CORS_OPTIONS)
+);
 
 app.use("/api/v1/swagger/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
 // Middleware to parse JSON bodies and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-
-
-// Pour accepter les connexions cross-domain (CORS)
-app.use(cors(CORS_OPTIONS)
-);
 
 // routes with authorizations
 app.use("/api/v1/auths", authRoutes);
@@ -59,7 +58,6 @@ app.use('/api/v1/grades', authorize, gradeRoutes);
 
 //authorize(pou course)
 app.use(errorMiddleware);
-app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
 
 

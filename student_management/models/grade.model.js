@@ -6,10 +6,12 @@ const GradeSchema = new mongoose.Schema({
   value: { type: Number, required: true, min: 0, max: 100 },
   gradedAt: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  isPublished: { type: Boolean, default: false },
+  publishedAt: { type: Date }
 }, { timestamps: true });
 
 // Une note par inscription 
-GradeSchema.index({ enrollmentId: 1 }, { unique: true });
+GradeSchema.index({ enrollment: 1 }, { unique: true });
 
 const Grade = mongoose.model("Grade", GradeSchema);
 

@@ -20,8 +20,6 @@ export default function AddCoursePage() {
 
   function onSubmit(e) {
     e.preventDefault();
-    // Here you would typically handle form submission,
-    // e.g., send data to a server or update state in a parent component.
     console.log("Course added:", course);
     postCourse(course).then((data)=>{
       console.log("Response from server:", data);
