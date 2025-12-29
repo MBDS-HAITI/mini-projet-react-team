@@ -9,6 +9,7 @@ import Loading from "../../components/common/Loading";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
+  
 
   if (loading) {
     return (

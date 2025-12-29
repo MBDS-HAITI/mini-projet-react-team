@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAcademicYears } from "../../api/routes/academic-year.api.js";
+import { getCourses } from "../../api/routes/course.api.js";
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import { formatDate } from "../../utils/fdate";
 import SortButton from "../../components/widgets/SortButton.jsx";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
 
-export default function AcademicYearPage() {
-  const [academicYears, setAcademicYears] = useState([]);
+export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -26,17 +26,19 @@ export default function AcademicYearPage() {
   const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
-    const fetchAcademicYear = async () => {
-      const result = await getAcademicYears();
-      setAcademicYears(result);
+    const fetchCourse = async () => {
+      const result = await getCourses();
+      
+      setCourses(result);
     };
-    fetchAcademicYear();
+    fetchCourse();
   }, []);
 
   // Filtrage + tri
-  const filteredAcademicYears = academicYears
-    .filter((year) =>
-      year.name.toLowerCase().includes(search.toLowerCase())
+  const filteredCourses = courses
+    .filter((course) =>
+      course.name.toLowerCase().includes(search.toLowerCase())
+        || course.code.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
       sortAsc
@@ -53,7 +55,7 @@ export default function AcademicYearPage() {
         
         {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Années académiques
+          Liste des cours
         </h1>
 
         {/* ===== BARRE ACTIONS ===== */}
@@ -100,10 +102,9 @@ export default function AcademicYearPage() {
               <TableHead>
                 <TableRow>
                   {[
+                    "Code",
                     "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Active",
+                    "Crédits",
                     "Création",
                     "Modification",
                     "Actions",
@@ -123,11 +124,11 @@ export default function AcademicYearPage() {
               </TableHead>
 
               <TableBody>
-                {filteredAcademicYears
+                {filteredCourses
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((academicYear) => (
+                  .map((course) => (
                     <TableRow
-                      key={academicYear._id}
+                      key={course._id}
                       hover
                       sx={{
                         "&:hover": {
@@ -136,27 +137,23 @@ export default function AcademicYearPage() {
                       }}
                     >
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.name}
+                        {course.code}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.startDate)}
+                        {course.name}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.endDate)}
+                        {course.credits}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.isActive ? "Oui" : "Non"}
+                        {formatDate(course.createdAt, true)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.createdAt, true)}
-                      </TableCell>
-
-                      <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.updatedAt, true)}
+                        {formatDate(course.updatedAt, true)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -181,7 +178,7 @@ export default function AcademicYearPage() {
           {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredAcademicYears.length}
+            count={filteredCourses.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}

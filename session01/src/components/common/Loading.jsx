@@ -7,7 +7,7 @@ export default function Loading({
 }) {
   const Wrapper = ({ children }) =>
     fullScreen ? (
-      <div className="min-h-screen w-full flex items-center justify-center px-4">
+      <div className="min-h-[620px] w-full flex items-center justify-center px-4">
         {children}
       </div>
     ) : (

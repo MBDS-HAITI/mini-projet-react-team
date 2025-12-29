@@ -15,15 +15,27 @@ const router = express.Router();
  * @openapi
  * components:
  *   schemas:
+ *     AcademicYear:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 64f4a6f2b4f3c2a1d9e8c777
+ *         name:
+ *           type: string
+ *           example: 2025-2026
+ *
  *     Semester:
  *       type: object
  *       properties:
  *         _id:
  *           type: string
  *         academicYear:
- *           type: string
- *           description: Référence vers l'année académique (AcademicYear)
- *           example: 64f4a6f2b4f3c2a1d9e8c777
+ *           oneOf:
+ *             - type: string
+ *               description: ID de l'année académique (POST / PUT)
+ *               example: 64f4a6f2b4f3c2a1d9e8c777
+ *             - $ref: '#/components/schemas/AcademicYear'
  *         name:
  *           type: string
  *           enum: [S1, S2]

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAcademicYears } from "../../api/routes/academic-year.api.js";
+import { getEnrollments } from "../../api/routes/enrollment.api";
 import {
   Table,
   TableBody,
@@ -11,66 +11,104 @@ import {
   TablePagination,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
-import SortButton from "../../components/widgets/SortButton.jsx";
-import SearchInput from "../../components/widgets/SearchInput.jsx";
 
-export default function AcademicYearPage() {
-  const [academicYears, setAcademicYears] = useState([]);
+export default function EnrollmentsPage() {
+  // ===== STATE PRINCIPAL =====
+  const [enrollments, setEnrollments] = useState([]);
 
-  // Pagination
+  // ===== PAGINATION =====
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Recherche & tri
+  // ===== RECHERCHE & TRI =====
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  // ===== FETCH DATA =====
   useEffect(() => {
-    const fetchAcademicYear = async () => {
-      const result = await getAcademicYears();
-      setAcademicYears(result);
+    const fetchEnrollments = async () => {
+      try {
+        const result = await getEnrollments();
+        setEnrollments(result);
+        console.log(result);
+      } catch (error) {
+        console.error("Erreur lors du chargement des inscriptions", error);
+      }
     };
-    fetchAcademicYear();
+
+    fetchEnrollments();
   }, []);
 
-  // Filtrage + tri
-  const filteredAcademicYears = academicYears
-    .filter((year) =>
-      year.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
+  // ===== FILTRAGE + TRI =====
+  const filteredEnrollments = enrollments
+    .filter((enrollment) => {
+      const studentName =
+        enrollment.student?.name ||
+        enrollment.student?.firstName ||
+        "";
+      return studentName.toLowerCase().includes(search.toLowerCase());
+    })
+    .sort((a, b) => {
+      const nameA = a.student?.name || "";
+      const nameB = b.student?.name || "";
+      return sortAsc
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
+    });
 
   return (
     /* ===== BACKGROUND GLOBAL ===== */
-    <div className="my-8">
-      
+    <div className="p-4 md:p-8">
       {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        
         {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Années académiques
+          Inscriptions
         </h1>
 
         {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          
           {/* Recherche */}
-          <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
+          <input
+            type="text"
+            placeholder="Rechercher par étudiant..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            className="
+              w-full md:w-72
+              px-4 py-2
+              rounded-lg
+              bg-white/10
+              border border-white/20
+              text-white
+              placeholder:text-gray-300
+              focus:outline-none
+              focus:ring-2 focus:ring-purple-500
+            "
+          />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
-            
-            {/* Tri */}
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
             <button
-              onClick={() => console.log("Ajouter une année académique")}
+              onClick={() => setSortAsc(!sortAsc)}
+              className="
+                px-4 py-2
+                rounded-lg
+                bg-white/10
+                border border-white/20
+                text-white
+                hover:bg-white/20
+                transition
+              "
+            >
+              Trier {sortAsc ? "↑" : "↓"}
+            </button>
+
+            <button
+              onClick={() => console.log("Nouvelle inscription")}
               className="
                 px-4 py-2
                 rounded-lg
@@ -81,29 +119,25 @@ export default function AcademicYearPage() {
                 transition
               "
             >
-              + Ajouter
+              + S’inscrire
             </button>
-
           </div>
         </div>
 
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
+          sx={{ backgroundColor: "transparent", color: "white" }}
         >
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   {[
-                    "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Active",
+                    "Étudiant",
+                    "Cours",
+                    "Semestre",
+                    "Statut",
                     "Création",
                     "Modification",
                     "Actions",
@@ -113,7 +147,8 @@ export default function AcademicYearPage() {
                       sx={{
                         color: "#cbd5f5",
                         fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        borderBottom:
+                          "1px solid rgba(255,255,255,0.2)",
                       }}
                     >
                       {head}
@@ -123,40 +158,46 @@ export default function AcademicYearPage() {
               </TableHead>
 
               <TableBody>
-                {filteredAcademicYears
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((academicYear) => (
+                {filteredEnrollments
+                  .slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                  .map((enrollment) => (
                     <TableRow
-                      key={academicYear._id}
+                      key={enrollment._id}
                       hover
                       sx={{
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          backgroundColor:
+                            "rgba(255,255,255,0.05)",
                         },
                       }}
                     >
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.name}
+                        {enrollment.student?.name ||
+                          enrollment.student?.firstName ||
+                          "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.startDate)}
+                        {enrollment.course?.name || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.endDate)}
+                        {enrollment.semester?.name || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {academicYear.isActive ? "Oui" : "Non"}
+                        {enrollment.status || "—"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.createdAt, true)}
+                        {formatDate(enrollment.createdAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(academicYear.updatedAt, true)}
+                        {formatDate(enrollment.updatedAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -181,7 +222,7 @@ export default function AcademicYearPage() {
           {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredAcademicYears.length}
+            count={filteredEnrollments.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}
@@ -192,8 +233,12 @@ export default function AcademicYearPage() {
             }}
             sx={{
               color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              ".MuiTablePagination-selectIcon": {
+                color: "white",
+              },
+              ".MuiTablePagination-actions button": {
+                color: "white",
+              },
             }}
           />
         </Paper>

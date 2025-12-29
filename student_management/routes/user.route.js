@@ -8,6 +8,7 @@ import {
   getUserStudent,
   putUser,
   deleteUser,
+  resetUserPassword,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -363,6 +364,57 @@ router.get("/student/:studentId", getUserStudent);
  *         description: Erreur serveur
  */
 router.put("/:id", putUser);
+
+/**
+ * @openapi
+ * /api/v1/users/{id}/reset-password:
+ *   patch:
+ *     summary: Réinitialiser le mot de passe d'un utilisateur (Admin only)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ObjectId de l'utilisateur
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: "TempPass2526"
+ *     responses:
+ *       200:
+ *         description: Mot de passe réinitialisé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Password reset successfully
+ *       400:
+ *         description: Données invalides (id ou newPassword)
+ *       403:
+ *         description: Forbidden (Admin only)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Erreur serveur
+ */
+router.patch("/:id/reset-password", resetUserPassword);
 
 /**
  * @openapi

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import { useAuth } from "../../auth/AuthProvider";
-
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +31,28 @@ export default function LoginPage() {
       await login(form);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || "Erreur de connexion");
+      setError(
+        err?.response?.data?.message || err?.message || "Erreur de connexion"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Placeholder: tu brancheras Google OAuth plus tard
+  const handleGoogleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      // TODO: Google sign-in flow ici
+      // ex: await loginWithGoogle()
+      console.log("Google login clicked");
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Erreur de connexion Google"
+      );
     } finally {
       setLoading(false);
     }
@@ -65,16 +85,15 @@ export default function LoginPage() {
                 </p>
 
                 <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
-                  Connexion {" "}
-                  <span
-                    className="bg-linear-to-r from-fuchsia-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent"
-                  >
+                  Connexion{" "}
+                  <span className="bg-linear-to-r from-fuchsia-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
                     Student Management
                   </span>
                 </h1>
 
                 <p className="mt-3 text-white/70 max-w-xl leading-relaxed">
-                  Connecte-toi pour accéder à la gestion des étudiants, matières et notes.
+                  Connecte-toi pour accéder à la gestion des étudiants, matières
+                  et notes.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -105,8 +124,38 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Google button */}
+            <div className="mt-6 w-full flex flex-col items-center">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2
+                           px-5 py-2 rounded-md text-sm font-semibold transition
+                           bg-white/10 hover:bg-white/15 active:bg-white/20
+                           border border-white/15 hover:border-white/25
+                           text-white shadow-[0_0_18px_rgba(255,255,255,0.06)]"
+              >
+                <span className="grid place-items-center w-7 h-7 rounded-md bg-white">
+                  <img
+                    src="/google-logo.png"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                </span>
+                Se connecter avec Google
+              </button>
+
+              {/* petit texte style “helper” */}
+              <p className="mt-3 text-white/50 text-sm">
+                Ou utilise tes identifiants ci-dessous.
+              </p>
+            </div>
+
             {/* Form */}
-            <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
               <div className="sm:col-span-1">
                 <label className="block text-sm mb-1 text-white/70">
                   Nom d’utilisateur
@@ -144,9 +193,10 @@ export default function LoginPage() {
               {/* helper row */}
               <div className="sm:col-span-2 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mt-1">
                 <p className="text-white/55 text-sm">
-                  Astuce: utilise ton compte <span className="text-white/80 font-medium">admin</span> pour tester.
+                  Astuce: utilise ton compte{" "}
+                  <span className="text-white/80 font-medium">admin</span> pour
+                  tester.
                 </p>
-
               </div>
 
               {/* actions */}
