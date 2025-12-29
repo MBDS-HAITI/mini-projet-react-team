@@ -10,7 +10,7 @@ const menuItems = [
   { label: "Notes", link: "/grades" },
   { label: "Matières", link: "/courses" },
   { label: "Semestres", link: "/semester" },
-  { label: "Années Académiques", link: "/academicyear" },
+  { label: "Années Académiques", link: "/academicyears" },
   { label: "A propos", link: "/about" },
 ];
 

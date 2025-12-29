@@ -36,6 +36,16 @@ export async function getAcademicYearById(id) {
 }
 
 /**
+ * GET /api/v1/academicyears/:id//details
+ * Response: {AcademicYear, semesters[], totals}
+ */
+export async function getAcademicYearDetails(id) {
+  if (!id) throw new Error("getAcademicYearById: id requis");
+  const res = await apiClient.get(`/academicyears/${id}/details`);
+  return res.data;
+}
+
+/**
  * PUT /api/v1/academicyears/:id
  * Body: { name?, startDate?, endDate?, isActive? }
  * Response: AcademicYear
