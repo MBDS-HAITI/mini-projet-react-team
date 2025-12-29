@@ -7,9 +7,11 @@ import AboutPage from "./pages/about/About";
 import NotFoundPage from "./pages/not-found.jsx/NotFound";
 import Unauthorized from "./pages/unauthorized/Unauthorized";
 import AcademicYearPage from "./pages/academic-year/AcademicYear";
+import CoursesPage from "./pages/Courses/CoursesPage";
+import AddCoursePage from "./pages/AddCourse";
+
 import SemestresPage from "./pages/semesters/Semesters";
 import StudentsPage from "./pages/students/Students";
-import CoursesPage from "./pages/courses/Courses";
 import ProfilePage from "./pages/profile/Profile";
 import EnrollmentsPage from "./pages/enrollments/Enrollments";
 import GradesPage from "./pages/grades/Grades";
@@ -40,6 +42,8 @@ export default function Navigation() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/courses/add" element={<AddCoursePage />} />
         </Route>
       </Routes>
     </>

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { getSemesters } from "../../api/routes/semester.api.js";
+
+import { getSemesters, deleteSemester } from "../../api/routes/semester.api.js";
+
 import {
   Table,
   TableBody,
@@ -9,75 +11,114 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  IconButton,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
 import SortButton from "../../components/widgets/SortButton.jsx";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
 
-export default function SemestersPage() {
+import UpsertSemesterModal from "./UpsertSemesterModal.jsx";
+import SemesterDetailsModal from "./SemesterDetailsModal.jsx";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
+import AddButton from "../../components/widgets/AddButton.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 
+
+
+export default function SemestersPage() {
   const [semesters, setSemesters] = useState([]);
+
+  //upsert modal state
+  const [openUpsert, setOpenUpsert] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState(null);
+
+  // Details modal state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState(null);
+
+  // Delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  
+
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
-  
-  useEffect(() => {
-    const fetchSemesters = async () => {
-      const result = await getSemesters();
-      setSemesters(result);
-    };
 
-    fetchSemesters();
+
+  const fetchSemeters = async () => {
+    const result = await getSemesters();
+    setSemesters(result);
+  }
+
+  useEffect(() => {
+    fetchSemeters();
   }, []);
 
   const filteredSemesters = semesters
-    .filter((semester) =>
-      semester.name.toLowerCase().includes(search.toLowerCase())
-      || 
-      semester.academicYear?.name.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (semester) =>
+        semester.name.toLowerCase().includes(search.toLowerCase()) ||
+        semester.academicYear?.name.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+      sortAsc ? a?.academicYear?.name.localeCompare(b?.academicYear?.name) : b?.academicYear?.name.localeCompare(a?.academicYear?.name)
     );
 
+  const onEdit = (row) => {
+    setSelectedSemester(row);
+    setOpenUpsert(true);
+  };
+
+  const onAdd = () => {
+    setSelectedSemester(null);
+    setOpenUpsert(true);
+  };
+
+  const onDetails = (row) => {
+    setDetailsId(row._id);
+    setDetailsOpen(true);
+  };
+
+  const askDelete = (row) => {
+    setToDelete(row);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete?._id) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteSemester(toDelete._id);
+      await fetchSemeters();
+      setConfirmOpen(false);
+      setToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <div className="p-4 md:p-8 ">
-      
+    <div className="p-4 md:p-8">
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
           Semestres
         </h1>
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        
-          {/* Recherche */}
+
           <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
 
-          {/* Actions droite */}
+
           <div className="flex items-center gap-3">
-            
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
-            {/* Ajouter */}
-            <button
-              onClick={() => console.log("Ajouter un semestre")}
-              className="
-                px-4 py-2
-                rounded-lg
-                bg-linear-to-r from-purple-500 to-indigo-500
-                text-white
-                font-semibold
-                hover:opacity-90
-                transition
-              "
-            >
-              + Ajouter
-            </button>
+
+            <AddButton onAdd={onAdd} />
           </div>
         </div>
 
@@ -129,11 +170,10 @@ export default function SemestersPage() {
                         },
                       }}
                     >
-                     
                       <TableCell sx={{ color: "white" }}>
                         {semester.academicYear?.name || "-"}
                       </TableCell>
-                      
+
                       <TableCell sx={{ color: "white" }}>
                         {semester.name}
                       </TableCell>
@@ -150,7 +190,7 @@ export default function SemestersPage() {
                         {semester.isActive ? "Oui" : "Non"}
                       </TableCell>
 
-                       <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "white" }}>
                         {formatDate(semester.createdAt)}
                       </TableCell>
 
@@ -158,18 +198,49 @@ export default function SemestersPage() {
                         {formatDate(semester.updatedAt)}
                       </TableCell>
 
+
                       <TableCell sx={{ color: "#a78bfa" }}>
-                        <span className="cursor-pointer hover:underline">
-                          Modifier
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer hover:underline">
-                          Détails
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer text-red-400 hover:underline">
-                          Supprimer
-                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <StyledTooltip title="Modifier" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onEdit(semester)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Pencil size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Détails" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onDetails(semester)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Eye size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Supprimer" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => askDelete(semester)}
+                              sx={{ color: "#f87171" }} // red-400
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -195,6 +266,33 @@ export default function SemestersPage() {
             }}
           />
         </Paper>
+
+
+        <UpsertSemesterModal
+          open={openUpsert}
+          onClose={() => setOpenUpsert(false)}
+          mode={selectedSemester ? "edit" : "create"}
+          data={selectedSemester}
+          onSuccess={fetchSemeters}
+        />
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Confirmer la suppression"
+          message={
+            <>
+              Voulez-vous vraiment supprimer le semestre <b>{toDelete?.name} de {toDelete?.academicYear?.name}</b> ?
+            </>
+          }
+          confirmText="Supprimer"
+          onClose={() => !isDeleting && setConfirmOpen(false)}
+          onConfirm={confirmDelete}
+          loading={isDeleting}
+        />
+        <SemesterDetailsModal
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+          semesterId={selectedSemester}
+        />
       </div>
     </div>
   );
