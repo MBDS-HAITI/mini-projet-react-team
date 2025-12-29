@@ -5,6 +5,7 @@ import Menu from "./components/Menu";
 import Navigation from "./Navigation";
 import { useLocation } from "react-router-dom";
 
+
 function App() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
