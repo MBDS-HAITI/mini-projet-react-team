@@ -1,6 +1,7 @@
 import Enrollment from "../models/enrollment.model.js";
 import Grade from "../models/grade.model.js";
 import mongoose from 'mongoose';
+
 export const postGrade = async (req, res, next) => {
     const session = await mongoose.startSession();
 
@@ -67,15 +68,17 @@ export const postGrade = async (req, res, next) => {
 export const getAllGrades = async (req, res) => {
     try {
         const grades = await Grade.find()
+            .populate("user", "username")
             .populate({
                 path: "enrollment",
                 populate: [
-                    { path: "student" },
-                    { path: "course" },
+                    { path: "student", select: "firstName lastName studentCode" },
+                    { path: "course", select: "name code" },
                     {
                         path: "semester",
-                        populate: { path: "academicYear" }
-                    }
+                        select: "name",
+                        populate: { path: "academicYear", select: "name" }
+                    },
                 ],
             });
         res.status(200).json(grades);
@@ -83,6 +86,7 @@ export const getAllGrades = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 export const getAllGradesBySemesterId = async (req, res) => {
     try {
         const { semesterId } = req.params;

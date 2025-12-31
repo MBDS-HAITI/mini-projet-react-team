@@ -11,6 +11,7 @@ const menuItems = [
   { label: "Matières", link: "/courses" },
   { label: "Semestres", link: "/semester" },
   { label: "Années Académiques", link: "/academicyears" },
+  { label: "Utilisateurs", link: "/users" },
   { label: "A propos", link: "/about" },
 ];
 

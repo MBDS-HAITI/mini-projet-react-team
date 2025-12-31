@@ -15,6 +15,7 @@ import ProfilePage from "./pages/profile/Profile";
 import EnrollmentsPage from "./pages/enrollments/Enrollments";
 import GradesPage from "./pages/grades/Grades";
 import CoursesPage from "./pages/courses/Courses";
+import UsersPage from "./pages/users/Users";
 
 export default function Navigation() {
   return (
@@ -34,6 +35,7 @@ export default function Navigation() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/grades" element={<GradesPage />} />
           <Route path="/semester" element={<SemestresPage />} />
+          <Route path="/users" element={<UsersPage />} />
 
           {/* Academic Year Routes */}
           <Route path="/academicyears" element={<AcademicYearPage />} />
