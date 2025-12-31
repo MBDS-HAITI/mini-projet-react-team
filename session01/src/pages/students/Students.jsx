@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getAllStudents } from "../../api/routes/student.api.js";
+import { deleteStudent, getAllStudents } from "../../api/routes/student.api.js";
 import {
   Table,
   TableBody,
@@ -9,24 +9,45 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  IconButton,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
 import SortButton from "../../components/widgets/SortButton.jsx";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
+import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import AddButton from "../../components/widgets/AddButton.jsx";
+import UpsertStudentModal from "./UpsertStudentModal.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
+
+  //upsert modal state
+  const [openUpsert, setOpenUpsert] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
+  // Details modal state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState(null);
+
+  // Delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  const fetchStudents = async () => {
+    const result = await getAllStudents();
+    setStudents(result);
+  };
+
   useEffect(() => {
-    const fetchStudents = async () => {
-      const result = await getAllStudents();
-      setStudents(result);
-    };
     fetchStudents();
   }, []);
 
@@ -35,7 +56,9 @@ export default function StudentsPage() {
 
     return (students ?? [])
       .filter((s) => {
-        const fullName = `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim().toLowerCase();
+        const fullName = `${s.firstName ?? ""} ${s.lastName ?? ""}`
+          .trim()
+          .toLowerCase();
         const code = (s.studentCode ?? "").toLowerCase();
         const phone = (s.phone ?? "").toLowerCase();
         const sex = (s.sex ?? "").toLowerCase();
@@ -53,11 +76,49 @@ export default function StudentsPage() {
       })
       .sort((a, b) => {
         // tri par nom, puis prénom
-        const aKey = `${a.lastName ?? ""} ${a.firstName ?? ""}`.trim().toLowerCase();
-        const bKey = `${b.lastName ?? ""} ${b.firstName ?? ""}`.trim().toLowerCase();
+        const aKey = `${a.lastName ?? ""} ${a.firstName ?? ""}`
+          .trim()
+          .toLowerCase();
+        const bKey = `${b.lastName ?? ""} ${b.firstName ?? ""}`
+          .trim()
+          .toLowerCase();
         return sortAsc ? aKey.localeCompare(bKey) : bKey.localeCompare(aKey);
       });
   }, [students, search, sortAsc]);
+
+  const onEdit = (row) => {
+    setSelectedStudent(row);
+    setOpenUpsert(true);
+  };
+
+  const onAdd = () => {
+    setSelectedStudent(null);
+    setOpenUpsert(true);
+  };
+
+  const onDetails = (row) => {
+    setDetailsId(row._id);
+    setDetailsOpen(true);
+  };
+
+  const askDelete = (row) => {
+    setToDelete(row);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete?._id) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteStudent(toDelete._id);
+      await fetchStudents();
+      setConfirmOpen(false);
+      setToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="p-4 md:p-8">
@@ -68,23 +129,18 @@ export default function StudentsPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           {/* Recherche */}
-          <SearchInput placeholder="Recherche code, nom, sexe, adr..." search={search} setSearch={setSearch} setPage={setPage} />
+          <SearchInput
+            placeholder="Recherche code, nom, sexe, adr..."
+            search={search}
+            setSearch={setSearch}
+            setPage={setPage}
+          />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
-            <button
-              onClick={() => console.log("Ajouter un étudiant")}
-              className="
-                px-4 py-2 rounded-lg
-                bg-linear-to-r from-purple-500 to-indigo-500
-                text-white font-semibold
-                hover:opacity-90 transition
-              "
-            >
-              + Ajouter
-            </button>
+            <AddButton onAdd={onAdd} />
           </div>
         </div>
 
@@ -108,6 +164,7 @@ export default function StudentsPage() {
                     "Adresse",
                     "Enregitré Le",
                     // "Modification",
+                    "Compte",
                     "Actions",
                   ].map((head) => (
                     <TableCell
@@ -129,14 +186,18 @@ export default function StudentsPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((student) => {
                     const key = student._id || student.id; // chez toi c'est souvent "id"
-                    const fullName = `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim();
+                    const fullName = `${student.firstName ?? ""} ${
+                      student.lastName ?? ""
+                    }`.trim();
 
                     return (
                       <TableRow
                         key={key}
                         hover
                         sx={{
-                          "&:hover": { backgroundColor: "rgba(255,255,255,0.05)" },
+                          "&:hover": {
+                            backgroundColor: "rgba(255,255,255,0.05)",
+                          },
                         }}
                       >
                         <TableCell sx={{ color: "white" }}>
@@ -166,19 +227,52 @@ export default function StudentsPage() {
                         <TableCell sx={{ color: "white" }}>
                           {formatDate(student.createdAt)}
                         </TableCell>
-
-                        {/* <TableCell sx={{ color: "white" }}>
-                          {formatDate(student.updatedAt)}
-                        </TableCell> */}
+                        <TableCell sx={{ color: "white" }}>
+                          {student.haveAccount ? "Oui" : "Non"}
+                        </TableCell>
 
                         <TableCell sx={{ color: "#a78bfa" }}>
-                          <span className="cursor-pointer hover:underline">Modifier</span>{" "}
-                          |{" "}
-                          <span className="cursor-pointer hover:underline">Détails</span>{" "}
-                          |{" "}
-                          <span className="cursor-pointer text-red-400 hover:underline">
-                            Supprimer
-                          </span>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <StyledTooltip title="Modifier" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => onEdit(student)}
+                                sx={{ color: "#a78bfa" }}
+                              >
+                                <Pencil size={18} />
+                              </IconButton>
+                            </StyledTooltip>
+
+                            <span style={{ opacity: 0.3 }}>|</span>
+
+                            <StyledTooltip title="Détails" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => onDetails(student)}
+                                sx={{ color: "#a78bfa" }}
+                              >
+                                <Eye size={18} />
+                              </IconButton>
+                            </StyledTooltip>
+
+                            <span style={{ opacity: 0.3 }}>|</span>
+
+                            <StyledTooltip title="Supprimer" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => askDelete(student)}
+                                sx={{ color: "#f87171" }} // red-400
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            </StyledTooltip>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -206,6 +300,26 @@ export default function StudentsPage() {
           />
         </Paper>
       </div>
+      <UpsertStudentModal
+        open={openUpsert}
+        onClose={() => setOpenUpsert(false)}
+        mode={selectedStudent ? "edit" : "create"}
+        data={selectedStudent}
+        onSuccess={fetchStudents}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirmer la suppression"
+        message={
+          <>
+            Voulez-vous vraiment supprimer l’année <b>{toDelete?.firstName} {toDelete?.lastName}</b> ?
+          </>
+        }
+        confirmText="Supprimer"
+        onClose={() => !isDeleting && setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+      />
     </div>
   );
 }
