@@ -24,8 +24,6 @@ import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import AddButton from "../../components/widgets/AddButton.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 
-
-
 export default function SemestersPage() {
   const [semesters, setSemesters] = useState([]);
 
@@ -48,11 +46,10 @@ export default function SemestersPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-
   const fetchSemeters = async () => {
     const result = await getSemesters();
     setSemesters(result);
-  }
+  };
 
   useEffect(() => {
     fetchSemeters();
@@ -65,7 +62,9 @@ export default function SemestersPage() {
         semester.academicYear?.name.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
-      sortAsc ? a?.academicYear?.name.localeCompare(b?.academicYear?.name) : b?.academicYear?.name.localeCompare(a?.academicYear?.name)
+      sortAsc
+        ? a?.academicYear?.name.localeCompare(b?.academicYear?.name)
+        : b?.academicYear?.name.localeCompare(a?.academicYear?.name)
     );
 
   const onEdit = (row) => {
@@ -110,13 +109,14 @@ export default function SemestersPage() {
         </h1>
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-
-          <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
-
+          <SearchInput
+            search={search}
+            setSearch={setSearch}
+            setPage={setPage}
+          />
 
           <div className="flex items-center gap-3">
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
 
             <AddButton onAdd={onAdd} />
           </div>
@@ -198,7 +198,6 @@ export default function SemestersPage() {
                         {formatDate(semester.updatedAt)}
                       </TableCell>
 
-
                       <TableCell sx={{ color: "#a78bfa" }}>
                         <div
                           style={{
@@ -267,7 +266,6 @@ export default function SemestersPage() {
           />
         </Paper>
 
-
         <UpsertSemesterModal
           open={openUpsert}
           onClose={() => setOpenUpsert(false)}
@@ -280,7 +278,11 @@ export default function SemestersPage() {
           title="Confirmer la suppression"
           message={
             <>
-              Voulez-vous vraiment supprimer le semestre <b>{toDelete?.name} de {toDelete?.academicYear?.name}</b> ?
+              Voulez-vous vraiment supprimer le semestre{" "}
+              <b>
+                {toDelete?.name} de {toDelete?.academicYear?.name}
+              </b>{" "}
+              ?
             </>
           }
           confirmText="Supprimer"

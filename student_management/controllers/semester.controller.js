@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Semester from "../models/semester.model.js";
 import AcademicYear from "../models/academic-year.model.js";
+import Enrollment from "../models/enrollment.model.js";
 
 export const postSemester = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -79,6 +80,19 @@ export const getSemester = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+
+export const getSemesterDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const semesterId = new mongoose.Types.ObjectId(id);
+    const semester = await Semester.findById(id).populate("academicYear", "name");
+    if (!semester) return res.status(404).json({ message: "Semester not found" });
+    // enrollments du semestre
+    const enrollments = await Enrollment.find({ semester: semesterId });
+  } catch (error) {
+    
+  }
 };
 
 export const putSemester = async (req, res, next) => {

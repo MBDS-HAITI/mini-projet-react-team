@@ -52,7 +52,7 @@ app.use("/api/v1/users", authorize, adminAuthorize, userRoutes);
 app.use("/api/v1/academicyears", authorize, scolariteAuthorize, academicYearRoutes);
 app.use("/api/v1/semesters", authorize, scolariteAuthorize, semesterRoutes);
 app.use("/api/v1/students", authorize, studentRoutes);
-app.use("/api/v1/courses", courseRoutes);
+app.use("/api/v1/courses",authorize, courseRoutes);
 app.use("/api/v1/enrollments", authorize, enrollmentRoutes);
 app.use('/api/v1/grades', authorize, gradeRoutes);
 

@@ -36,6 +36,7 @@ export const getCourse = async (req, res) => {
 export const putCourse = async (req, res) => {
     try {
         const { id } = req.params;
+        
         const course = await Course.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
 
         if (!course) {
