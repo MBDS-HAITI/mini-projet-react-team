@@ -48,13 +48,13 @@ export default function AcademicYearPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-  const fetchAcademicYear = async () => {
+  const fetchAcademicYears = async () => {
     const result = await getAcademicYears();
     setAcademicYears(result);
   };
 
   useEffect(() => {
-    fetchAcademicYear();
+    fetchAcademicYears();
   }, []);
 
   // Filtrage + tri
@@ -90,7 +90,7 @@ export default function AcademicYearPage() {
     setIsDeleting(true);
     try {
       await deleteAcademicYear(toDelete._id);
-      await fetchAcademicYear();
+      await fetchAcademicYears();
       setConfirmOpen(false);
       setToDelete(null);
     } finally {
@@ -270,7 +270,7 @@ export default function AcademicYearPage() {
         onClose={() => setOpenUpsert(false)}
         mode={selectedYear ? "edit" : "create"}
         data={selectedYear}
-        onSuccess={fetchAcademicYear}
+        onSuccess={fetchAcademicYears}
       />
       <ConfirmDialog
         open={confirmOpen}

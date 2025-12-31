@@ -9,6 +9,7 @@ import {
   Button,
   FormControlLabel,
   Checkbox,
+  MenuItem,
 } from "@mui/material";
 import {
   btnCancelSx,
@@ -138,7 +139,10 @@ export default function UpsertStudentModal({
             label="Adresse"
             shrinkLabel
           />
-          <FormField formik={formik} name="sex" label="Sexe" shrinkLabel />
+          <FormField formik={formik} name="sex" label="Sexe" select>
+            <MenuItem value="M">Masculin</MenuItem>
+            <MenuItem value="F">Féminin</MenuItem>
+          </FormField>
           <FormControlLabel
             label={<span style={{ color: "white" }}>Possède un compte</span>}
             control={

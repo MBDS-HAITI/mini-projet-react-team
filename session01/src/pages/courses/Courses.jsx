@@ -1,21 +1,30 @@
 import { useEffect, useState } from "react";
-import { getCourses } from "../../api/routes/course.api.js";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-} from "@mui/material";
-import { formatDate } from "../../utils/fdate";
-import SortButton from "../../components/widgets/SortButton.jsx";
+import { deleteCourse, getCourses } from "../../api/routes/course.api.js";
 import SearchInput from "../../components/widgets/SearchInput.jsx";
+import SortButton from "../../components/widgets/SortButton.jsx";
+import AddButton from "../../components/widgets/AddButton.jsx";
+import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
+import { IconButton, Paper, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, TablePagination } from "@mui/material";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import { formatDate } from "../../utils/fdate.js";
+import UpsertCourseModal from "./UpsertCourse.jsx";
+
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
+
+  //upsert modal state
+  const [openUpsert, setOpenUpsert] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  // Details modal state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState(null);
+
+  // Delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -25,67 +34,81 @@ export default function CoursesPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  const fetchCourses = async () => {
+    const result = await getCourses();
+    setCourses(result);
+  };
+
   useEffect(() => {
-    const fetchCourse = async () => {
-      const result = await getCourses();
-      
-      setCourses(result);
-    };
-    fetchCourse();
+    fetchCourses();
   }, []);
 
   // Filtrage + tri
   const filteredCourses = courses
-    .filter((course) =>
-      course.name.toLowerCase().includes(search.toLowerCase())
-        || course.code.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (course) =>
+        course.name.toLowerCase().includes(search.toLowerCase()) ||
+        course.code.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     );
 
+  const onEdit = (row) => {
+    setSelectedCourse(row);
+    setOpenUpsert(true);
+  };
+
+  const onAdd = (row) => {
+    setSelectedCourse(null);
+    setOpenUpsert(true);
+  };
+
+  const onDetails = (row) => {
+    setDetailsId(row._id);
+    setDetailsOpen(true);
+  };
+
+  const askDelete = (row) => {
+    setToDelete(row);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete?._id) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteCourse(toDelete._id);
+      await fetchCourses();
+      setConfirmOpen(false);
+      setToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    /* ===== BACKGROUND GLOBAL ===== */
     <div className="my-8">
-      
-      {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        
-        {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
           Liste des cours
         </h1>
-
-        {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          
           {/* Recherche */}
-          <SearchInput search={search} setSearch={setSearch} setPage={setPage} />
+          <SearchInput
+            search={search}
+            setSearch={setSearch}
+            setPage={setPage}
+          />
 
           {/* Actions droite */}
           <div className="flex items-center gap-3">
-            
             {/* Tri */}
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
 
             {/* Ajouter */}
-            <button
-              onClick={() => console.log("Ajouter une année académique")}
-              className="
-                px-4 py-2
-                rounded-lg
-                bg-linear-to-r from-purple-500 to-indigo-500
-                text-white
-                font-semibold
-                hover:opacity-90
-                transition
-              "
-            >
-              + Ajouter
-            </button>
-
+            <AddButton onAdd={onAdd} />
           </div>
         </div>
 
@@ -157,17 +180,47 @@ export default function CoursesPage() {
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
-                        <span className="cursor-pointer hover:underline">
-                          Modifier
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer hover:underline">
-                          Détails
-                        </span>{" "}
-                        |{" "}
-                        <span className="cursor-pointer text-red-400 hover:underline">
-                          Supprimer
-                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <StyledTooltip title="Modifier" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onEdit(course)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Pencil size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Détails" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onDetails(course)}
+                              sx={{ color: "#a78bfa" }}
+                            >
+                              <Eye size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+
+                          <span style={{ opacity: 0.3 }}>|</span>
+
+                          <StyledTooltip title="Supprimer" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => askDelete(course)}
+                              sx={{ color: "#f87171" }} // red-400
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -195,6 +248,16 @@ export default function CoursesPage() {
           />
         </Paper>
       </div>
+      {/* Upsert Modal */}
+      {openUpsert && (
+        <UpsertCourseModal
+          open={openUpsert}
+          onClose={() => setOpenUpsert(false)}
+          mode={selectedCourse ? "edit" : "create"}
+          data={selectedCourse}
+          onSuccess={fetchCourses}
+        />
+      )}
     </div>
   );
 }

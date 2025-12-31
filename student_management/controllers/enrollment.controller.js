@@ -50,6 +50,7 @@ export const postEnrollment = async (req, res, next) => {
         err.statusCode = 404;
         throw err;
       }
+      console.log(req.body);
 
       // 3) Prevent duplicates (student + course + semester)
       const dup = await Enrollment.exists({ student, course, semester }).session(session);
@@ -58,6 +59,8 @@ export const postEnrollment = async (req, res, next) => {
         err.statusCode = 409;
         throw err;
       }
+
+      
 
       // 4) Create enrollment inside transaction
       const [created] = await Enrollment.create([req.body], { session });
@@ -84,125 +87,137 @@ export const postEnrollment = async (req, res, next) => {
 
 
 export const getAllEnrollments = async (req, res) => {
-    try {
-        const enrollments = await Enrollment.find()
-            .populate('student')
-            .populate('course')
-            .populate({
-                path: "semester",
-                populate: { path: "academicYear" },
-            });
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const enrollments = await Enrollment.find()
+      .populate("student", "firstName lastName studentCode")
+      .populate("course", "name code")
+      .populate({
+        path: "semester",
+        select: "name ",
+        populate: { path: "academicYear", select: "name" },
+      });
+    res.status(200).json(enrollments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getAllEnrollmentsByAcademicYearId = async (req, res) => {
-    try {
-        const { academicYearId } = req.params;
+  try {
+    const { academicYearId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(academicYearId)) {
-            return res.status(400).json({ message: "academicYearId invalide" });
-        }
-
-        // récupérer les semestres de l'année
-        const semesters = await Semester.find({ academicYear: academicYearId }).select("_id");
-        const semesterIds = semesters.map((s) => s._id);
-
-        // récupérer les enrollments liés à ces semestres
-        const enrollments = await Enrollment.find({ semester: { $in: semesterIds } })
-            .populate("semester")
-            .populate("student")
-            .populate("course");
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!mongoose.Types.ObjectId.isValid(academicYearId)) {
+      return res.status(400).json({ message: "academicYearId invalide" });
     }
+
+    // récupérer les semestres de l'année
+    const semesters = await Semester.find({ academicYear: academicYearId }).select("_id");
+    const semesterIds = semesters.map((s) => s._id);
+
+    // récupérer les enrollments liés à ces semestres
+    const enrollments = await Enrollment.find({ semester: { $in: semesterIds } })
+      .populate("student", "firstName lastName studentCode")
+      .populate("course", "name code")
+      .populate({
+        path: "semester",
+        select: "name ",
+        populate: { path: "academicYear", select: "name" },
+      });
+    res.status(200).json(enrollments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getAllEnrollmentsBySemesterId = async (req, res) => {
-    try {
-        const { semesterId } = req.params;
+  try {
+    const { semesterId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(semesterId)) {
-            return res.status(400).json({ message: "Semester invalide" });
-        }
-
-        // récupérer les enrollments liés 
-        const enrollments = await Enrollment.find({ semester: semesterId })
-            .populate("student")
-            .populate("course");
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!mongoose.Types.ObjectId.isValid(semesterId)) {
+      return res.status(400).json({ message: "Semester invalide" });
     }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ semester: semesterId })
+      .populate("student", "firstName lastName studentCode")
+      .populate("course", "name code")
+      .populate({
+        path: "semester",
+        select: "name ",
+        populate: { path: "academicYear", select: "name" },
+      });
+    res.status(200).json(enrollments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getAllEnrollmentsByStudentId = async (req, res) => {
-    try {
-        const { studentId } = req.params;
+  try {
+    const { studentId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(studentId)) {
-            return res.status(400).json({ message: "Student invalide" });
-        }
-
-        if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
-            return res.status(403).json({ message: "Forbidden" })
-        }
-
-        // récupérer les enrollments liés 
-        const enrollments = await Enrollment.find({ student: studentId })
-            .populate({
-                path: "semester",
-                populate: { path: "academicYear" },
-            })
-            .populate("course");
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Student invalide" });
     }
+
+    if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
+      return res.status(403).json({ message: "Forbidden" })
+    }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ student: studentId })
+      .populate("student", "firstName lastName studentCode")
+      .populate("course", "name code")
+      .populate({
+        path: "semester",
+        select: "name ",
+        populate: { path: "academicYear", select: "name" },
+      });
+    res.status(200).json(enrollments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getAllEnrollmentsByCourseId = async (req, res) => {
-    try {
-        const { courseId } = req.params;
+  try {
+    const { courseId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(courseId)) {
-            return res.status(400).json({ message: "Course invalide" });
-        }
-
-        // récupérer les enrollments liés 
-        const enrollments = await Enrollment.find({ course: courseId })
-            .populate({
-                path: "semester",
-                populate: { path: "academicYear" },
-            })
-            .populate("student")
-            .populate("course");
-        res.status(200).json(enrollments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: "Course invalide" });
     }
+
+    // récupérer les enrollments liés 
+    const enrollments = await Enrollment.find({ course: courseId })
+      .populate({
+        path: "semester",
+        populate: { path: "academicYear" },
+      })
+      .populate("student")
+      .populate("course");
+    res.status(200).json(enrollments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getEnrollment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const enrollment = await Enrollment.findById(id)
-            .populate({
-                path: "semester",
-                populate: { path: "academicYear" }
-            })
-            .populate('student')
-            .populate('course');
-        if (!enrollment) {
-            return res.status(404).json({ message: `Enrollment not found` });
-        }
-        res.status(200).json(enrollment);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const { id } = req.params;
+    const enrollment = await Enrollment.findById(id)
+      .populate({
+        path: "semester",
+        populate: { path: "academicYear" }
+      })
+      .populate('student')
+      .populate('course');
+    if (!enrollment) {
+      return res.status(404).json({ message: `Enrollment not found` });
     }
+    res.status(200).json(enrollment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const putEnrollment = async (req, res, next) => {
@@ -330,11 +345,11 @@ export const putEnrollment = async (req, res, next) => {
 };
 
 export const deleteEnrollment = async (req, res) => {
-    try {
-        const enrollment = await Enrollment.findByIdAndDelete(req.params.id);
-        if (!enrollment) return res.status(404).json({ message: "Enrollment not found" });
-        return res.status(204).send();
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const enrollment = await Enrollment.findByIdAndDelete(req.params.id);
+    if (!enrollment) return res.status(404).json({ message: "Enrollment not found" });
+    return res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

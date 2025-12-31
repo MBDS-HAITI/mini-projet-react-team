@@ -50,7 +50,6 @@ export const adminAuthorize = async (req, res, next)=>{
 export const scolariteAuthorize = async (req, res, next)=>{
     try {
         
-        
         if(!req.user){
             return res.status(401).json({message: "Unauthorized"})
         }
