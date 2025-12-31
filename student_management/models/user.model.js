@@ -46,7 +46,7 @@ const UserSchema = new mongoose.Schema({
           },
           message: "Le champ student est requis."
         },
-    default: null
+    default: undefined
   },
   providers: { type: [ProviderSchema], default: [] },
 

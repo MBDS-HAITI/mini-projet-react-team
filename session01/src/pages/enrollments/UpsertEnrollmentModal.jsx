@@ -15,17 +15,11 @@ import {
 } from "../../api/routes/enrollment.api.js";
 
 import { validateEnrollment } from "../../utils/validate-enrollment.js";
-import {
-  toDateInputValue,
-  toISOEndOfDay,
-  toISOStartOfDay,
-} from "../../utils/helpers";
 
 import {
   dialogPaperSx,
   titleSx,
   sectionSx,
-  checkboxSx,
   btnCancelSx,
   btnSaveSx,
 } from "../../utils/fieldStylesSx.js";

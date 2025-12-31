@@ -11,6 +11,7 @@ import { apiClient } from "../client";
  *  - GET    /users/student/:studentId
  *  - PUT    /users/:id
  *  - DELETE /users/:id
+ *  - PATCH  /users/:id/reset-password
  */
 
 /**

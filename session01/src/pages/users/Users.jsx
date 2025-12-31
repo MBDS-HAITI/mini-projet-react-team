@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  deleteEnrollment,
-  getEnrollments,
-} from "../../api/routes/enrollment.api";
+
+import { getAllUsers, deleteUser } from "../../api/routes/user.api.js";
+
 import {
   Table,
   TableBody,
@@ -14,66 +13,97 @@ import {
   TablePagination,
   IconButton,
 } from "@mui/material";
-import { formatDate } from "../../utils/fdate";
-import SearchInput from "../../components/widgets/SearchInput";
-import SortButton from "../../components/widgets/SortButton";
-import AddButton from "../../components/widgets/AddButton";
-import { StyledTooltip } from "../../components/widgets/StyledTooltip";
+
+import SortButton from "../../components/widgets/SortButton.jsx";
+import SearchInput from "../../components/widgets/SearchInput.jsx";
+import AddButton from "../../components/widgets/AddButton.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import UpsertEnrollmentModal from "./UpsertEnrollmentModal";
-import ConfirmDialog from "../../components/ConfirmDialog";
+import { formatDate } from "../../utils/fdate";
+import UpsertUserModal from "./UpsertUserModal.jsx";
 
-export default function EnrollmentsPage() {
-  // ===== STATE PRINCIPAL =====
-  const [enrollments, setEnrollments] = useState([]);
+// TODO (optionnel): à créer si tu veux edit/details
+// import UpsertUserModal from "./UpsertUserModal.jsx";
+// import UserDetailsModal from "./UserDetailsModal.jsx";
 
-  //upsert modal state
+const ROLE_LABEL = {
+  ADMIN: "Admin",
+  SCOLARITE: "Scolarité",
+  STUDENT: "Étudiant",
+};
+
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+
+  // Modals (optionnels)
   const [openUpsert, setOpenUpsert] = useState(false);
-  const [selectedEnrollment, setSelectedEnrollment] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Delete modal state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState(null);
+
+  // Delete
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Pagination
+  // Pagination / Search / Sort
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Recherche & tri
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-  // ===== FETCH DATA =====
-  const fetchEnrollments = async () => {
-    const result = await getEnrollments();
-    setEnrollments(result);
+  const fetchUsers = async () => {
+    const result = await getAllUsers();
+    setUsers(result || []);
   };
 
   useEffect(() => {
-    fetchEnrollments();
+    fetchUsers();
   }, []);
 
-  // ===== FILTRAGE + TRI =====
-  const filteredEnrollments = enrollments
-    .filter((enrollment) => {
-      const studentName =
-        enrollment.student?.name || enrollment.student?.firstName || "";
-      return studentName.toLowerCase().includes(search.toLowerCase());
+  const q = search.trim().toLowerCase();
+
+  const filteredUsers = users
+    .filter((u) => {
+      if (!q) return true;
+
+      const haystack = [
+        u.email,
+        u.username,
+        u.role,
+        ROLE_LABEL[u.role],
+        u.isActive ? "oui" : "non",
+        u.mailVerified ? "verifie" : "non verifie",
+        // si user.student est populaté:
+        u.student?.studentCode,
+        u.student?.firstName,
+        u.student?.lastName,
+        // sinon ça sera juste un id:
+        typeof u.student === "string" ? u.student : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
     })
     .sort((a, b) => {
-      const nameA = a.student?.name || "";
-      const nameB = b.student?.name || "";
-      return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      // tri par username sinon email
+      const aKey = (a.username || a.email || "").toLowerCase();
+      const bKey = (b.username || b.email || "").toLowerCase();
+      return sortAsc ? aKey.localeCompare(bKey) : bKey.localeCompare(aKey);
     });
 
-  const onEdit = (row) => {
-    setSelectedEnrollment(row);
+  const onAdd = () => {
+    setSelectedUser(null);
     setOpenUpsert(true);
   };
 
-  const onAdd = () => {
-    setSelectedEnrollment(null);
+  const onEdit = (row) => {
+    setSelectedUser(row);
     setOpenUpsert(true);
   };
 
@@ -92,8 +122,8 @@ export default function EnrollmentsPage() {
 
     setIsDeleting(true);
     try {
-      await deleteEnrollment(toDelete._id);
-      await fetchEnrollments();
+      await deleteUser(toDelete._id);
+      await fetchUsers();
       setConfirmOpen(false);
       setToDelete(null);
     } finally {
@@ -102,35 +132,26 @@ export default function EnrollmentsPage() {
   };
 
   return (
-    /* ===== BACKGROUND GLOBAL ===== */
     <div className="p-4 md:p-8">
-      {/* ===== CARD CENTRALE ===== */}
       <div className="w-full max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        {/* ===== TITRE ===== */}
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Liste des Inscriptions
+          Utilisateurs
         </h1>
 
-        {/* ===== BARRE ACTIONS ===== */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
           <SearchInput
             search={search}
             setSearch={setSearch}
             setPage={setPage}
+            placeholder="email, username, student"
           />
 
-          {/* Actions droite */}
           <div className="flex items-center gap-3">
-            {/* Tri */}
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
             <AddButton onAdd={onAdd} />
           </div>
         </div>
 
-        {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
           sx={{ backgroundColor: "transparent", color: "white" }}
@@ -140,13 +161,12 @@ export default function EnrollmentsPage() {
               <TableHead>
                 <TableRow>
                   {[
+                    "Email",
+                    "Username",
+                    "Rôle",
                     "Étudiant",
-                    "Code Étudiant",
-                    "Cours",
-                    "Code Cours",
-                    "Semestre",
-                    "Année Académique",
-                    "Statut",
+                    "Mail vérifié",
+                    "Actif",
                     "Création",
                     "Modification",
                     "Actions",
@@ -166,11 +186,11 @@ export default function EnrollmentsPage() {
               </TableHead>
 
               <TableBody>
-                {filteredEnrollments
+                {filteredUsers
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((enrollment) => (
+                  .map((u) => (
                     <TableRow
-                      key={enrollment._id}
+                      key={u._id}
                       hover
                       sx={{
                         "&:hover": {
@@ -178,40 +198,42 @@ export default function EnrollmentsPage() {
                         },
                       }}
                     >
+                      <TableCell sx={{ color: "white" }}>{u.email}</TableCell>
+
                       <TableCell sx={{ color: "white" }}>
-                        {enrollment.student?.lastName?.toUpperCase() +
-                          " " +
-                          enrollment.student?.firstName || "—"}
-                      </TableCell>
-                      <TableCell sx={{ color: "white" }}>
-                        {enrollment.student.studentCode}
+                        {u.username || "-"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {enrollment.course?.name}
+                        {ROLE_LABEL[u.role] || u.role}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {enrollment.course?.code}
+                        {u.role === "STUDENT"
+                          ? u.student?.studentCode
+                            ? `${u.student.studentCode} - ${
+                                u.student.firstName || ""
+                              } ${u.student.lastName || ""}`.trim()
+                            : typeof u.student === "string"
+                            ? u.student
+                            : "-"
+                          : "-"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {enrollment.semester?.name || "—"}
-                      </TableCell>
-                      <TableCell sx={{ color: "white" }}>
-                        {enrollment.semester?.academicYear?.name || "—"}
+                        {u.mailVerified ? "Oui" : "Non"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {enrollment.status || "—"}
+                        {u.isActive ? "Oui" : "Non"}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(enrollment.createdAt)}
+                        {formatDate(u.createdAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "white" }}>
-                        {formatDate(enrollment.updatedAt)}
+                        {formatDate(u.updatedAt)}
                       </TableCell>
 
                       <TableCell sx={{ color: "#a78bfa" }}>
@@ -225,7 +247,7 @@ export default function EnrollmentsPage() {
                           <StyledTooltip title="Modifier" placement="top">
                             <IconButton
                               size="small"
-                              onClick={() => onEdit(enrollment)}
+                              onClick={() => onEdit(u)}
                               sx={{ color: "#a78bfa" }}
                             >
                               <Pencil size={18} />
@@ -237,7 +259,7 @@ export default function EnrollmentsPage() {
                           <StyledTooltip title="Détails" placement="top">
                             <IconButton
                               size="small"
-                              onClick={() => onDetails(enrollment)}
+                              onClick={() => onDetails(u)}
                               sx={{ color: "#a78bfa" }}
                             >
                               <Eye size={18} />
@@ -249,7 +271,7 @@ export default function EnrollmentsPage() {
                           <StyledTooltip title="Supprimer" placement="top">
                             <IconButton
                               size="small"
-                              onClick={() => askDelete(enrollment)}
+                              onClick={() => askDelete(u)}
                               sx={{ color: "#f87171" }}
                             >
                               <Trash2 size={18} />
@@ -263,10 +285,9 @@ export default function EnrollmentsPage() {
             </Table>
           </TableContainer>
 
-          {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
-            count={filteredEnrollments.length}
+            count={filteredUsers.length}
             page={page}
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}
@@ -277,38 +298,42 @@ export default function EnrollmentsPage() {
             }}
             sx={{
               color: "white",
-              ".MuiTablePagination-selectIcon": {
-                color: "white",
-              },
-              ".MuiTablePagination-actions button": {
-                color: "white",
-              },
+              ".MuiTablePagination-selectIcon": { color: "white" },
+              ".MuiTablePagination-actions button": { color: "white" },
             }}
           />
         </Paper>
+
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Confirmer la suppression"
+          message={
+            <>
+              Voulez-vous vraiment supprimer l’utilisateur{" "}
+              <b>{toDelete?.email}</b> ?
+            </>
+          }
+          confirmText="Supprimer"
+          onClose={() => !isDeleting && setConfirmOpen(false)}
+          onConfirm={confirmDelete}
+          loading={isDeleting}
+        />
+
+        <UpsertUserModal
+          open={openUpsert}
+          onClose={() => setOpenUpsert(false)}
+          mode={selectedUser ? "edit" : "create"}
+          data={selectedUser}
+          onSuccess={fetchUsers}
+        />
+        {/*
+        <UserDetailsModal
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+          userId={detailsId}
+        />
+        */}
       </div>
-      <UpsertEnrollmentModal
-        open={openUpsert}
-        onClose={() => setOpenUpsert(false)}
-        mode={selectedEnrollment ? "edit" : "create"}
-        onSuccess={fetchEnrollments}
-        data={selectedEnrollment}
-      />
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Confirmer la suppression"
-        message={
-          <>
-            Voulez-vous vraiment supprimer l’inscrition de de 
-            <b> {toDelete?.student?.lastName?.toUpperCase()} {toDelete?.student?.firstName} </b> 
-            pour le cours <b>{toDelete?.course?.name}</b>? de l'année académique <b>{toDelete?.semester?.academicYear?.name}</b> ?
-          </>
-        }
-        confirmText="Supprimer"
-        onClose={() => !isDeleting && setConfirmOpen(false)}
-        onConfirm={confirmDelete}
-        loading={isDeleting}
-      />
     </div>
   );
 }
