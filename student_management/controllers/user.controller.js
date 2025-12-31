@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import Student from "../models/student.model.js";
+import mongoose from "mongoose";
 
 
 export const postUser = async (req, res, next) => {
