@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useAuth } from "../../auth/AuthProvider";
 import { formatDate } from "../../utils/fdate";
+import { API_BASE_URL } from "../../config/env";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -54,9 +55,7 @@ export default function ProfilePage() {
   const handleVerifyEmail = () => console.log("Send verify email");
   const handleResetPassword = () => console.log("Reset password");
   const handleLinkGoogle = () => {
-    // idéalement: redirect vers ton endpoint backend OAuth Google
-    // window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
-    console.log("Link Google provider");
+    window.location.href = `${API_BASE_URL}/auths/google/link`;
   };
   const handleUnlinkGoogle = () => console.log("Unlink Google provider");
 
