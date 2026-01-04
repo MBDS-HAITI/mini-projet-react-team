@@ -18,7 +18,7 @@ export const swaggerSpec = swaggerJSDoc({
       version: "1.0.0",
       description: "Documentation OpenAPI",
     },
-    servers: [{ url: `${HOST_BASE_URL}:${PORT}` }],
+    servers: [{ url: `${HOST_BASE_URL}` }],
     components: {
       securitySchemes: {
         bearerAuth: {

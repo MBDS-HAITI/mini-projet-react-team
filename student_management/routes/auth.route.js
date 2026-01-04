@@ -2,6 +2,8 @@
 import express from "express";
 import {
   changePassword,
+  googleCallback,
+  googleLinkStart,
   me,
   refreshAccessToken,
   signIn,
@@ -143,5 +145,12 @@ router.post("/changepassword", authorize, changePassword);
  *         description: Informations de l'utilisateur
  */
 router.get("/me", authorize, me);
+
+// user connecté seulement (link provider)
+router.get("/google/link", googleLinkStart);
+
+// callback Google (pas besoin requireAuth car on utilise un cookie state + uid)
+router.get("/google/callback", googleCallback);
+
 
 export default router;

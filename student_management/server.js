@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser"
 import mongoose from'mongoose';
+
 import academicYearRoutes from './routes/academic-year.route.js';
 import authRoutes from './routes/auth.route.js';
 import oauthRoutes from './routes/oauth.route.js';
@@ -12,12 +13,13 @@ import studentRoutes from './routes/student.route.js';
 import courseRoutes from './routes/course.route.js';
 import enrollmentRoutes from './routes/enrollment.route.js';
 import gradeRoutes from './routes/grade.route.js';
+
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
+
 import { HOST_BASE_URL, MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
 import { passport, session, secret, configureGooglePassport, requireLogin } from "./auths/auth.js";
-import fs from "fs";
-import https from "https";
+
 import { CORS_OPTIONS } from './config/cors.js';
 import errorMiddleware from "./middlewares/error.middleware.js";
 import { adminAuthorize, authorize, scolariteAuthorize } from "./middlewares/auth.middleware.js";
@@ -31,11 +33,9 @@ if (NODE_ENV === "development") {
 
 
 const app = express();
-const key = fs.readFileSync("./data/react_team.key");
-const cert = fs.readFileSync("./data/react_team.crt");
+
 // Pour accepter les connexions cross-domain (CORS)
-app.use(cors(CORS_OPTIONS)
-);
+app.use(cors(CORS_OPTIONS));
 
 app.use("/api/v1/swagger/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/health", (req, res) => res.status(200).json({ ok: true }));
@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 
-// routes with authorizations
+// routes 
 app.use("/api/v1/auths", authRoutes);
 app.use("/api/v1/users", authorize, adminAuthorize, userRoutes);
 app.use("/api/v1/academicyears", authorize, scolariteAuthorize, academicYearRoutes);
@@ -68,32 +68,33 @@ export const authenticaton_base = "/api/vx"; // évite les typos et garde ça si
 configureGooglePassport();
 
 
-app.use(authenticaton_base, session({
-  secret,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: true, // OK car tu es en https.createServer
-  },
-}));
+// app.use(authenticaton_base, session({
+//   secret,
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     httpOnly: true,
+//     sameSite: "lax",
+//     secure: true, // OK car tu es en https.createServer
+//   },
+// }));
 
-app.use(authenticaton_base, passport.initialize());
-app.use(authenticaton_base, passport.session());
+// app.use(authenticaton_base, passport.initialize());
+// app.use(authenticaton_base, passport.session());
 
 
-// OAuth routes
-app.use(`${authenticaton_base}`, oauthRoutes)
+// // OAuth routes
+// app.use(`${authenticaton_base}`, oauthRoutes)
 
- app.get(`${authenticaton_base}/authenticated`, requireLogin, (req, res) => res.json({ user: req.user }));
+//  app.get(`${authenticaton_base}/authenticated`, requireLogin, (req, res) => res.json({ user: req.user }));
 
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB");
 
-    https.createServer({ key, cert }, app).listen(PORT, () => {
-      console.log(`HTTPS server is running on ${HOST_BASE_URL}:${PORT}`);
+    
+    app.listen(PORT,"0.0.0.0", () => {
+      console.log(`HTTP server is running on ${HOST_BASE_URL}`);
     });
   })
   .catch((err) => {
