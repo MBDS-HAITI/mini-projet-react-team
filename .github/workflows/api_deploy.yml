@@ -63,7 +63,7 @@ jobs:
             ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
             ghcr.io/mbds-haiti/mini-projet-react-team-api:${{ github.sha }}
 
-      - name: Deploy via SSH
+            - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_IP }}
@@ -71,6 +71,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
+
+            # 🔑 LOGIN GHCR (OBLIGATOIRE)
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
             docker pull ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
 
