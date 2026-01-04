@@ -82,7 +82,7 @@ jobs:
             docker run -d \
               --name student_api \
               --restart unless-stopped \
-              -p 8010:8010 \
+              -p 127.0.0.1:8010:8010 \
               -e PORT="${{ secrets.PORT }}" \
               -e NODE_ENV="${{ secrets.NODE_ENV }}" \
               -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
