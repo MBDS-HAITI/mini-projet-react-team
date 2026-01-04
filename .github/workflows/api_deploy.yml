@@ -3,8 +3,14 @@ name: API CI/CD
 on:
   push:
     branches: ["master"]
+    paths:
+      - "student_management/**"
+      - ".github/workflows/api_deploy.yml"
   pull_request:
     branches: ["master"]
+    paths:
+      - "student_management/**"
+      - ".github/workflows/api_deploy.yml"
 
 permissions:
   contents: read
