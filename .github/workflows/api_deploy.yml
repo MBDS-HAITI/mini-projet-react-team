@@ -36,7 +36,6 @@ jobs:
       - name: Lint (if present)
         run: npm run lint --if-present
 
-
   cd:
     name: CD - Build/Push Docker + Deploy (VPS)
     runs-on: ubuntu-latest
@@ -61,8 +60,8 @@ jobs:
           file: ./student_management/Dockerfile
           push: true
           tags: |
-            ghcr.io/student_management-api:latest
-            ghcr.io/student_management-api:${{ github.sha }}
+            ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
+            ghcr.io/mbds-haiti/mini-projet-react-team-api:${{ github.sha }}
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -73,7 +72,7 @@ jobs:
           script: |
             set -e
 
-            docker pull ghcr.io/student_management-api:latest
+            docker pull ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
 
             docker stop student_api || true
             docker rm student_api || true
@@ -94,4 +93,4 @@ jobs:
               -e JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}" \
               -e JWT_REFRESH_EXPIRES_IN="${{ secrets.JWT_REFRESH_EXPIRES_IN }}" \
               -e HOST_BASE_URL="${{ secrets.HOST_BASE_URL }}" \
-              ghcr.io/student_management-api:latest
+              ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
