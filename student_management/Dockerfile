@@ -25,6 +25,7 @@ COPY package*.json ./
 COPY config ./config
 COPY controllers ./controllers
 COPY data ./data
+COPY helpers ./helpers
 COPY middlewares ./middlewares
 COPY models ./models
 COPY routes ./routes
