@@ -94,7 +94,8 @@ jobs:
               -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
               -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-              -e GOOGLE_CALLBACK_URL="${{ secrets.GOOGLE_CALLBACK_URL }}" \
+              -e GOOGLE_LINK_CALLBACK_URL="${{ secrets.GOOGLE_LINK_CALLBACK_URL }}" \
+              -e GOOGLE_LOGIN_CALLBACK_URL="${{ secrets.GOOGLE_LOGIN_CALLBACK_URL }}" \
               -e FRONT_URL="${{ secrets.FRONT_URL }}" \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               -e JWT_EXPIRES_IN="${{ secrets.JWT_EXPIRES_IN }}" \

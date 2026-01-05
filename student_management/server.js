@@ -18,7 +18,6 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
 
 import { HOST_BASE_URL, MONGODB_URI, NODE_ENV, PORT } from './config/env.js';
-import { passport, session, secret, configureGooglePassport, requireLogin } from "./auths/auth.js";
 
 import { CORS_OPTIONS } from './config/cors.js';
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -48,6 +47,7 @@ app.use(cookieParser());
 
 // routes 
 app.use("/api/v1/auths", authRoutes);
+app.use("/api/v1/oauths", oauthRoutes);
 app.use("/api/v1/users", authorize, adminAuthorize, userRoutes);
 app.use("/api/v1/academicyears", authorize, scolariteAuthorize, academicYearRoutes);
 app.use("/api/v1/semesters", authorize, scolariteAuthorize, semesterRoutes);
@@ -63,9 +63,6 @@ app.use(errorMiddleware);
 
 //Test authentication route
 export const authenticaton_base = "/api/vx"; // évite les typos et garde ça simple
-
-// Configure passport strategy (à faire une seule fois)
-configureGooglePassport();
 
 
 // app.use(authenticaton_base, session({

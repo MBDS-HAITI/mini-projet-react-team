@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import { useAuth } from "../../auth/AuthProvider";
+import { API_BASE_URL } from "../../config/env";
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ export default function LoginPage() {
   const from = location.state?.from?.pathname || "/home";
 
   const [form, setForm] = useState({
-    username: "admin",
-    password: "Admin123#",
+    username: "scolarite",
+    password: "Scolarite123#",
   });
 
   const [error, setError] = useState("");
@@ -39,14 +40,12 @@ export default function LoginPage() {
     }
   };
 
-  // ✅ Placeholder: tu brancheras Google OAuth plus tard
+  
   const handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
     try {
-      // TODO: Google sign-in flow ici
-      // ex: await loginWithGoogle()
-      console.log("Google login clicked");
+      window.location.href = `${API_BASE_URL}/oauths/google/login`;
     } catch (err) {
       setError(
         err?.response?.data?.message ||

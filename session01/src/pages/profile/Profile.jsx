@@ -21,10 +21,10 @@ export default function ProfilePage() {
       createdAt: user.createdAt ? formatDate(user.createdAt) : "-",
       updatedAt: user.updatedAt ? formatDate(user.updatedAt) : "-",
       providers: providerNames,
-      hasGoogle: (user.providers || []).some((p) => (p?.provider || p?.name || p) === "google"),
+      hasGoogle: (user.providers || []).some((p) => p?.type === "google"),
     };
   }, [user]);
-
+  
   if (loading) {
     return (
       <div className="p-4 md:p-8">
@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const handleVerifyEmail = () => console.log("Send verify email");
   const handleResetPassword = () => console.log("Reset password");
   const handleLinkGoogle = () => {
-    window.location.href = `${API_BASE_URL}/auths/google/link`;
+    window.location.href = `${API_BASE_URL}/oauths/google/link`;
   };
   const handleUnlinkGoogle = () => console.log("Unlink Google provider");
 
