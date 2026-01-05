@@ -1,7 +1,7 @@
 // config/env.js
 import { config } from 'dotenv';
 
-config({path: '.env'});
+config({ path: '.env' });
 
 // All dependencies in file .env
 export const { PORT,
@@ -16,5 +16,11 @@ export const { PORT,
     JWT_EXPIRES_IN,
     JWT_REFRESH_SECRET,
     JWT_REFRESH_EXPIRES_IN,
-    HOST_BASE_URL
- }=  process.env
+    HOST_BASE_URL,
+    MAIL_HOST,
+    MAIL_PORT,
+    MAIL_USER,
+    MAIL_PASS,
+    MAIL_FROM,
+    MAIL_FROM_NAME,
+} = process.env

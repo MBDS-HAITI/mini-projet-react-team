@@ -102,4 +102,10 @@ jobs:
               -e JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}" \
               -e JWT_REFRESH_EXPIRES_IN="${{ secrets.JWT_REFRESH_EXPIRES_IN }}" \
               -e HOST_BASE_URL="${{ secrets.HOST_BASE_URL }}" \
+              -e MAIL_HOST="${{ secrets.MAIL_HOST }}" \
+              -e MAIL_PORT="${{ secrets.MAIL_PORT }}" \
+              -e MAIL_USER="${{ secrets.MAIL_USER }}" \
+              -e MAIL_PASS="${{ secrets.MAIL_PASS }}" \
+              -e MAIL_FROM="${{ secrets.MAIL_FROM }}" \
+              -e MAIL_FROM_NAME="${{ secrets.MAIL_FROM_NAME }}" \
               ghcr.io/mbds-haiti/mini-projet-react-team-api:latest
