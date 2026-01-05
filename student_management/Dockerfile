@@ -22,7 +22,6 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Code applicatif
 COPY package*.json ./
-COPY auths ./auths
 COPY config ./config
 COPY controllers ./controllers
 COPY data ./data
