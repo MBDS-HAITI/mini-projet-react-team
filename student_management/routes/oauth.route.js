@@ -1,20 +1,19 @@
-import express from 'express'
-import { passport, requireLogin } from "../auths/auth.js";
-import { authenticaton_base } from '../server.js';
+// routes/auth.route.js
+import express from "express";
+import { googleCallback, googleLinkStart, googleLoginCallback, googleLoginStart } from "../controllers/oauth.controller.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
 
-router.get("/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/fail" }),
-  (req, res) => res.redirect(`/${authenticaton_base}/authenticated`)
-);
 
-router.get("/auth/fail", (req, res) => res.status(401).send("Auth failed"));
+// user connecté seulement (link provider)
+router.get("/google/link", googleLinkStart);
 
-router.get("/authenticated", requireLogin, (req, res) => res.json({ user: req.user }));
+// callback Google (pas besoin requireAuth car on utilise un cookie state + uid)
+router.get("/google/link/callback", googleCallback);
+
+router.get("/google/login", googleLoginStart);
+
+router.get("/google/callback", googleLoginCallback);
 
 export default router;
