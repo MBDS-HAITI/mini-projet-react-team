@@ -83,7 +83,7 @@ export const postUser = async (req, res, next) => {
       delete userObj.password;
       createdUserObj = userObj;
     });
-    await sendWelcomeEmail({ to: createdUserObj.email, name: createdUserObj.username });
+    await sendWelcomeEmail({ to: createdUserObj.email, name: createdUserObj.username, username: createdUserObj.username, password: password ?? `${createdUserObj.username}2526` });
     // await sendVerifyEmail({ to: user.email, name: user.username, token: verifyToken });
 
     return res.status(201).json({ success: true, user: createdUserObj });
