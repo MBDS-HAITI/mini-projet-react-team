@@ -30,6 +30,8 @@ COPY middlewares ./middlewares
 COPY models ./models
 COPY routes ./routes
 COPY scripts ./scripts
+COPY services ./services
+COPY templates ./templates
 COPY server.js ./server.js
 
 # Permissions (au cas où certains dossiers doivent être lisibles)

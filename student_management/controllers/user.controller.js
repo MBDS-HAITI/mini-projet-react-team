@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import Student from "../models/student.model.js";
 import mongoose from "mongoose";
+import { sendWelcomeEmail } from "../services/mail/index.js";
 
 
 export const postUser = async (req, res, next) => {
@@ -82,6 +83,8 @@ export const postUser = async (req, res, next) => {
       delete userObj.password;
       createdUserObj = userObj;
     });
+    await sendWelcomeEmail({ to: createdUserObj.email, name: createdUserObj.username });
+    // await sendVerifyEmail({ to: user.email, name: user.username, token: verifyToken });
 
     return res.status(201).json({ success: true, user: createdUserObj });
   } catch (err) {
