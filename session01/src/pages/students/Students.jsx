@@ -4,34 +4,29 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Paper,
   TablePagination,
   IconButton,
+  TableContainer,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
-import SortButton from "../../components/widgets/SortButton.jsx";
-import SearchInput from "../../components/widgets/SearchInput.jsx";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import AddButton from "../../components/widgets/AddButton.jsx";
 import UpsertStudentModal from "./UpsertStudentModal.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import Container from "../../components/layout/Container.jsx";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
 
-  //upsert modal state
   const [openUpsert, setOpenUpsert] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // Details modal state
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsId, setDetailsId] = useState(null);
 
-  // Delete modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -75,7 +70,6 @@ export default function StudentsPage() {
         );
       })
       .sort((a, b) => {
-        // tri par nom, puis prénom
         const aKey = `${a.lastName ?? ""} ${a.firstName ?? ""}`
           .trim()
           .toLowerCase();
@@ -108,7 +102,6 @@ export default function StudentsPage() {
 
   const confirmDelete = async () => {
     if (!toDelete?._id) return;
-
     setIsDeleting(true);
     try {
       await deleteStudent(toDelete._id);
@@ -120,50 +113,35 @@ export default function StudentsPage() {
     }
   };
 
+  const title = "Liste des Étudiants";
+
   return (
-    <div className="p-4 md:p-8">
-      <div className="w-full max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Étudiants
-        </h1>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
-          <SearchInput
-            placeholder="Recherche code, nom, sexe, adr..."
-            search={search}
-            setSearch={setSearch}
-            setPage={setPage}
-          />
-
-          {/* Actions droite */}
-          <div className="flex items-center gap-3">
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+    <>
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         <Paper
           elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
+          sx={{ backgroundColor: "transparent", color: "white" }}
         >
           <TableContainer>
-            <Table>
+            <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow>
                   {[
                     "Code",
-                    "Nom ",
+                    "Nom",
                     "Sexe",
                     "Date naissance",
                     "Téléphone",
                     "Adresse",
-                    "Enregitré Le",
-                    // "Modification",
+                    "Enregistré le",
                     "Compte",
                     "Actions",
                   ].map((head) => (
@@ -173,6 +151,7 @@ export default function StudentsPage() {
                         color: "#cbd5f5",
                         fontWeight: "bold",
                         borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {head}
@@ -185,7 +164,7 @@ export default function StudentsPage() {
                 {filteredStudents
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((student) => {
-                    const key = student._id || student.id; // chez toi c'est souvent "id"
+                    const key = student._id || student.id;
                     const fullName = `${student.firstName ?? ""} ${
                       student.lastName ?? ""
                     }`.trim();
@@ -200,38 +179,55 @@ export default function StudentsPage() {
                           },
                         }}
                       >
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {student.studentCode || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {fullName || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {student.sex || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {formatDate(student.dateOfBirth)}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {student.phone || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell sx={{ color: "white", minWidth: 220 }}>
                           {student.address || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {formatDate(student.createdAt)}
                         </TableCell>
-                        <TableCell sx={{ color: "white" }}>
+
+                        <TableCell
+                          sx={{ color: "white", whiteSpace: "nowrap" }}
+                        >
                           {student.haveAccount ? "Oui" : "Non"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "#a78bfa" }}>
+                        <TableCell
+                          sx={{ color: "#a78bfa", whiteSpace: "nowrap" }}
+                        >
                           <div
                             style={{
                               display: "flex",
@@ -239,7 +235,7 @@ export default function StudentsPage() {
                               gap: 10,
                             }}
                           >
-                            <StyledTooltip title="Modifier" placement="top">
+                            <StyledTooltip title="Modifier">
                               <IconButton
                                 size="small"
                                 onClick={() => onEdit(student)}
@@ -249,9 +245,7 @@ export default function StudentsPage() {
                               </IconButton>
                             </StyledTooltip>
 
-                            <span style={{ opacity: 0.3 }}>|</span>
-
-                            <StyledTooltip title="Détails" placement="top">
+                            <StyledTooltip title="Détails">
                               <IconButton
                                 size="small"
                                 onClick={() => onDetails(student)}
@@ -261,13 +255,11 @@ export default function StudentsPage() {
                               </IconButton>
                             </StyledTooltip>
 
-                            <span style={{ opacity: 0.3 }}>|</span>
-
-                            <StyledTooltip title="Supprimer" placement="top">
+                            <StyledTooltip title="Supprimer">
                               <IconButton
                                 size="small"
                                 onClick={() => askDelete(student)}
-                                sx={{ color: "#f87171" }} // red-400
+                                sx={{ color: "#f87171" }}
                               >
                                 <Trash2 size={18} />
                               </IconButton>
@@ -299,7 +291,8 @@ export default function StudentsPage() {
             }}
           />
         </Paper>
-      </div>
+      </Container>
+
       <UpsertStudentModal
         open={openUpsert}
         onClose={() => setOpenUpsert(false)}
@@ -307,19 +300,21 @@ export default function StudentsPage() {
         data={selectedStudent}
         onSuccess={fetchStudents}
       />
+
       <ConfirmDialog
         open={confirmOpen}
         title="Confirmer la suppression"
         message={
           <>
-            Voulez-vous vraiment supprimer l’année <b>{toDelete?.firstName} {toDelete?.lastName}</b> ?
+            Voulez-vous vraiment supprimer l’étudiant{" "}
+            <b>{toDelete?.firstName} {toDelete?.lastName}</b> ?
           </>
         }
-        confirmText="Supprimer"
+        visible={!isDeleting}
         onClose={() => !isDeleting && setConfirmOpen(false)}
         onConfirm={confirmDelete}
         loading={isDeleting}
       />
-    </div>
+    </>
   );
 }

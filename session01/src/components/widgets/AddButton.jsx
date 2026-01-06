@@ -4,7 +4,7 @@ export default function AddButton({onAdd}) {
     <button
       onClick={onAdd}
       className="
-                    px-4 py-2
+                    px-2 py-1 md:px-4 md:py-2
                     rounded-lg
                     bg-linear-to-r from-purple-500 to-indigo-500
                     text-white
