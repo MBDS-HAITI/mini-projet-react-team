@@ -139,6 +139,7 @@ export default function GradesPage() {
         setSortAsc={setSortAsc}
         onAdd={onAdd}
         setPage={setPage}
+        canManage={canManage}
       >
         {/* ===== TABLE ===== */}
         <Paper

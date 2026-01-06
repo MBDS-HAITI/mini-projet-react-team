@@ -2,8 +2,19 @@ import React from "react";
 import SearchInput from "../widgets/SearchInput";
 import SortButton from "../widgets/SortButton";
 import AddButton from "../widgets/AddButton";
+import { useAuth } from "../../auth/AuthProvider";
 
-export default function Container({children,title, search, setSearch, sortAsc, setSortAsc, onAdd, setPage}) {
+export default function Container({
+  children,
+  title,
+  search,
+  setSearch,
+  sortAsc,
+  setSortAsc,
+  onAdd,
+  setPage,
+  canManage,
+}) {
   return (
     <div className="my-2 md:m-4">
       <div className="w-full max-w-sm flex flex-col md:max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-2 md:p-6">
@@ -21,12 +32,11 @@ export default function Container({children,title, search, setSearch, sortAsc, s
 
           <div className="flex items-center gap-3">
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-            <AddButton onAdd={onAdd} />
+            {canManage && <AddButton onAdd={onAdd} />}
           </div>
         </div>
         {children}
       </div>
-
     </div>
   );
 }

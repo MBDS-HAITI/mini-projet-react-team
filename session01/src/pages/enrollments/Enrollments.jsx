@@ -141,6 +141,7 @@ export default function EnrollmentsPage() {
         setSortAsc={setSortAsc}
         onAdd={onAdd}
         setPage={setPage}
+        canManage={canManage}
       >
         {/* ===== TABLE ===== */}
         <Paper
