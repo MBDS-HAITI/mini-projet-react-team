@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import { useAuth } from "../../auth/AuthProvider";
 import { API_BASE_URL } from "../../config/env";
+
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -12,8 +13,8 @@ export default function LoginPage() {
   const from = location.state?.from?.pathname || "/home";
 
   const [form, setForm] = useState({
-    username: "scolarite",
-    password: "Scolarite123#",
+    username: "",
+    password: "",
   });
 
   const [error, setError] = useState("");
@@ -68,7 +69,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full min-h-[70vh] flex items-center justify-center px-4 py-10">
+    <div className="w-full h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-4xl relative">
         {/* glow */}
         <div className="absolute -top-14 -left-10 w-72 h-72 bg-fuchsia-500/20 blur-3xl rounded-full" />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   deleteEnrollment,
   getEnrollments,
+  getEnrollmentsByStudentId,
 } from "../../api/routes/enrollment.api";
 import {
   Table,
@@ -20,9 +21,17 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import UpsertEnrollmentModal from "./UpsertEnrollmentModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import Container from "../../components/layout/Container";
+import { useAuth } from "../../auth/AuthProvider";
+import {
+  ADMIN_ROLE,
+  SCOLARITE_ROLE,
+  STUDENT_ROLE,
+} from "../../utils/roles-type";
 
 export default function EnrollmentsPage() {
-  // ===== STATE PRINCIPAL =====
+  const { user } = useAuth();
+  const canManage = [ADMIN_ROLE, SCOLARITE_ROLE].includes(user.role);
+
   const [enrollments, setEnrollments] = useState([]);
 
   //upsert modal state
@@ -44,7 +53,15 @@ export default function EnrollmentsPage() {
 
   // ===== FETCH DATA =====
   const fetchEnrollments = async () => {
-    const result = await getEnrollments();
+    let result;
+
+    if (user.role === STUDENT_ROLE) {
+      result = await getEnrollmentsByStudentId(
+        user.student || user.student._id
+      );
+    } else {
+      result = await getEnrollments();
+    }
     setEnrollments(result);
   };
 
@@ -99,7 +116,20 @@ export default function EnrollmentsPage() {
     }
   };
 
-  const title = "Liste des Inscriptions";
+  const title = canManage ? "Liste des Inscriptions" : "Mes Inscriptions";
+
+  const tableHeaders = [
+    "Étudiant",
+    "Code Étudiant",
+    "Cours",
+    "Code Cours",
+    "Semestre",
+    "Année Académique",
+    "Statut",
+    "Création",
+    "Modification",
+    ...(canManage ? ["Actions"] : []),
+  ];
 
   return (
     <>
@@ -121,18 +151,7 @@ export default function EnrollmentsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Étudiant",
-                    "Code Étudiant",
-                    "Cours",
-                    "Code Cours",
-                    "Semestre",
-                    "Année Académique",
-                    "Statut",
-                    "Création",
-                    "Modification",
-                    "Actions",
-                  ].map((head) => (
+                  {tableHeaders.map((head) => (
                     <TableCell
                       key={head}
                       sx={{
@@ -196,49 +215,51 @@ export default function EnrollmentsPage() {
                         {formatDate(enrollment.updatedAt)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "#a78bfa" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                          }}
-                        >
-                          <StyledTooltip title="Modifier" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => onEdit(enrollment)}
-                              sx={{ color: "#a78bfa" }}
-                            >
-                              <Pencil size={18} />
-                            </IconButton>
-                          </StyledTooltip>
+                      {canManage && (
+                        <TableCell sx={{ color: "#a78bfa" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <StyledTooltip title="Modifier" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => onEdit(enrollment)}
+                                sx={{ color: "#a78bfa" }}
+                              >
+                                <Pencil size={18} />
+                              </IconButton>
+                            </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                            <span style={{ opacity: 0.3 }}>|</span>
 
-                          <StyledTooltip title="Détails" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => onDetails(enrollment)}
-                              sx={{ color: "#a78bfa" }}
-                            >
-                              <Eye size={18} />
-                            </IconButton>
-                          </StyledTooltip>
+                            <StyledTooltip title="Détails" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => onDetails(enrollment)}
+                                sx={{ color: "#a78bfa" }}
+                              >
+                                <Eye size={18} />
+                              </IconButton>
+                            </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                            <span style={{ opacity: 0.3 }}>|</span>
 
-                          <StyledTooltip title="Supprimer" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => askDelete(enrollment)}
-                              sx={{ color: "#f87171" }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          </StyledTooltip>
-                        </div>
-                      </TableCell>
+                            <StyledTooltip title="Supprimer" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => askDelete(enrollment)}
+                                sx={{ color: "#f87171" }}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            </StyledTooltip>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
               </TableBody>
@@ -269,33 +290,37 @@ export default function EnrollmentsPage() {
           />
         </Paper>
       </Container>
-      <UpsertEnrollmentModal
-        open={openUpsert}
-        onClose={() => setOpenUpsert(false)}
-        mode={selectedEnrollment ? "edit" : "create"}
-        onSuccess={fetchEnrollments}
-        data={selectedEnrollment}
-      />
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Confirmer la suppression"
-        message={
-          <>
-            Voulez-vous vraiment supprimer l’inscrition de de
-            <b>
-              {" "}
-              {toDelete?.student?.lastName?.toUpperCase()}{" "}
-              {toDelete?.student?.firstName}{" "}
-            </b>
-            pour le cours <b>{toDelete?.course?.name}</b>? de l'année académique{" "}
-            <b>{toDelete?.semester?.academicYear?.name}</b> ?
-          </>
-        }
-        confirmText="Supprimer"
-        onClose={() => !isDeleting && setConfirmOpen(false)}
-        onConfirm={confirmDelete}
-        loading={isDeleting}
-      />
+      {canManage && (
+        <div>
+          <UpsertEnrollmentModal
+            open={openUpsert}
+            onClose={() => setOpenUpsert(false)}
+            mode={selectedEnrollment ? "edit" : "create"}
+            onSuccess={fetchEnrollments}
+            data={selectedEnrollment}
+          />
+          <ConfirmDialog
+            open={confirmOpen}
+            title="Confirmer la suppression"
+            message={
+              <>
+                Voulez-vous vraiment supprimer l’inscrition de de
+                <b>
+                  {" "}
+                  {toDelete?.student?.lastName?.toUpperCase()}{" "}
+                  {toDelete?.student?.firstName}{" "}
+                </b>
+                pour le cours <b>{toDelete?.course?.name}</b>? de l'année
+                académique <b>{toDelete?.semester?.academicYear?.name}</b> ?
+              </>
+            }
+            confirmText="Supprimer"
+            onClose={() => !isDeleting && setConfirmOpen(false)}
+            onConfirm={confirmDelete}
+            loading={isDeleting}
+          />
+        </div>
+      )}
     </>
   );
 }

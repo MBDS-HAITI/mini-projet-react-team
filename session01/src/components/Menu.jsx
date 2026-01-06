@@ -2,22 +2,59 @@ import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import MyAccount from "./widgets/NavProfile";
+import { useAuth } from "../auth/AuthProvider";
+import { ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE } from "../utils/roles-type";
 
 const menuItems = [
-  { label: "Accueil", link: "/home" },
-  { label: "Etudiants", link: "/students" },
-  { label: "Inscriptions", link: "/enrollments" },
-  { label: "Notes", link: "/grades" },
-  { label: "Matières", link: "/courses" },
-  { label: "Semestres", link: "/semester" },
-  { label: "Années Académiques", link: "/academicyears" },
-  { label: "Utilisateurs", link: "/users" },
-  { label: "A propos", link: "/about" },
+  {
+    label: "Accueil",
+    link: "/home",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE],
+  },
+  {
+    label: "Etudiants",
+    link: "/students",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE],
+  },
+  {
+    label: "Inscriptions",
+    link: "/enrollments",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE],
+  },
+  {
+    label: "Notes",
+    link: "/grades",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE],
+  },
+  { label: "Matières", link: "/courses", roles: [ADMIN_ROLE, SCOLARITE_ROLE] },
+  {
+    label: "Semestres",
+    link: "/semester",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE],
+  },
+  {
+    label: "Années Académiques",
+    link: "/academicyears",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE],
+  },
+  { label: "Utilisateurs", link: "/users", roles: [ADMIN_ROLE] },
+  {
+    label: "A propos",
+    link: "/about",
+    roles: [ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE],
+  },
 ];
 
 export default function Menu() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+
+  // Filtre les éléments du menu selon le rôle de l'utilisateur
+  const menuItemsFiltered = useMemo(() => {
+    if (!user || !user.role) return [];
+    return menuItems.filter((item) => item.roles.includes(user.role));
+  }, [user]);
 
   // Ferme le menu mobile quand on change de page
   useEffect(() => {
@@ -70,7 +107,7 @@ export default function Menu() {
 
               {/* Desktop menu */}
               <ul className="hidden md:flex items-center gap-1 lg:gap-2">
-                {menuItems.map((item) => (
+                {menuItemsFiltered.map((item) => (
                   <MenuItem
                     key={item.link}
                     label={item.label}
@@ -103,11 +140,13 @@ export default function Menu() {
               "pointer-events-auto", // <= important : permet de cliquer dedans
               "mt-3 rounded-2xl border border-white/10 bg-[#280a48] backdrop-blur shadow-sm",
               "transition-all duration-300 origin-top",
-              open ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none",
+              open
+                ? "scale-100 opacity-100"
+                : "scale-95 opacity-0 pointer-events-none",
             ].join(" ")}
           >
             <ul className="flex flex-col p-2">
-              {menuItems.map((item) => (
+              {menuItemsFiltered.map((item) => (
                 <MenuItem
                   key={item.link}
                   label={item.label}
