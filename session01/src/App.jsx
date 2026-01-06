@@ -12,7 +12,7 @@ function App() {
 
   return (
     <>
-      <Header />
+      {!isLoginPage && <Header />}
       {!isLoginPage && <Menu />}
       <main className="w-full flex flex-col items-center mb-8 p-2">
         <Navigation />

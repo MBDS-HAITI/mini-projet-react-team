@@ -68,7 +68,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full min-h-[70vh] flex items-center justify-center px-4 py-10">
+    <div className="w-full h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-4xl relative">
         {/* glow */}
         <div className="absolute -top-14 -left-10 w-72 h-72 bg-fuchsia-500/20 blur-3xl rounded-full" />

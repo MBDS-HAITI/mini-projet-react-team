@@ -2,25 +2,23 @@
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
+import Loading from "../components/common/Loading";
 
-export default function ProtectedRoute() {
-  const { loading, isAuthenticated } = useAuth();
+export default function ProtectedRoute({ allowedRoles }) {
+  const { loading, isAuthenticated, user } = useAuth();
   const location = useLocation();
 
-  // Pendant le boot (refresh + /me), on évite de rediriger trop vite
   if (loading) {
-    return (
-      <div style={{ padding: 16 }}>
-        Chargement...
-      </div>
-    );
+    return <Loading/>
   }
 
-  // Pas authentifié => rediriger vers login, en gardant la route demandée
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Auth OK => render la route enfant
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate replace to="/unauthorized" />;
+  }
+
   return <Outlet />;
 }

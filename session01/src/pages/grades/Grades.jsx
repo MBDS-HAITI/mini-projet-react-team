@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { deleteGrade, getGrades } from "../../api/routes/grade.api.js";
+import { deleteGrade, getGrades, getGradesByStudentId } from "../../api/routes/grade.api.js";
 import {
   Table,
   TableBody,
@@ -12,17 +12,18 @@ import {
   IconButton,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
-import SearchInput from "../../components/widgets/SearchInput";
-import SortButton from "../../components/widgets/SortButton";
-import AddButton from "../../components/widgets/AddButton";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import UpsertGradeModal from "./UpsertGradeModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import Container from "../../components/layout/Container.jsx";
+import { ADMIN_ROLE, SCOLARITE_ROLE } from "../../utils/roles-type.js";
+import { useAuth } from "../../auth/AuthProvider.jsx";
 
 export default function GradesPage() {
-  // ===== STATE PRINCIPAL =====
+  const { user } = useAuth();
+  const canManage = [ADMIN_ROLE, SCOLARITE_ROLE].includes(user.role);
+
   const [grades, setGrades] = useState([]);
 
   //upsert modal state
@@ -44,7 +45,12 @@ export default function GradesPage() {
 
   // ===== FETCH DATA =====
   const fetchGrades = async () => {
-    const result = await getGrades();
+    let result;
+    if (user.role === STUDENT_ROLE) {
+      result = await getGradesByStudentId();
+    } else {
+      result = await getGrades();
+    }
     setGrades(result);
   };
 
@@ -89,8 +95,6 @@ export default function GradesPage() {
     setOpenUpsert(true);
   };
 
-
-
   const askDelete = (row) => {
     setToDelete(row);
     setConfirmOpen(true);
@@ -110,19 +114,32 @@ export default function GradesPage() {
     }
   };
 
-  const title = "Liste des Notes";
+  const title = canManage ? "Liste des Notes" : "Mes Notes";
 
+  const tableHeaders = [
+    "Étudiant",
+    "Code Étudiant",
+    "Cours",
+    "Code Cours",
+    "Semestre",
+    "Année Académique",
+    "Note",
+    "Publiée",
+    "Enregistré par",
+    "Modification",
+    ...(canManage ? ["Actions"] : []),
+  ];
   return (
     <>
-          <Container
-            title={title}
-            search={search}
-            setSearch={setSearch}
-            sortAsc={sortAsc}
-            setSortAsc={setSortAsc}
-            onAdd={onAdd}
-            setPage={setPage}
-          >
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
@@ -132,19 +149,7 @@ export default function GradesPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Étudiant",
-                    "Code Étudiant",
-                    "Cours",
-                    "Code Cours",
-                    "Semestre",
-                    "Année Académique",
-                    "Note",
-                    "Publiée",
-                    "Enregistré par",
-                    "Modification",
-                    "Actions",
-                  ].map((head) => (
+                  {tableHeaders.map((head) => (
                     <TableCell
                       key={head}
                       sx={{
@@ -211,37 +216,39 @@ export default function GradesPage() {
                         {formatDate(grade.updatedAt)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "#a78bfa" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                          }}
-                        >
-                          <StyledTooltip title="Modifier" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => onEdit(grade)}
-                              sx={{ color: "#a78bfa" }}
-                            >
-                              <Pencil size={18} />
-                            </IconButton>
-                          </StyledTooltip>
+                      {canManage && (
+                        <TableCell sx={{ color: "#a78bfa" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <StyledTooltip title="Modifier" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => onEdit(grade)}
+                                sx={{ color: "#a78bfa" }}
+                              >
+                                <Pencil size={18} />
+                              </IconButton>
+                            </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                            <span style={{ opacity: 0.3 }}>|</span>
 
-                          <StyledTooltip title="Supprimer" placement="top">
-                            <IconButton
-                              size="small"
-                              onClick={() => askDelete(grade)}
-                              sx={{ color: "#f87171" }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          </StyledTooltip>
-                        </div>
-                      </TableCell>
+                            <StyledTooltip title="Supprimer" placement="top">
+                              <IconButton
+                                size="small"
+                                onClick={() => askDelete(grade)}
+                                sx={{ color: "#f87171" }}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            </StyledTooltip>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
               </TableBody>
@@ -274,33 +281,38 @@ export default function GradesPage() {
       </Container>
 
       {/* ===== MODALS ===== */}
-      <UpsertGradeModal
-        open={openUpsert}
-        onClose={() => setOpenUpsert(false)}
-        mode={selectedGrade ? "edit" : "create"}
-        onSuccess={fetchGrades}
-        data={selectedGrade}
-      />
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Confirmer la suppression"
-        message={
-          <>
-            Voulez-vous vraiment supprimer la note
-            <b>
-              {" "}
-              {toDelete?.enrollment?.student?.lastName?.toUpperCase()}{" "}
-              {toDelete?.enrollment?.student?.firstName}{" "}
-            </b>
-            pour le cours <b>{toDelete?.enrollment?.course?.name}</b>? de l'année académique{" "}
-            <b>{toDelete?.enrollment?.semester?.academicYear?.name}</b> ?
-          </>
-        }
-        confirmText="Supprimer"
-        onClose={() => !isDeleting && setConfirmOpen(false)}
-        onConfirm={confirmDelete}
-        loading={isDeleting}
-      />
+      {canManage && (
+        <div>
+          <UpsertGradeModal
+            open={openUpsert}
+            onClose={() => setOpenUpsert(false)}
+            mode={selectedGrade ? "edit" : "create"}
+            onSuccess={fetchGrades}
+            data={selectedGrade}
+          />
+          <ConfirmDialog
+            open={confirmOpen}
+            title="Confirmer la suppression"
+            message={
+              <>
+                Voulez-vous vraiment supprimer la note
+                <b>
+                  {" "}
+                  {toDelete?.enrollment?.student?.lastName?.toUpperCase()}{" "}
+                  {toDelete?.enrollment?.student?.firstName}{" "}
+                </b>
+                pour le cours <b>{toDelete?.enrollment?.course?.name}</b>? de
+                l'année académique{" "}
+                <b>{toDelete?.enrollment?.semester?.academicYear?.name}</b> ?
+              </>
+            }
+            confirmText="Supprimer"
+            onClose={() => !isDeleting && setConfirmOpen(false)}
+            onConfirm={confirmDelete}
+            loading={isDeleting}
+          />
+        </div>
+      )}
     </>
   );
 }
