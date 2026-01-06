@@ -17,7 +17,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import UpsertGradeModal from "./UpsertGradeModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import Container from "../../components/layout/Container.jsx";
-import { ADMIN_ROLE, SCOLARITE_ROLE } from "../../utils/roles-type.js";
+import { ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE } from "../../utils/roles-type.js";
 import { useAuth } from "../../auth/AuthProvider.jsx";
 
 export default function GradesPage() {
