@@ -15,13 +15,11 @@ import {
   IconButton,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
-import SearchInput from "../../components/widgets/SearchInput";
-import SortButton from "../../components/widgets/SortButton";
-import AddButton from "../../components/widgets/AddButton";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import UpsertEnrollmentModal from "./UpsertEnrollmentModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import Container from "../../components/layout/Container";
 
 export default function EnrollmentsPage() {
   // ===== STATE PRINCIPAL =====
@@ -101,35 +99,19 @@ export default function EnrollmentsPage() {
     }
   };
 
+  const title = "Liste des Inscriptions";
+
   return (
-    /* ===== BACKGROUND GLOBAL ===== */
-    <div className="p-4 md:p-8">
-      {/* ===== CARD CENTRALE ===== */}
-      <div className="w-full max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        {/* ===== TITRE ===== */}
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Liste des Inscriptions
-        </h1>
-
-        {/* ===== BARRE ACTIONS ===== */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
-          <SearchInput
-            search={search}
-            setSearch={setSearch}
-            setPage={setPage}
-          />
-
-          {/* Actions droite */}
-          <div className="flex items-center gap-3">
-            {/* Tri */}
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+    <>
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
@@ -286,7 +268,7 @@ export default function EnrollmentsPage() {
             }}
           />
         </Paper>
-      </div>
+      </Container>
       <UpsertEnrollmentModal
         open={openUpsert}
         onClose={() => setOpenUpsert(false)}
@@ -299,9 +281,14 @@ export default function EnrollmentsPage() {
         title="Confirmer la suppression"
         message={
           <>
-            Voulez-vous vraiment supprimer l’inscrition de de 
-            <b> {toDelete?.student?.lastName?.toUpperCase()} {toDelete?.student?.firstName} </b> 
-            pour le cours <b>{toDelete?.course?.name}</b>? de l'année académique <b>{toDelete?.semester?.academicYear?.name}</b> ?
+            Voulez-vous vraiment supprimer l’inscrition de de
+            <b>
+              {" "}
+              {toDelete?.student?.lastName?.toUpperCase()}{" "}
+              {toDelete?.student?.firstName}{" "}
+            </b>
+            pour le cours <b>{toDelete?.course?.name}</b>? de l'année académique{" "}
+            <b>{toDelete?.semester?.academicYear?.name}</b> ?
           </>
         }
         confirmText="Supprimer"
@@ -309,6 +296,6 @@ export default function EnrollmentsPage() {
         onConfirm={confirmDelete}
         loading={isDeleting}
       />
-    </div>
+    </>
   );
 }

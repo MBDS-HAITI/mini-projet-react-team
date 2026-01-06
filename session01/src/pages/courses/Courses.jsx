@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import { deleteCourse, getCourses } from "../../api/routes/course.api.js";
-import SearchInput from "../../components/widgets/SearchInput.jsx";
-import SortButton from "../../components/widgets/SortButton.jsx";
-import AddButton from "../../components/widgets/AddButton.jsx";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
-import { IconButton, Paper, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, TablePagination } from "@mui/material";
+import {
+  IconButton,
+  Paper,
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TablePagination,
+} from "@mui/material";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "../../utils/fdate.js";
 import UpsertCourseModal from "./UpsertCourse.jsx";
-
+import Container from "../../components/layout/Container.jsx";
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
@@ -88,30 +95,19 @@ export default function CoursesPage() {
     }
   };
 
+  const title = "Liste des cours";
+
   return (
-    <div className="my-8">
-      <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Liste des cours
-        </h1>
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
-          <SearchInput
-            search={search}
-            setSearch={setSearch}
-            setPage={setPage}
-          />
-
-          {/* Actions droite */}
-          <div className="flex items-center gap-3">
-            {/* Tri */}
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+    <>
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
@@ -247,7 +243,8 @@ export default function CoursesPage() {
             }}
           />
         </Paper>
-      </div>
+      </Container>
+
       {/* Upsert Modal */}
       {openUpsert && (
         <UpsertCourseModal
@@ -258,6 +255,6 @@ export default function CoursesPage() {
           onSuccess={fetchCourses}
         />
       )}
-    </div>
+    </>
   );
 }

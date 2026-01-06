@@ -23,6 +23,7 @@ import UpsertAcademicYearModal from "./UpsertAcademicYearModal";
 import AddButton from "../../components/widgets/AddButton.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import AcademicYearDetailsModal from "./AcademiYeardetailsModal.jsx";
+import Container from "../../components/layout/Container.jsx";
 
 export default function AcademicYearPage() {
   const [academicYears, setAcademicYears] = useState([]);
@@ -98,31 +99,19 @@ export default function AcademicYearPage() {
     }
   };
 
+  const title = "Liste des Années Académiques";
+
   return (
-    <div className="my-8">
-      <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Années académiques
-        </h1>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
-          <SearchInput
-            search={search}
-            setSearch={setSearch}
-            setPage={setPage}
-          />
-
-          {/* Actions droite */}
-          <div className="flex items-center gap-3">
-            {/* Tri */}
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+    <>
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
@@ -263,7 +252,7 @@ export default function AcademicYearPage() {
             }}
           />
         </Paper>
-      </div>
+      </Container>
       {/* Modal Section */}
       <UpsertAcademicYearModal
         open={openUpsert}
@@ -290,6 +279,6 @@ export default function AcademicYearPage() {
         onClose={() => setDetailsOpen(false)}
         academicYearId={detailsId}
       />
-    </div>
+    </>
   );
 }

@@ -29,11 +29,11 @@ export default function MyAccount() {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        // garde ton style Tailwind
-        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium
+         sx={{ color: "#fff", fontWeight: "bold" }}
+        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm
                    bg-white/10 hover:bg-white/15 active:bg-white/20
                    border border-white/15 hover:border-white/25
-                   transition text-white"
+                   transition"
       >
         Mon compte
       </Button>

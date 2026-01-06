@@ -19,6 +19,7 @@ import { StyledTooltip } from "../../components/widgets/StyledTooltip";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import UpsertGradeModal from "./UpsertGradeModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import Container from "../../components/layout/Container.jsx";
 
 export default function GradesPage() {
   // ===== STATE PRINCIPAL =====
@@ -109,36 +110,19 @@ export default function GradesPage() {
     }
   };
 
-  return (
-    /* ===== BACKGROUND GLOBAL ===== */
-    <div className="p-4 md:p-8">
-      {/* ===== CARD CENTRALE ===== */}
-      <div className="w-full max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        {/* ===== TITRE ===== */}
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Liste des Notes
-        </h1>
+  const title = "Liste des Notes";
 
-        {/* ===== BARRE ACTIONS ===== */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* Recherche */}
-          <SearchInput
+  return (
+    <>
+          <Container
+            title={title}
             search={search}
             setSearch={setSearch}
+            sortAsc={sortAsc}
+            setSortAsc={setSortAsc}
+            onAdd={onAdd}
             setPage={setPage}
-            placeholder="nom, prenom, matière..."
-          />
-
-          {/* Actions droite */}
-          <div className="flex items-center gap-3">
-            {/* Tri */}
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            {/* Ajouter */}
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+          >
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
@@ -287,7 +271,9 @@ export default function GradesPage() {
             }}
           />
         </Paper>
-      </div>
+      </Container>
+
+      {/* ===== MODALS ===== */}
       <UpsertGradeModal
         open={openUpsert}
         onClose={() => setOpenUpsert(false)}
@@ -315,6 +301,6 @@ export default function GradesPage() {
         onConfirm={confirmDelete}
         loading={isDeleting}
       />
-    </div>
+    </>
   );
 }

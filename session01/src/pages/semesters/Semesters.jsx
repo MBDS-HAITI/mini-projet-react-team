@@ -14,15 +14,13 @@ import {
   IconButton,
 } from "@mui/material";
 import { formatDate } from "../../utils/fdate";
-import SortButton from "../../components/widgets/SortButton.jsx";
-import SearchInput from "../../components/widgets/SearchInput.jsx";
 
 import UpsertSemesterModal from "./UpsertSemesterModal.jsx";
 import SemesterDetailsModal from "./SemesterDetailsModal.jsx";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
-import AddButton from "../../components/widgets/AddButton.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import Container from "../../components/layout/Container.jsx";
 
 export default function SemestersPage() {
   const [semesters, setSemesters] = useState([]);
@@ -101,27 +99,19 @@ export default function SemestersPage() {
     }
   };
 
+  const title = "Liste des Semestres";
+
   return (
-    <div className="p-4 md:p-8">
-      <div className="w-full max-w-6xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Semestres
-        </h1>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <SearchInput
-            search={search}
-            setSearch={setSearch}
-            setPage={setPage}
-          />
-
-          <div className="flex items-center gap-3">
-            <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
-
-            <AddButton onAdd={onAdd} />
-          </div>
-        </div>
-
+    <>
+      <Container
+        title={title}
+        search={search}
+        setSearch={setSearch}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        onAdd={onAdd}
+        setPage={setPage}
+      >
         <Paper
           elevation={0}
           sx={{
@@ -265,37 +255,36 @@ export default function SemestersPage() {
             }}
           />
         </Paper>
-
-        <UpsertSemesterModal
-          open={openUpsert}
-          onClose={() => setOpenUpsert(false)}
-          mode={selectedSemester ? "edit" : "create"}
-          data={selectedSemester}
-          onSuccess={fetchSemeters}
-        />
-        <ConfirmDialog
-          open={confirmOpen}
-          title="Confirmer la suppression"
-          message={
-            <>
-              Voulez-vous vraiment supprimer le semestre{" "}
-              <b>
-                {toDelete?.name} de {toDelete?.academicYear?.name}
-              </b>{" "}
-              ?
-            </>
-          }
-          confirmText="Supprimer"
-          onClose={() => !isDeleting && setConfirmOpen(false)}
-          onConfirm={confirmDelete}
-          loading={isDeleting}
-        />
-        <SemesterDetailsModal
-          open={detailsOpen}
-          onClose={() => setDetailsOpen(false)}
-          semesterId={selectedSemester}
-        />
-      </div>
-    </div>
+      </Container>
+      <UpsertSemesterModal
+        open={openUpsert}
+        onClose={() => setOpenUpsert(false)}
+        mode={selectedSemester ? "edit" : "create"}
+        data={selectedSemester}
+        onSuccess={fetchSemeters}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirmer la suppression"
+        message={
+          <>
+            Voulez-vous vraiment supprimer le semestre{" "}
+            <b>
+              {toDelete?.name} de {toDelete?.academicYear?.name}
+            </b>{" "}
+            ?
+          </>
+        }
+        confirmText="Supprimer"
+        onClose={() => !isDeleting && setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+      />
+      <SemesterDetailsModal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        semesterId={selectedSemester}
+      />
+    </>
   );
 }
