@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import { useAuth } from "../../auth/AuthProvider";
 import { API_BASE_URL } from "../../config/env";
+
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -12,8 +13,8 @@ export default function LoginPage() {
   const from = location.state?.from?.pathname || "/home";
 
   const [form, setForm] = useState({
-    username: "scolarite",
-    password: "Scolarite123#",
+    username: "",
+    password: "",
   });
 
   const [error, setError] = useState("");
