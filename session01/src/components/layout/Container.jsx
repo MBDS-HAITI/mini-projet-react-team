@@ -13,11 +13,11 @@ export default function Container({
   setSortAsc,
   onAdd,
   setPage,
-  canManage,
+  canManage = true,
 }) {
   return (
     <div className="my-2 md:m-4">
-      <div className="w-full max-w-sm flex flex-col md:max-w-7xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-2 md:p-6">
+      <div className="w-full max-w-sm flex flex-col md:max-w-screen backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-2 md:p-6">
         <h1 className="md:text-2xl font-bold text-white p-2 md:mb-6 text-center">
           {title}
         </h1>
