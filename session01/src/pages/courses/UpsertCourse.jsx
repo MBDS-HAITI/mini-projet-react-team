@@ -11,11 +11,6 @@ import {
 import { createCourse, updateCourse } from "../../api/routes/course.api.js";
 import { validateCourse } from "../../utils/validate-course.js";
 import {
-  toDateInputValue,
-  toISOEndOfDay,
-  toISOStartOfDay,
-} from "../../utils/helpers";
-import {
   dialogPaperSx,
   titleSx,
   sectionSx,
