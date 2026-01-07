@@ -47,7 +47,7 @@ export default function GradesPage() {
   const fetchGrades = async () => {
     let result;
     if (user.role === STUDENT_ROLE) {
-      result = await getGradesByStudentId();
+      result = await getGradesByStudentId(user.student || user.student._id);
     } else {
       result = await getGrades();
     }
@@ -139,6 +139,7 @@ export default function GradesPage() {
         setSortAsc={setSortAsc}
         onAdd={onAdd}
         setPage={setPage}
+        canManage={canManage}
       >
         {/* ===== TABLE ===== */}
         <Paper
