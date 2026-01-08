@@ -4,12 +4,14 @@
   box-sizing: border-box;
 }
 
-html {
-  font-family: "Quicksand", sans-serif;
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
+  font-weight: 400;
 
-  color: #ebe7ef;
-  background: radial-gradient(#230c61, #04093d);
+  /* color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #000; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -18,12 +20,13 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* html {
+  font-family: "Quicksand", sans-serif;
+  line-height: 1.5;
 
+  color: #ebe7ef;
+  background: radial-gradient(#230c61, #04093d);
 
-/* header img {
-  height: 5rem;
-  width: 10rem;
-  object-fit: cover;
 } */
 
 header h1 {

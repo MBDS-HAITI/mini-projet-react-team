@@ -4,6 +4,7 @@ import MenuItem from "./MenuItem";
 import MyAccount from "./widgets/NavProfile";
 import { useAuth } from "../auth/AuthProvider";
 import { ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE } from "../utils/roles-type";
+import ThemeModeToggle from "./ThemeModeToggle";
 
 const menuItems = [
   {
@@ -120,6 +121,7 @@ export default function Menu() {
 
             {/* Right */}
             <div className="flex items-center gap-2">
+              <ThemeModeToggle/>
               <MyAccount />
             </div>
           </div>
