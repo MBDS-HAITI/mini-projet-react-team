@@ -1,198 +1,245 @@
-// src/components/dashboards/AdminDashboard.jsx
-// import { useNavigate } from "react-router-dom";
-// import StatCard from "../widgets/StatCard";
-// import DashboardHeader from "./DashboardHeader";
-// import { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// export default function AdminDashboard() {
-//   const [dashboards, setDashboards] = useState([
-//     { title: "Utilisateurs", value: 100, subtitle: "Total" },
-//     { title: "Étudiants", value: 75, subtitle: "Inscrits" },
-//     { title: "Cours", value: 12, subtitle: "Actif" },
-//   ]);
-//   const navigate = useNavigate();
+import DashboardHeader from "./DashboardHeader";
+import StatCard from "../widgets/StatCard";
+import { ActionButton } from "../ActionButton";
+import { SummaryItem } from "../SummaryItem";
 
-//   return (
-//     <div className="w-full">
-//       {/* Container */}
-//       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
-//         {/* Title */}
-//         <DashboardHeader
-//           title={"Dashboard Admin"}
-//           description={"Vue globale & actions rapides"}
-//           level={"ADMIN"}
-//         />
-
-//         {/* Stats grid */}
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//           {dashboards.map((d) => (
-//             <StatCard title={d.title} value={d.value} subtitle={d.subtitle} />
-//           ))}
-//         </div>
-
-//         {/* Quick actions */}
-//         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-2xl shadow-black/30">
-//           <div className="flex items-center justify-between gap-3">
-//             <h2 className="text-lg font-semibold text-white">
-//               Actions rapides
-//             </h2>
-//             <span className="text-xs text-white/50">Gestion & création</span>
-//           </div>
-
-//           <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-//             <button
-//               onClick={() => navigate("/users")}
-//               className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-//                          bg-gradient-to-r from-fuchsia-500 to-cyan-400
-//                          hover:opacity-95 transition shadow-lg shadow-black/25"
-//             >
-//               Gérer les utilisateurs
-//             </button>
-
-//             <button
-//               onClick={() => navigate("/students/add")}
-//               className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-//                          border border-white/15 bg-[#140524]/70
-//                          hover:bg-white/10 transition"
-//             >
-//               Ajouter un étudiant
-//             </button>
-
-//             <button
-//               onClick={() => navigate("/courses/add")}
-//               className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-//                          border border-white/15 bg-[#140524]/70
-//                          hover:bg-white/10 transition"
-//             >
-//               Ajouter un cours
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-import React from "react";
-
-// Optionnel: si tu utilises lucide-react
-// npm i lucide-react
 import {
   Users,
-  UserRound,
-  CalendarDays,
-  Layers,
-  BookOpen,
-  ClipboardList,
   GraduationCap,
-  Plus,
-  ArrowUpRight,
-  ShieldCheck,
+  Shield,
+  UserCog,
   AlertTriangle,
+  Lock,
+  Settings,
+  CheckCircle,
+  Edit,
 } from "lucide-react";
 
-const StatCard = ({ title, value, subtitle, Icon, trend }) => {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl transition hover:bg-white/10">
-      {/* glow */}
-      <div className="pointer-events-none absolute -inset-24 opacity-0 blur-3xl transition group-hover:opacity-100"
-           style={{ background: "radial-gradient(circle at 30% 20%, rgba(168,85,247,0.35), transparent 60%)" }} />
-
-      <div className="relative flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-white/70">{title}</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{value}</p>
-          {subtitle ? (
-            <p className="mt-2 text-sm text-white/60">{subtitle}</p>
-          ) : null}
-        </div>
-
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
-          <Icon className="h-5 w-5 text-white/80" />
-        </div>
-      </div>
-
-      {trend ? (
-        <div className="relative mt-4 flex items-center gap-2 text-xs text-white/60">
-          <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-emerald-200 ring-1 ring-emerald-500/25">
-            {trend}
-          </span>
-          <span>vs. semaine passée</span>
-        </div>
-      ) : null}
-    </div>
-  );
-};
-
-const Panel = ({ title, right, children }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-    <div className="mb-4 flex items-center justify-between gap-3">
-      <h3 className="text-base font-semibold text-white">{title}</h3>
-      {right}
-    </div>
-    {children}
-  </div>
-);
-
 export default function AdminDashboard() {
-  // TODO: remplacer par tes vrais stats venant de l’API
-  const stats = {
-    users: 100,
-    students: 75,
-    academicYears: 3,
-    semesters: 6,
-    courses: 12,
-    enrollments: 248,
-    grades: 180,
-    unverifiedUsers: 4,
-    unpublishedGrades: 32,
-    activeYear: "2025-2026",
-    activeSemester: "S1",
+
+  const [dashboards] = useState([
+    {
+      key: "users",
+      title: "Utilisateurs",
+      value: 412,
+      subtitle: "Total",
+      icon: <Users />,
+      valueColor: "text-cyan-400",
+    },
+    {
+      key: "students",
+      title: "Étudiants",
+      value: 342,
+      subtitle: "Actifs",
+      icon: <GraduationCap />,
+      valueColor: "text-green-400",
+    },
+    {
+      key: "scolarite",
+      title: "Scolarité",
+      value: 4,
+      subtitle: "Comptes",
+      icon: <UserCog />,
+      valueColor: "text-indigo-400",
+    },
+    {
+      key: "admins",
+      title: "Admins",
+      value: 2,
+      subtitle: "Actifs",
+      icon: <Shield />,
+      valueColor: "text-fuchsia-400",
+    },
+  ]);
+
+  /* =======================
+     ÉTAT DU SYSTÈME
+     ======================= */
+  const systemStats = {
+    activeUsers: 398,
+    blockedAccounts: 3,
+    failedLogins: 7,
+    academicYear: "2024 - 2025",
   };
 
+  /* =======================
+     ACTIVITÉS RÉCENTES
+     ======================= */
+  const [activities] = useState([
+    {
+      id: 1,
+      action: "Création compte étudiant",
+      user: "admin@system",
+      date: "12/11/2025",
+    },
+    {
+      id: 2,
+      action: "Réinitialisation mot de passe",
+      user: "scolarite@system",
+      date: "11/11/2025",
+    },
+    {
+      id: 3,
+      action: "Blocage compte utilisateur",
+      user: "admin@system",
+      date: "10/11/2025",
+    },
+  ]);
+
   return (
-    <div className="bg-[#070A1A] text-white">
-      {/* background */}
-      <div
-        className="pointer-events-none fixed inset-0 opacity-80"
-        style={{
-          background:
-            "radial-gradient(circle at 20% 10%, rgba(99,102,241,0.35), transparent 45%), radial-gradient(circle at 70% 30%, rgba(168,85,247,0.30), transparent 45%), radial-gradient(circle at 50% 90%, rgba(236,72,153,0.18), transparent 55%)",
-        }}
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      {/* ================= HEADER ================= */}
+      <DashboardHeader
+        title="Dashboard Administrateur"
+        description="Supervision et gestion du système"
+        level="ADMIN"
       />
 
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs text-white/70 ring-1 ring-white/10">
-              <ShieldCheck className="h-4 w-4" />
-              Admin • Vision globale
+      {/* ================= KPI CARDS ================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {dashboards.map((item) => (
+          <StatCard
+            key={item.key}
+            title={item.title}
+            value={item.value}
+            subtitle={item.subtitle}
+            icon={item.icon}
+            valueColor={item.valueColor}
+          />
+        ))}
+      </div>
+
+      {/* ================= CONTENU CENTRAL ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ======== COLONNE PRINCIPALE ======== */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* État du système */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              État du système
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <SummaryItem
+                label="Utilisateurs actifs"
+                value={systemStats.activeUsers}
+                color="text-green-400"
+              />
+              <SummaryItem
+                label="Comptes bloqués"
+                value={systemStats.blockedAccounts}
+                color="text-red-400"
+              />
+              <SummaryItem
+                label="Connexions échouées"
+                value={systemStats.failedLogins}
+                color="text-amber-400"
+              />
+              <SummaryItem
+                label="Année académique"
+                value={systemStats.academicYear}
+              />
             </div>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
-              Dashboard Administrateur
-            </h1>
-            <p className="mt-1 text-sm text-white/60">
-              Année active: <span className="text-white">{stats.activeYear}</span> • Semestre:
-              <span className="text-white"> {stats.activeSemester}</span>
-            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <select className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 outline-none backdrop-blur-xl">
-              <option className="bg-[#0B0F2A]">Année: {stats.activeYear}</option>
-              <option className="bg-[#0B0F2A]">2024-2025</option>
-              <option className="bg-[#0B0F2A]">2023-2024</option>
-            </select>
+          {/* Activités récentes */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Activités récentes
+            </h3>
 
-            <select className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 outline-none backdrop-blur-xl">
-              <option className="bg-[#0B0F2A]">Semestre: {stats.activeSemester}</option>
-              <option className="bg-[#0B0F2A]">S2</option>
-            </select>
+            <ul className="text-sm text-white/70 space-y-3">
+              {activities.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex justify-between border-b border-white/5 pb-2"
+                >
+                  <span>{a.action}</span>
+                  <span className="text-white/40">
+                    {a.user} • {a.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-2 text-sm font-medium shadow-lg shadow-fuchsia-500/20 transition hover:opacity-95">
-              <Plus className="h-4 w-4" />
-              Créer
-            </button>
+          {/* ================= ACTIONS RAPIDES ================= */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Actions rapides
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <ActionButton
+                icon={<Users />}
+                label="Utilisateurs"
+                onClick={() => navigate("/users")}
+              />
+              <ActionButton
+                icon={<CheckCircle />}
+                label="Inscriptions"
+                onClick={() => navigate("/enrollments")}
+              />
+              <ActionButton
+                icon={<Edit />}
+                label="Gestion des notes"
+                onClick={() => navigate("/grades")}
+              />
+              <ActionButton
+                icon={<Lock />}
+                label="Gestion semestres"
+                onClick={() => navigate("/semester")}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ======== ASIDE DROIT ======== */}
+        <div className="space-y-6">
+          {/* Configuration */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Settings className="text-cyan-400" />
+              <h3 className="font-semibold text-white">Configuration</h3>
+            </div>
+
+            <ul className="text-sm text-white/70 space-y-2">
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/academic")}
+              >
+                • Années et semestres
+              </li>
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/roles")}
+              >
+                • Rôles et permissions
+              </li>
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/system")}
+              >
+                • Paramètres système
+              </li>
+            </ul>
+          </div>
+
+          {/* Alertes système */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="text-red-400" />
+              <h3 className="font-semibold text-white">Alertes système</h3>
+            </div>
+
+            <ul className="text-sm text-white/70 space-y-2">
+              <li>• 3 comptes bloqués</li>
+              <li>• Connexions suspectes détectées</li>
+              <li>• Sauvegarde système recommandée</li>
+            </ul>
           </div>
         </div>
 
