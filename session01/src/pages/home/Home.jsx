@@ -1,6 +1,6 @@
 // src/pages/home/HomePage.jsx
 
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useAuth } from "../../auth/AuthProvider";
 import AdminDashboard from "../../components/dashboards/AdminDashboard";
 import ScolariteDashboard from "../../components/dashboards/ScolariteDashboard";
