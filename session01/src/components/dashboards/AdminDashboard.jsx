@@ -130,7 +130,7 @@ export default function AdminDashboard() {
               <SummaryItem
                 label="Utilisateurs actifs"
                 value={systemStats.activeUsers}
-                color="te xt-green-400"
+                color="text-green-400"
               />
               <SummaryItem
                 label="Comptes bloqués"
