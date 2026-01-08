@@ -1,8 +1,10 @@
-// src/components/dashboards/ScolariteDashboard.jsx
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import DashboardHeader from "./DashboardHeader";
 import StatCard from "../widgets/StatCard";
+import { ActionButton } from "../ActionButton";
+import { SummaryItem } from "../SummaryItem";
 
 import {
   GraduationCap,
@@ -11,13 +13,19 @@ import {
   FileText,
   AlertTriangle,
   CalendarDays,
+  CheckCircle,
+  Edit,
+  FileWarning,
+  Lock,
 } from "lucide-react";
 
 export default function ScolariteDashboard() {
+  const navigate = useNavigate();
+
   /* =======================
      KPI DASHBOARD (CARDS)
      ======================= */
-  const [dashboards, setDashboards] = useState([
+  const [dashboards] = useState([
     {
       key: "students",
       title: "Étudiants",
@@ -25,9 +33,10 @@ export default function ScolariteDashboard() {
       subtitle: "Inscrits",
       icon: <GraduationCap />,
       valueColor: "text-green-400",
+      hint: "+12 ce mois",
     },
     {
-      key: "newInscriptions",
+      key: "inscriptions",
       title: "Inscriptions",
       value: 58,
       subtitle: "Ce semestre",
@@ -43,7 +52,7 @@ export default function ScolariteDashboard() {
       valueColor: "text-indigo-400",
     },
     {
-      key: "notes",
+      key: "grades",
       title: "Notes",
       value: 1280,
       subtitle: "Saisies",
@@ -65,7 +74,7 @@ export default function ScolariteDashboard() {
   /* =======================
      DERNIÈRES NOTES
      ======================= */
-  const [recentNotes, setRecentNotes] = useState([
+  const [recentNotes] = useState([
     {
       id: 1,
       student: "Jean Pierre",
@@ -94,8 +103,8 @@ export default function ScolariteDashboard() {
       {/* ================= HEADER ================= */}
       <DashboardHeader
         title="Dashboard Scolarité"
-        description="Vue globale & suivi académique"
-        level="SCOLARITE"
+        description="Vue globale et suivi académique"
+        level="SCOLARITÉ"
       />
 
       {/* ================= KPI CARDS ================= */}
@@ -106,6 +115,7 @@ export default function ScolariteDashboard() {
             title={item.title}
             value={item.value}
             subtitle={item.subtitle}
+            hint={item.hint}
             icon={item.icon}
             valueColor={item.valueColor}
           />
@@ -114,7 +124,7 @@ export default function ScolariteDashboard() {
 
       {/* ================= CONTENU CENTRAL ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ======== CENTRE ======== */}
+        {/* ======== COLONNE PRINCIPALE ======== */}
         <div className="lg:col-span-2 space-y-6">
           {/* Résumé académique */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-6">
@@ -123,7 +133,7 @@ export default function ScolariteDashboard() {
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <SummaryItem label="Année active" value={stats.academicYear} />
+              <SummaryItem label="Année" value={stats.academicYear} />
               <SummaryItem label="Semestre" value={stats.semester} />
               <SummaryItem
                 label="Notes en attente"
@@ -138,7 +148,7 @@ export default function ScolariteDashboard() {
             </div>
           </div>
 
-          {/* Table des dernières notes */}
+          {/* Dernières notes */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">
               Dernières notes saisies
@@ -155,7 +165,12 @@ export default function ScolariteDashboard() {
               </thead>
               <tbody>
                 {recentNotes.map((n) => (
-                  <tr key={n.id} className="border-b border-white/5">
+                  <tr
+                    key={n.id}
+                    className={`border-b border-white/5 ${
+                      n.status === "En attente" ? "bg-white/5" : ""
+                    }`}
+                  >
                     <td className="py-2">{n.student}</td>
                     <td className="text-center">{n.subject}</td>
                     <td className="text-center">{n.classLevel}</td>
@@ -173,6 +188,36 @@ export default function ScolariteDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Actions rapides */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Actions rapides
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <ActionButton
+                icon={<CheckCircle />}
+                label="Inscriptions"
+                onClick={() => navigate("/enrollments")}
+              />
+              <ActionButton
+                icon={<Edit />}
+                label="Saisie des notes"
+                onClick={() => navigate("/grades")}
+              />
+              <ActionButton
+                icon={<FileWarning />}
+                label="Notes manquantes"
+                onClick={() => navigate("/grades/missing")}
+              />
+              <ActionButton
+                icon={<Lock />}
+                label="Clôture semestre"
+                onClick={() => navigate("/semester")}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ======== ASIDE DROIT ======== */}
@@ -184,10 +229,10 @@ export default function ScolariteDashboard() {
               <h3 className="font-semibold text-white">Calendrier</h3>
             </div>
             <p className="text-sm text-white/60">
-              Examens, rattrapages, clôtures
+              Examens, rattrapages et clôtures
             </p>
             <div className="mt-4 h-32 rounded-lg bg-white/10 flex items-center justify-center text-white/40">
-              📅 (Calendar UI à venir)
+              📅 Calendar UI à venir
             </div>
           </div>
 
@@ -205,16 +250,6 @@ export default function ScolariteDashboard() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* =================== SOUS-COMPONENT =================== */
-function SummaryItem({ label, value, color = "text-white" }) {
-  return (
-    <div className="rounded-lg bg-white/10 p-4">
-      <div className="text-xs text-white/60">{label}</div>
-      <div className={`text-lg font-bold ${color}`}>{value}</div>
     </div>
   );
 }

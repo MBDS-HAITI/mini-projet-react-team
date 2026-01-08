@@ -1,59 +1,249 @@
-// src/components/dashboards/AdminDashboard.jsx
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StatCard from "../widgets/StatCard";
+
 import DashboardHeader from "./DashboardHeader";
+import StatCard from "../widgets/StatCard";
+import { ActionButton } from "../ActionButton";
+import { SummaryItem } from "../SummaryItem";
+
+import {
+  Users,
+  GraduationCap,
+  Shield,
+  UserCog,
+  AlertTriangle,
+  Lock,
+  Settings,
+  CheckCircle,
+  Edit,
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
+  /* =======================
+     KPI GLOBAUX SYSTÈME
+     ======================= */
+  const [dashboards] = useState([
+    {
+      key: "users",
+      title: "Utilisateurs",
+      value: 412,
+      subtitle: "Total",
+      icon: <Users />,
+      valueColor: "text-cyan-400",
+    },
+    {
+      key: "students",
+      title: "Étudiants",
+      value: 342,
+      subtitle: "Actifs",
+      icon: <GraduationCap />,
+      valueColor: "text-green-400",
+    },
+    {
+      key: "scolarite",
+      title: "Scolarité",
+      value: 4,
+      subtitle: "Comptes",
+      icon: <UserCog />,
+      valueColor: "text-indigo-400",
+    },
+    {
+      key: "admins",
+      title: "Admins",
+      value: 2,
+      subtitle: "Actifs",
+      icon: <Shield />,
+      valueColor: "text-fuchsia-400",
+    },
+  ]);
+
+  /* =======================
+     ÉTAT DU SYSTÈME
+     ======================= */
+  const systemStats = {
+    activeUsers: 398,
+    blockedAccounts: 3,
+    failedLogins: 7,
+    academicYear: "2024 - 2025",
+  };
+
+  /* =======================
+     ACTIVITÉS RÉCENTES
+     ======================= */
+  const [activities] = useState([
+    {
+      id: 1,
+      action: "Création compte étudiant",
+      user: "admin@system",
+      date: "12/11/2025",
+    },
+    {
+      id: 2,
+      action: "Réinitialisation mot de passe",
+      user: "scolarite@system",
+      date: "11/11/2025",
+    },
+    {
+      id: 3,
+      action: "Blocage compte utilisateur",
+      user: "admin@system",
+      date: "10/11/2025",
+    },
+  ]);
+
   return (
-    <div className="w-full">
-      {/* Container */}
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
-        {/* Title */}
-        <DashboardHeader title={"Dashboard Admin"} description={"Vue globale & actions rapides"} level={"ADMIN"} />
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      {/* ================= HEADER ================= */}
+      <DashboardHeader
+        title="Dashboard Administrateur"
+        description="Supervision et gestion du système"
+        level="ADMIN"
+      />
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard title="Utilisateurs" value="100" subtitle="Total" />
-          <StatCard title="Étudiants" value="75" subtitle="Inscrits" valueColor="text-fuchsia-300" />
-          <StatCard title="Cours" value="12" subtitle="Actifs" valueColor="text-white" />
-        </div>
+      {/* ================= KPI CARDS ================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {dashboards.map((item) => (
+          <StatCard
+            key={item.key}
+            title={item.title}
+            value={item.value}
+            subtitle={item.subtitle}
+            icon={item.icon}
+            valueColor={item.valueColor}
+          />
+        ))}
+      </div>
 
-        {/* Quick actions */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-2xl shadow-black/30">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-white">Actions rapides</h2>
-            <span className="text-xs text-white/50">Gestion & création</span>
+      {/* ================= CONTENU CENTRAL ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ======== COLONNE PRINCIPALE ======== */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* État du système */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              État du système
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <SummaryItem
+                label="Utilisateurs actifs"
+                value={systemStats.activeUsers}
+                color="text-green-400"
+              />
+              <SummaryItem
+                label="Comptes bloqués"
+                value={systemStats.blockedAccounts}
+                color="text-red-400"
+              />
+              <SummaryItem
+                label="Connexions échouées"
+                value={systemStats.failedLogins}
+                color="text-amber-400"
+              />
+              <SummaryItem
+                label="Année académique"
+                value={systemStats.academicYear}
+              />
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button
-              onClick={() => navigate("/users")}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-                         bg-gradient-to-r from-fuchsia-500 to-cyan-400
-                         hover:opacity-95 transition shadow-lg shadow-black/25"
-            >
-              Gérer les utilisateurs
-            </button>
+          {/* Activités récentes */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Activités récentes
+            </h3>
 
-            <button
-              onClick={() => navigate("/students/add")}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-                         border border-white/15 bg-[#140524]/70
-                         hover:bg-white/10 transition"
-            >
-              Ajouter un étudiant
-            </button>
+            <ul className="text-sm text-white/70 space-y-3">
+              {activities.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex justify-between border-b border-white/5 pb-2"
+                >
+                  <span>{a.action}</span>
+                  <span className="text-white/40">
+                    {a.user} • {a.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <button
-              onClick={() => navigate("/courses/add")}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white
-                         border border-white/15 bg-[#140524]/70
-                         hover:bg-white/10 transition"
-            >
-              Ajouter un cours
-            </button>
+          {/* ================= ACTIONS RAPIDES ================= */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Actions rapides
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <ActionButton
+                icon={<Users />}
+                label="Utilisateurs"
+                onClick={() => navigate("/users")}
+              />
+              <ActionButton
+                icon={<CheckCircle />}
+                label="Inscriptions"
+                onClick={() => navigate("/enrollments")}
+              />
+              <ActionButton
+                icon={<Edit />}
+                label="Gestion des notes"
+                onClick={() => navigate("/grades")}
+              />
+              <ActionButton
+                icon={<Lock />}
+                label="Gestion semestres"
+                onClick={() => navigate("/semester")}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ======== ASIDE DROIT ======== */}
+        <div className="space-y-6">
+          {/* Configuration */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Settings className="text-cyan-400" />
+              <h3 className="font-semibold text-white">Configuration</h3>
+            </div>
+
+            <ul className="text-sm text-white/70 space-y-2">
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/academic")}
+              >
+                • Années et semestres
+              </li>
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/roles")}
+              >
+                • Rôles et permissions
+              </li>
+              <li
+                className="cursor-pointer hover:text-white"
+                onClick={() => navigate("/settings/system")}
+              >
+                • Paramètres système
+              </li>
+            </ul>
+          </div>
+
+          {/* Alertes système */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="text-red-400" />
+              <h3 className="font-semibold text-white">Alertes système</h3>
+            </div>
+
+            <ul className="text-sm text-white/70 space-y-2">
+              <li>• 3 comptes bloqués</li>
+              <li>• Connexions suspectes détectées</li>
+              <li>• Sauvegarde système recommandée</li>
+            </ul>
           </div>
         </div>
       </div>
