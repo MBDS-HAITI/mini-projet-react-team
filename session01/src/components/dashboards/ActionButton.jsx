@@ -8,27 +8,25 @@ export function ActionButton({ icon, label, onClick }) {
   return (
     <Paper
       elevation={0}
-      component="button"
-      type="button"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onClick?.();
+      }}
       sx={{
-        width: "100%",
         cursor: "pointer",
-        borderRadius: 3, // rounded-xl
-        p: 2, // p-4
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1, // gap-2 approximatif
+        borderRadius: 3,
+        p: 2,
         border: "1px solid",
         borderColor: "divider",
         backgroundColor: alpha(theme.palette.background.paper, 0.8),
         backdropFilter: "blur(12px)",
         boxShadow: theme.shadows[2],
         transition: "all 0.25s ease",
-        color: "text.primary",
-        textAlign: "center",
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
 
         "&:hover": {
           transform: "translateY(-3px)",
@@ -51,9 +49,14 @@ export function ActionButton({ icon, label, onClick }) {
     >
       <Box
         sx={{
-          color: "secondary.main", // remplace text-cyan-400, adaptatif
+          height: 38,
+          width: 38,
+          borderRadius: 2,
           display: "grid",
           placeItems: "center",
+          backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+          color: "secondary.main",
+          flex: "0 0 auto",
         }}
       >
         {icon}
@@ -61,9 +64,10 @@ export function ActionButton({ icon, label, onClick }) {
 
       <Typography
         sx={{
-          fontSize: 13, // text-sm
-          fontWeight: 800, // font-semibold (un peu +)
+          fontSize: 13,
+          fontWeight: 800,
           color: "text.primary",
+          lineHeight: 1.1,
         }}
       >
         {label}

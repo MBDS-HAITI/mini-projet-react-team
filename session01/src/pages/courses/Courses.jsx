@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { deleteCourse, getCourses } from "../../api/routes/course.api.js";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import {
@@ -12,15 +12,18 @@ import {
   TableBody,
   TablePagination,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "../../utils/fdate.js";
 import UpsertCourseModal from "./UpsertCourse.jsx";
 import Container from "../../components/layout/Container.jsx";
 
 export default function CoursesPage() {
+  const theme = useTheme();
+
   const [courses, setCourses] = useState([]);
 
-  //upsert modal state
+  // Upsert modal state
   const [openUpsert, setOpenUpsert] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
@@ -50,23 +53,30 @@ export default function CoursesPage() {
     fetchCourses();
   }, []);
 
-  // Filtrage + tri
-  const filteredCourses = courses
-    .filter(
-      (course) =>
-        course.name.toLowerCase().includes(search.toLowerCase()) ||
-        course.code.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    );
+  const filteredCourses = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return (courses ?? [])
+      .filter((course) => {
+        if (!q) return true;
+        const name = (course.name ?? "").toLowerCase();
+        const code = (course.code ?? "").toLowerCase();
+        const credits = String(course.credits ?? "").toLowerCase();
+        return name.includes(q) || code.includes(q) || credits.includes(q);
+      })
+      .sort((a, b) => {
+        const aName = (a.name ?? "").toLowerCase();
+        const bName = (b.name ?? "").toLowerCase();
+        return sortAsc ? aName.localeCompare(bName) : bName.localeCompare(aName);
+      });
+  }, [courses, search, sortAsc]);
 
   const onEdit = (row) => {
     setSelectedCourse(row);
     setOpenUpsert(true);
   };
 
-  const onAdd = (row) => {
+  const onAdd = () => {
     setSelectedCourse(null);
     setOpenUpsert(true);
   };
@@ -97,6 +107,8 @@ export default function CoursesPage() {
 
   const title = "Liste des cours";
 
+  const headers = ["Code", "Nom", "Crédits", "Création", "Modification", "Actions"];
+
   return (
     <>
       <Container
@@ -108,32 +120,20 @@ export default function CoursesPage() {
         onAdd={onAdd}
         setPage={setPage}
       >
-        {/* ===== TABLE ===== */}
-        <Paper
-          elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
-        >
+        <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
           <TableContainer>
-            <Table>
+            <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Code",
-                    "Nom",
-                    "Crédits",
-                    "Création",
-                    "Modification",
-                    "Actions",
-                  ].map((head) => (
+                  {headers.map((head) => (
                     <TableCell
                       key={head}
                       sx={{
-                        color: "#cbd5f5",
-                        fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        color: theme.palette.table?.headText ?? "text.secondary",
+                        fontWeight: 800,
+                        borderBottom: "1px solid",
+                        borderBottomColor: "divider",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {head}
@@ -151,67 +151,62 @@ export default function CoursesPage() {
                       hover
                       sx={{
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          backgroundColor:
+                            theme.palette.table?.rowHover ?? theme.palette.action.hover,
                         },
                       }}
                     >
-                      <TableCell sx={{ color: "white" }}>
-                        {course.code}
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {course.code ?? "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
-                        {course.name}
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {course.name ?? "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
-                        {course.credits}
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {course.credits ?? "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(course.createdAt, true)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(course.updatedAt, true)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "#a78bfa" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                          }}
-                        >
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <StyledTooltip title="Modifier" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => onEdit(course)}
-                              sx={{ color: "#a78bfa" }}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                             >
                               <Pencil size={18} />
                             </IconButton>
                           </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
                           <StyledTooltip title="Détails" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => onDetails(course)}
-                              sx={{ color: "#a78bfa" }}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                             >
                               <Eye size={18} />
                             </IconButton>
                           </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
                           <StyledTooltip title="Supprimer" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => askDelete(course)}
-                              sx={{ color: "#f87171" }} // red-400
+                              sx={{ color: theme.palette.actions?.danger ?? "error.main" }}
                             >
                               <Trash2 size={18} />
                             </IconButton>
@@ -224,7 +219,6 @@ export default function CoursesPage() {
             </Table>
           </TableContainer>
 
-          {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
             count={filteredCourses.length}
@@ -237,15 +231,18 @@ export default function CoursesPage() {
               setPage(0);
             }}
             sx={{
-              color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              color: "text.secondary",
+              borderTop: "1px solid",
+              borderTopColor: "divider",
+              ".MuiTablePagination-selectIcon": { color: "text.secondary" },
+              ".MuiTablePagination-actions button": { color: "text.secondary" },
+              ".MuiTablePagination-select": { color: "text.secondary" },
+              ".MuiTablePagination-displayedRows": { color: "text.secondary" },
             }}
           />
         </Paper>
       </Container>
 
-      {/* Upsert Modal */}
       {openUpsert && (
         <UpsertCourseModal
           open={openUpsert}

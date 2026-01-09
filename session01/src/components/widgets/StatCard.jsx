@@ -1,58 +1,133 @@
 // src/components/widgets/StatCard.jsx
+import * as React from "react";
+import { Box, Paper, Typography, alpha, useTheme } from "@mui/material";
+
 export default function StatCard({
   title,
-  value=100,
+  value = 100,
   subtitle,
   icon,
-  hint,        // petit texte optionnel (ex: "+12 ce mois")
-  valueColor = "text-cyan-300", // tu peux changer selon la card
+  hint,
+  valueColor, // Si non défini, utilisera la couleur primaire du thème
 }) {
+  const theme = useTheme();
+
   return (
-    <div
-      className="w-full m-2 rounded-xl overflow-hidden md:max-w-md transform transition duration-500 hover:scale-105
-                 border border-white/10 bg-white/5 backdrop-blur-xl hover:shadow-fuchsia-600 hover:shadow-lg shadow-2xl shadow-black/40"
+    <Paper
+      elevation={0}
+      sx={{
+        width: "100%",
+        m: 1,
+        borderRadius: 3,
+        overflow: "hidden",
+        maxWidth: { md: 448 },
+        transition: "all 0.3s ease-in-out",
+        border: "1px solid",
+        // Utilisation de la couleur 'divider' automatique du thème
+        borderColor: "divider", 
+        // Utilisation de 'background.paper' avec une légère opacité pour l'effet verre
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: "blur(12px)",
+        boxShadow: theme.shadows[2],
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: theme.shadows[10],
+          borderColor: "secondary.main",
+        },
+      }}
     >
-      <div className="w-full p-6">
+      <Box sx={{ p: 3 }}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-          <div className="uppercase tracking-wider text-sm font-bold text-white/70">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            pb: 1.5,
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="overline"
+            sx={{
+              fontWeight: 800,
+              color: "text.secondary", // Couleur grise adaptative
+              letterSpacing: 1.2,
+            }}
+          >
             {title}
-          </div>
+          </Typography>
 
-          {/* icon optionnel */}
-          {icon ? (
-            <div className="h-10 w-10 rounded-lg grid place-items-center border border-white/10 bg-white/5">
-              <span className="text-fuchsia-300">{icon}</span>
-            </div>
-          ) : null}
-        </div>
+          {icon && (
+            <Box
+              sx={{
+                height: 40,
+                width: 40,
+                borderRadius: 2,
+                display: "grid",
+                placeItems: "center",
+                backgroundColor: alpha(theme.palette.secondary.main, 0.1),
+                color: "secondary.main",
+              }}
+            >
+              {icon}
+            </Box>
+          )}
+        </Box>
 
-        {/* Value */}
-        <div className="flex items-end justify-between gap-4">
-          <div className={`text-4xl font-extrabold drop-shadow ${valueColor}`}>
+        {/* Value Area */}
+        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 900,
+              // Utilise valueColor si fourni, sinon la couleur primaire du thème
+              color: valueColor || "primary.main",
+            }}
+          >
             {value}
-          </div>
+          </Typography>
 
-          {subtitle ? (
-            <div className="text-right">
-              <div className="text-md text-white/50">{subtitle}</div>
-              {hint ? (
-                <div className="text-md text-white/60 mt-1">{hint}</div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
+          {(subtitle || hint) && (
+            <Box sx={{ textAlign: "right" }}>
+              <Typography variant="body2" color="text.secondary">
+                {subtitle}
+              </Typography>
+              {hint && (
+                <Typography variant="caption" sx={{ color: "success.main", fontWeight: "bold" }}>
+                  {hint}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Box>
 
-        {/* Accent row */}
-        <div className="mt-5 flex items-center gap-2">
-          <span className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
-            <span className="block h-full w-2/5 bg-linear-to-r from-fuchsia-500 to-cyan-400" />
-          </span>
-          <span className="text-[10px] font-mono text-white/40 select-none">
-            stat
-          </span>
-        </div>
-      </div>
-    </div>
+        {/* Progress bar décorative */}
+        <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              height: 4,
+              flexGrow: 1,
+              borderRadius: 1,
+              bgcolor: "action.hover", // Couleur neutre automatique
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                height: "100%",
+                width: "45%",
+                background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              }}
+            />
+          </Box>
+          <Typography variant="caption" color="text.disabled" sx={{ fontSize: 9 }}>
+            STATS
+          </Typography>
+        </Box>
+      </Box>
+    </Paper>
   );
 }

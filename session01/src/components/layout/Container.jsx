@@ -1,8 +1,13 @@
-import React from "react";
+// src/components/layout/Container.jsx
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
+
 import SearchInput from "../widgets/SearchInput";
 import SortButton from "../widgets/SortButton";
 import AddButton from "../widgets/AddButton";
-import { useAuth } from "../../auth/AuthProvider";
 
 export default function Container({
   children,
@@ -15,14 +20,51 @@ export default function Container({
   setPage,
   canManage = true,
 }) {
-  return (
-    <div className="my-2 md:m-4">
-      <div className="w-full max-w-sm flex flex-col md:max-w-screen backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-2 md:p-6">
-        <h1 className="md:text-2xl font-bold text-white p-2 md:mb-6 text-center">
-          {title}
-        </h1>
+  const theme = useTheme();
 
-        <div className="flex flex-wrap items-center justify-end md:justify-between gap-4 mb-2 md:mb-6">
+  return (
+    <Box sx={{ my: 1, mx: { xs: 0, md: 2 } }}>
+      <Paper
+        elevation={0}
+        sx={{
+          width: "100%",
+          maxWidth: { xs: 480, md: "100%" }, // max-w-sm -> md:max-w-screen
+          mx: "auto",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: 3, // rounded-2xl
+          p: { xs: 1, md: 3 }, // p-2 -> md:p-6
+          backdropFilter: "blur(16px)",
+          backgroundColor: theme.palette.background.paperGlass,
+          border: "1px solid",
+          borderColor: theme.palette.borders.container,
+          boxShadow: theme.palette.effects.containerShadow,
+        }}
+      >
+        <Typography
+          component="h1"
+          sx={{
+            fontWeight: 800,
+            textAlign: "center",
+            p: 1,
+            mb: { xs: 0, md: 3 },
+            fontSize: { xs: 18, md: 24 },
+            color: "text.primary",
+          }}
+        >
+          {title}
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: { xs: "flex-end", md: "space-between" },
+            gap: 2,
+            mb: { xs: 1, md: 3 },
+          }}
+        >
           <SearchInput
             placeholder="Recherche code, nom, sexe, adr..."
             search={search}
@@ -30,13 +72,14 @@ export default function Container({
             setPage={setPage}
           />
 
-          <div className="flex items-center gap-3">
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <SortButton sortAsc={sortAsc} setSortAsc={setSortAsc} />
             {canManage && <AddButton onAdd={onAdd} />}
-          </div>
-        </div>
+          </Box>
+        </Box>
+
         {children}
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 }

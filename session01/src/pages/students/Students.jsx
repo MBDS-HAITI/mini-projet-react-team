@@ -11,6 +11,7 @@ import {
   IconButton,
   TableContainer,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { formatDate } from "../../utils/fdate";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import { Eye, Pencil, Trash2 } from "lucide-react";
@@ -19,6 +20,8 @@ import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import Container from "../../components/layout/Container.jsx";
 
 export default function StudentsPage() {
+  const theme = useTheme();
+
   const [students, setStudents] = useState([]);
 
   const [openUpsert, setOpenUpsert] = useState(false);
@@ -115,6 +118,18 @@ export default function StudentsPage() {
 
   const title = "Liste des Étudiants";
 
+  const HEADERS = [
+    "Code",
+    "Nom",
+    "Sexe",
+    "Date naissance",
+    "Téléphone",
+    "Adresse",
+    "Enregistré le",
+    "Compte",
+    "Actions",
+  ];
+
   return (
     <>
       <Container
@@ -126,31 +141,20 @@ export default function StudentsPage() {
         onAdd={onAdd}
         setPage={setPage}
       >
-        <Paper
-          elevation={0}
-          sx={{ backgroundColor: "transparent", color: "white" }}
-        >
+        {/* wrapper transparent OK, mais couleurs = thème */}
+        <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
           <TableContainer>
             <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Code",
-                    "Nom",
-                    "Sexe",
-                    "Date naissance",
-                    "Téléphone",
-                    "Adresse",
-                    "Enregistré le",
-                    "Compte",
-                    "Actions",
-                  ].map((head) => (
+                  {HEADERS.map((head) => (
                     <TableCell
                       key={head}
                       sx={{
-                        color: "#cbd5f5",
-                        fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        color: theme.palette.table?.headText ?? theme.palette.text.secondary,
+                        fontWeight: 800,
+                        borderBottom: "1px solid",
+                        borderBottomColor: "divider",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -165,9 +169,7 @@ export default function StudentsPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((student) => {
                     const key = student._id || student.id;
-                    const fullName = `${student.firstName ?? ""} ${
-                      student.lastName ?? ""
-                    }`.trim();
+                    const fullName = `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim();
 
                     return (
                       <TableRow
@@ -175,71 +177,49 @@ export default function StudentsPage() {
                         hover
                         sx={{
                           "&:hover": {
-                            backgroundColor: "rgba(255,255,255,0.05)",
+                            backgroundColor: theme.palette.table?.rowHover ?? theme.palette.action.hover,
                           },
                         }}
                       >
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {student.studentCode || "-"}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {fullName || "-"}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {student.sex || "-"}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {formatDate(student.dateOfBirth)}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {student.phone || "-"}
                         </TableCell>
 
-                        <TableCell sx={{ color: "white", minWidth: 220 }}>
+                        <TableCell sx={{ color: "text.primary", minWidth: 220 }}>
                           {student.address || "-"}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {formatDate(student.createdAt)}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "white", whiteSpace: "nowrap" }}
-                        >
+                        <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                           {student.haveAccount ? "Oui" : "Non"}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ color: "#a78bfa", whiteSpace: "nowrap" }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                            }}
-                          >
+                        <TableCell sx={{ whiteSpace: "nowrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <StyledTooltip title="Modifier">
                               <IconButton
                                 size="small"
                                 onClick={() => onEdit(student)}
-                                sx={{ color: "#a78bfa" }}
+                                sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                               >
                                 <Pencil size={18} />
                               </IconButton>
@@ -249,7 +229,7 @@ export default function StudentsPage() {
                               <IconButton
                                 size="small"
                                 onClick={() => onDetails(student)}
-                                sx={{ color: "#a78bfa" }}
+                                sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                               >
                                 <Eye size={18} />
                               </IconButton>
@@ -259,7 +239,7 @@ export default function StudentsPage() {
                               <IconButton
                                 size="small"
                                 onClick={() => askDelete(student)}
-                                sx={{ color: "#f87171" }}
+                                sx={{ color: theme.palette.actions?.danger ?? "error.main" }}
                               >
                                 <Trash2 size={18} />
                               </IconButton>
@@ -285,9 +265,13 @@ export default function StudentsPage() {
               setPage(0);
             }}
             sx={{
-              color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              color: "text.secondary",
+              borderTop: "1px solid",
+              borderTopColor: "divider",
+              ".MuiTablePagination-selectIcon": { color: "text.secondary" },
+              ".MuiTablePagination-actions button": { color: "text.secondary" },
+              ".MuiTablePagination-select": { color: "text.secondary" },
+              ".MuiTablePagination-displayedRows": { color: "text.secondary" },
             }}
           />
         </Paper>
@@ -307,7 +291,10 @@ export default function StudentsPage() {
         message={
           <>
             Voulez-vous vraiment supprimer l’étudiant{" "}
-            <b>{toDelete?.firstName} {toDelete?.lastName}</b> ?
+            <b>
+              {toDelete?.firstName} {toDelete?.lastName}
+            </b>{" "}
+            ?
           </>
         }
         visible={!isDeleting}
