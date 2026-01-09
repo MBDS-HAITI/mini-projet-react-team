@@ -1,3 +1,5 @@
+// src/theme/theme.jsx
+
 import { amber, deepOrange, grey, indigo } from "@mui/material/colors";
 
 export const getDesignTokens = (mode) => ({
@@ -11,7 +13,7 @@ export const getDesignTokens = (mode) => ({
           divider: grey[200],
           background: {
             default: "#F8FAFC", 
-            paper: "#FF23FF",
+            paper: "#FFFFFF",
           },
           text: {
             primary: grey[900],

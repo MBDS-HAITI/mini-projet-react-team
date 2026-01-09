@@ -1,5 +1,5 @@
 // src/auth/AuthProvider.jsx
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { apiClient } from "../api/client.js";
 import {
   getMe,
@@ -7,103 +7,143 @@ import {
   signIn,
   signOut,
 } from "../api/routes/auth.api.js";
+import { Alert, Snackbar } from "@mui/material";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);const idleTimerRef = useRef(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
-  // Applique/retire le Bearer token sur apiClient
-  const applyTokenToClient = (accessToken) => {
-    if (accessToken) {
-      apiClient.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-      setIsAuthenticated(true);
-    } else {
-      delete apiClient.defaults.headers.common.Authorization;
-      setIsAuthenticated(false);
-    }
+  // Définir le temps d'inactivité (15 minutes)
+  const IDLE_TIMEOUT = 15 * 60 * 1000;
+
+  const login = async (credentials) => {
+    const res = await signIn(credentials);
+    const token = res?.data?.token ?? res?.token;
+    const userData = res?.data?.user ?? res?.user;
+
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+    setUser(userData);
+    return res;
   };
 
-  // Login
-  const login = async ({ username, password }) => {
-    const res = await signIn({ username, password });
-
-    const accessToken = res?.data?.token ?? res?.token ?? null;
-    const loggedUser = res?.data?.user ?? res?.user ?? null;
-    if (!accessToken) {
-      throw new Error("Aucun token reçu depuis /auths/signin");
-    }
-    setToken(accessToken);
-    setUser(loggedUser);
-    applyTokenToClient(accessToken);
-    return { accessToken, user: loggedUser };
-  };
-
-  const logout = async () => {
+  const logout = useCallback(async () => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     try {
       await signOut();
     } finally {
-      setToken(null);
       setUser(null);
-      applyTokenToClient(null);
+      delete apiClient.defaults.headers.common.Authorization;
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // Au démarrage: refresh silencieux (cookie HttpOnly)
+  const resetIdleTimer = useCallback(() => {
+    console.log("reset");
+    
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    
+    if (user) {
+      idleTimerRef.current = setTimeout(() => {
+        setAlertMessage("Votre session a expiré suite à une trop longue inactivité.");
+        setSessionExpired(true);
+        logout();
+      }, IDLE_TIMEOUT);
+    }
+  }, [user, logout, IDLE_TIMEOUT]);
+
   useEffect(() => {
+    // Liste des événements qui considèrent que l'utilisateur est "actif"
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
 
-    const manageAuth = async () => {
+    if (user) {
+      // Initialiser le timer
+      resetIdleTimer();
+
+      // Ajouter les écouteurs d'événements
+      activityEvents.forEach(event => {
+        window.addEventListener(event, resetIdleTimer);
+      });
+    }
+
+    return () => {
+      // Nettoyage
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, resetIdleTimer);
+      });
+    };
+  }, [user]); // On relance l'effet quand l'état de l'utilisateur change
+
+  useEffect(() => {
+    const initAuth = async () => {
       try {
+        // 1. On tente de récupérer un token via le refresh au démarrage
         const res = await refreshAccessToken();
-
-        const accessToken = res?.token;
-
-        if (accessToken) {
-          setToken(accessToken);
-          applyTokenToClient(accessToken);
-
-          const me = await getMe();
-          setUser(me?.data ?? me);
-        } else {
-          setToken(null);
-          setUser(null);
-          applyTokenToClient(null);
+        if (res?.token) {
+          apiClient.defaults.headers.common.Authorization = `Bearer ${res.token}`;
+          // 2. On récupère les infos utilisateur
+          const userData = await getMe();
+          setUser(userData?.data ?? userData);
         }
       } catch (e) {
-        console.log(
-          "[AuthProvider] refresh failed:",
-          e?.response?.status,
-          e?.response?.data || e.message
-        );
-        setToken(null);
-        setUser(null);
-        applyTokenToClient(null);
+        console.warn("Session expirée ou absente");
       } finally {
         setLoading(false);
       }
     };
 
-    manageAuth();
+    initAuth();
+
+    // On écoute l'événement d'expiration envoyé par le client.js
+    const handleExpire = () => {
+      setUser(null);
+      delete apiClient.defaults.headers.common.Authorization;
+      setLoading(false);
+      // On déclenche l'affichage du message
+      setSessionExpired(true);
+    };
+    window.addEventListener("auth-session-expired", handleExpire);
+    return () =>
+      window.removeEventListener("auth-session-expired", handleExpire);
   }, []);
 
   const value = useMemo(
     () => ({
-      token,
       user,
+      isAuthenticated: !!user,
       loading,
-      isAuthenticated,
       login,
       logout,
-      setUser,
-      setToken,
     }),
-    [token, user, loading, isAuthenticated]
+    [user, loading]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    
+      <Snackbar
+        open={sessionExpired}
+        autoHideDuration={6000}
+        onClose={() => setSessionExpired(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSessionExpired(false)}
+          severity="warning"
+          variant="filled"
+          sx={{ width: "100%" }}
+          className="shadow-lg border border-orange-200"
+        >
+          {alertMessage || "Votre session a expiré. Veuillez vous reconnecter."}
+        </Alert>
+      </Snackbar>
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
