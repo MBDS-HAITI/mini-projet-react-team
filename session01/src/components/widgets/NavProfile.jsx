@@ -5,10 +5,14 @@ import Divider from "@mui/material/Divider";
 import { useState } from "react";
 import { useAuth } from "../../auth/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 export default function MyAccount() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+
+  const isLight = theme.palette.mode === "light";
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -18,7 +22,7 @@ export default function MyAccount() {
 
   const goToProfile = () => {
     handleClose();
-    navigate("/profile"); 
+    navigate("/profile");
   };
 
   return (
@@ -29,11 +33,24 @@ export default function MyAccount() {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-         sx={{ color: "#fff", fontWeight: "bold" }}
-        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm
-                   bg-white/10 hover:bg-white/15 active:bg-white/20
-                   border border-white/15 hover:border-white/25
-                   transition"
+        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition"
+        sx={{
+          fontWeight: "bold",
+
+          color: isLight ? "#0F172A" : "#fff",
+          backgroundColor: isLight ? "#FFFFFF" : "rgba(255,255,255,0.10)",
+          border: isLight
+            ? "1px solid rgba(15,23,42,0.10)"
+            : "1px solid rgba(255,255,255,0.15)",
+          boxShadow: isLight ? "0 10px 25px rgba(15,23,42,0.06)" : "none",
+
+          "&:hover": {
+            backgroundColor: isLight ? "#FFFFFF" : "rgba(255,255,255,0.15)",
+            border: isLight
+              ? "1px solid rgba(15,23,42,0.18)"
+              : "1px solid rgba(255,255,255,0.25)",
+          },
+        }}
       >
         Mon compte
       </Button>
@@ -43,7 +60,6 @@ export default function MyAccount() {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        // pour que le menu colle mieux au bouton (optionnel)
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
@@ -52,14 +68,24 @@ export default function MyAccount() {
               mt: 1,
               minWidth: 200,
               borderRadius: 2,
-              // glass theme
-              backgroundColor: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
-              color: "white",
               overflow: "hidden",
+
+              backgroundColor: isLight
+                ? "#FFFFFF"
+                : "rgba(255,255,255,0.08)",
+
+              color: isLight ? "#0F172A" : "white",
+
+              border: isLight
+                ? "1px solid rgba(15,23,42,0.10)"
+                : "1px solid rgba(255,255,255,0.18)",
+
+              boxShadow: isLight
+                ? "0 18px 45px rgba(15,23,42,0.12)"
+                : "0 16px 40px rgba(0,0,0,0.35)",
+
+              backdropFilter: isLight ? "none" : "blur(14px)",
+              WebkitBackdropFilter: isLight ? "none" : "blur(14px)",
             },
           },
         }}
@@ -74,16 +100,31 @@ export default function MyAccount() {
           onClick={goToProfile}
           sx={{
             fontSize: 14,
-            color: "rgba(255,255,255,0.92)",
             px: 2,
             py: 1.2,
-            "&:hover": { backgroundColor: "rgba(255,255,255,0.10)" },
+
+            color: isLight
+              ? "rgba(15,23,42,0.88)"
+              : "rgba(255,255,255,0.92)",
+
+            "&:hover": {
+              backgroundColor: isLight
+                ? "rgba(15,23,42,0.06)"
+                : "rgba(255,255,255,0.10)",
+            },
           }}
         >
           Profil
         </MenuItem>
 
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.12)", my: 0.2 }} />
+        <Divider
+          sx={{
+            my: 0.2,
+            borderColor: isLight
+              ? "rgba(15,23,42,0.10)"
+              : "rgba(255,255,255,0.12)",
+          }}
+        />
 
         <MenuItem
           onClick={() => {
@@ -92,10 +133,18 @@ export default function MyAccount() {
           }}
           sx={{
             fontSize: 14,
-            color: "rgba(248,113,113,0.95)", // rouge doux (logout)
             px: 2,
             py: 1.2,
-            "&:hover": { backgroundColor: "rgba(248,113,113,0.12)" },
+
+            color: isLight
+              ? "rgba(239,68,68,0.95)"
+              : "rgba(248,113,113,0.95)",
+
+            "&:hover": {
+              backgroundColor: isLight
+                ? "rgba(239,68,68,0.10)"
+                : "rgba(248,113,113,0.12)",
+            },
           }}
         >
           Se déconnecter
