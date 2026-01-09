@@ -121,8 +121,8 @@ export default function AdminDashboard() {
         {/* ======== COLONNE PRINCIPALE ======== */}
         <div className="lg:col-span-2 space-y-6">
           {/* État du système */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
               État du système
             </h3>
 
@@ -150,12 +150,12 @@ export default function AdminDashboard() {
           </div>
 
           {/* Activités récentes */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
               Activités récentes
             </h3>
 
-            <ul className="text-sm text-white/70 space-y-3">
+            <ul className="text-sm text-slate-600 dark:text-white/70 space-y-3">
               {activities.map((a) => (
                 <li
                   key={a.id}
@@ -171,8 +171,8 @@ export default function AdminDashboard() {
           </div>
 
           {/* ================= ACTIONS RAPIDES ================= */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
               Actions rapides
             </h3>
 
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
         {/* ======== ASIDE DROIT ======== */}
         <div className="space-y-6">
           {/* Configuration */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
             <div className="flex items-center gap-2 mb-3">
               <Settings className="text-cyan-400" />
               <h3 className="font-semibold text-white">Configuration</h3>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Alertes système */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="text-red-400" />
               <h3 className="font-semibold text-white">Alertes système</h3>
