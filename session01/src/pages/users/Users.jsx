@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import { getAllUsers, deleteUser } from "../../api/routes/user.api.js";
-
 import {
   Table,
   TableBody,
@@ -13,17 +11,13 @@ import {
   TablePagination,
   IconButton,
 } from "@mui/material";
-
+import { useTheme } from "@mui/material/styles";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "../../utils/fdate";
 import UpsertUserModal from "./UpsertUserModal.jsx";
 import Container from "../../components/layout/Container.jsx";
-
-// TODO (optionnel): à créer si tu veux edit/details
-// import UpsertUserModal from "./UpsertUserModal.jsx";
-// import UserDetailsModal from "./UserDetailsModal.jsx";
 
 const ROLE_LABEL = {
   ADMIN: "Admin",
@@ -32,9 +26,11 @@ const ROLE_LABEL = {
 };
 
 export default function UsersPage() {
+  const theme = useTheme();
+
   const [users, setUsers] = useState([]);
 
-  // Modals (optionnels)
+  // Modals
   const [openUpsert, setOpenUpsert] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -62,38 +58,37 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
-  const q = search.trim().toLowerCase();
+  const filteredUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
 
-  const filteredUsers = users
-    .filter((u) => {
-      if (!q) return true;
+    return (users ?? [])
+      .filter((u) => {
+        if (!q) return true;
 
-      const haystack = [
-        u.email,
-        u.username,
-        u.role,
-        ROLE_LABEL[u.role],
-        u.isActive ? "oui" : "non",
-        u.mailVerified ? "verifie" : "non verifie",
-        // si user.student est populaté:
-        u.student?.studentCode,
-        u.student?.firstName,
-        u.student?.lastName,
-        // sinon ça sera juste un id:
-        typeof u.student === "string" ? u.student : "",
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        const haystack = [
+          u.email,
+          u.username,
+          u.role,
+          ROLE_LABEL[u.role],
+          u.isActive ? "oui" : "non",
+          u.mailVerified ? "verifie" : "non verifie",
+          u.student?.studentCode,
+          u.student?.firstName,
+          u.student?.lastName,
+          typeof u.student === "string" ? u.student : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-      return haystack.includes(q);
-    })
-    .sort((a, b) => {
-      // tri par username sinon email
-      const aKey = (a.username || a.email || "").toLowerCase();
-      const bKey = (b.username || b.email || "").toLowerCase();
-      return sortAsc ? aKey.localeCompare(bKey) : bKey.localeCompare(aKey);
-    });
+        return haystack.includes(q);
+      })
+      .sort((a, b) => {
+        const aKey = (a.username || a.email || "").toLowerCase();
+        const bKey = (b.username || b.email || "").toLowerCase();
+        return sortAsc ? aKey.localeCompare(bKey) : bKey.localeCompare(aKey);
+      });
+  }, [users, search, sortAsc]);
 
   const onAdd = () => {
     setSelectedUser(null);
@@ -130,6 +125,32 @@ export default function UsersPage() {
   };
 
   const title = "Liste des Utilisateurs";
+
+  const headers = [
+    "Email",
+    "Username",
+    "Rôle",
+    "Étudiant",
+    "Mail vérifié",
+    "Actif",
+    "Création",
+    "Modification",
+    "Actions",
+  ];
+
+  const renderStudentCell = (u) => {
+    if (u.role !== "STUDENT") return "—";
+
+    if (u.student?.studentCode) {
+      const fullName = `${u.student.firstName || ""} ${u.student.lastName || ""}`.trim();
+      return `${u.student.studentCode} - ${fullName}`.trim();
+    }
+
+    if (typeof u.student === "string") return u.student;
+
+    return "—";
+  };
+
   return (
     <>
       <Container
@@ -141,137 +162,115 @@ export default function UsersPage() {
         onAdd={onAdd}
         setPage={setPage}
       >
-        <Paper
-          elevation={0}
-          sx={{ backgroundColor: "transparent", color: "white" }}
-        >
+        <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
           <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {[
-                      "Email",
-                      "Username",
-                      "Rôle",
-                      "Étudiant",
-                      "Mail vérifié",
-                      "Actif",
-                      "Création",
-                      "Modification",
-                      "Actions",
-                    ].map((head) => (
-                      <TableCell
-                        key={head}
-                        sx={{
-                          color: "#cbd5f5",
-                          fontWeight: "bold",
-                          borderBottom: "1px solid rgba(255,255,255,0.2)",
-                        }}
-                      >
-                        {head}
+            <Table sx={{ minWidth: 1100 }}>
+              <TableHead>
+                <TableRow>
+                  {headers.map((head) => (
+                    <TableCell
+                      key={head}
+                      sx={{
+                        color: theme.palette.table?.headText ?? "text.secondary",
+                        fontWeight: 800,
+                        borderBottom: "1px solid",
+                        borderBottomColor: "divider",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {head}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {filteredUsers
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((u) => (
+                    <TableRow
+                      key={u._id}
+                      hover
+                      sx={{
+                        "&:hover": {
+                          backgroundColor:
+                            theme.palette.table?.rowHover ?? theme.palette.action.hover,
+                        },
+                      }}
+                    >
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {u.email ?? "—"}
                       </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
 
-                <TableBody>
-                  {filteredUsers
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((u) => (
-                      <TableRow
-                        key={u._id}
-                        hover
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "rgba(255,255,255,0.05)",
-                          },
-                        }}
-                      >
-                        <TableCell sx={{ color: "white" }}>{u.email}</TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {u.username || "—"}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {u.username || "-"}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {ROLE_LABEL[u.role] || u.role || "—"}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {ROLE_LABEL[u.role] || u.role}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {renderStudentCell(u)}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {u.role === "STUDENT"
-                            ? u.student?.studentCode
-                              ? `${u.student.studentCode} - ${
-                                  u.student.firstName || ""
-                                } ${u.student.lastName || ""}`.trim()
-                              : typeof u.student === "string"
-                              ? u.student
-                              : "-"
-                            : "-"}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {u.mailVerified ? "Oui" : "Non"}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {u.mailVerified ? "Oui" : "Non"}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {u.isActive ? "Oui" : "Non"}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {u.isActive ? "Oui" : "Non"}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {formatDate(u.createdAt)}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {formatDate(u.createdAt)}
-                        </TableCell>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {formatDate(u.updatedAt)}
+                      </TableCell>
 
-                        <TableCell sx={{ color: "white" }}>
-                          {formatDate(u.updatedAt)}
-                        </TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <StyledTooltip title="Modifier" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onEdit(u)}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
+                            >
+                              <Pencil size={18} />
+                            </IconButton>
+                          </StyledTooltip>
 
-                        <TableCell sx={{ color: "#a78bfa" }}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                            }}
-                          >
-                            <StyledTooltip title="Modifier" placement="top">
-                              <IconButton
-                                size="small"
-                                onClick={() => onEdit(u)}
-                                sx={{ color: "#a78bfa" }}
-                              >
-                                <Pencil size={18} />
-                              </IconButton>
-                            </StyledTooltip>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
-                            <span style={{ opacity: 0.3 }}>|</span>
+                          <StyledTooltip title="Détails" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => onDetails(u)}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
+                            >
+                              <Eye size={18} />
+                            </IconButton>
+                          </StyledTooltip>
 
-                            <StyledTooltip title="Détails" placement="top">
-                              <IconButton
-                                size="small"
-                                onClick={() => onDetails(u)}
-                                sx={{ color: "#a78bfa" }}
-                              >
-                                <Eye size={18} />
-                              </IconButton>
-                            </StyledTooltip>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
-                            <span style={{ opacity: 0.3 }}>|</span>
-
-                            <StyledTooltip title="Supprimer" placement="top">
-                              <IconButton
-                                size="small"
-                                onClick={() => askDelete(u)}
-                                sx={{ color: "#f87171" }}
-                              >
-                                <Trash2 size={18} />
-                              </IconButton>
-                            </StyledTooltip>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+                          <StyledTooltip title="Supprimer" placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={() => askDelete(u)}
+                              sx={{ color: theme.palette.actions?.danger ?? "error.main" }}
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </StyledTooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </TableContainer>
 
           <TablePagination
@@ -286,20 +285,24 @@ export default function UsersPage() {
               setPage(0);
             }}
             sx={{
-              color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              color: "text.secondary",
+              borderTop: "1px solid",
+              borderTopColor: "divider",
+              ".MuiTablePagination-selectIcon": { color: "text.secondary" },
+              ".MuiTablePagination-actions button": { color: "text.secondary" },
+              ".MuiTablePagination-select": { color: "text.secondary" },
+              ".MuiTablePagination-displayedRows": { color: "text.secondary" },
             }}
           />
         </Paper>
       </Container>
+
       <ConfirmDialog
         open={confirmOpen}
         title="Confirmer la suppression"
         message={
           <>
-            Voulez-vous vraiment supprimer l’utilisateur{" "}
-            <b>{toDelete?.email}</b> ?
+            Voulez-vous vraiment supprimer l’utilisateur <b>{toDelete?.email}</b> ?
           </>
         }
         confirmText="Supprimer"
@@ -315,13 +318,14 @@ export default function UsersPage() {
         data={selectedUser}
         onSuccess={fetchUsers}
       />
+
       {/*
-        <UserDetailsModal
-          open={detailsOpen}
-          onClose={() => setDetailsOpen(false)}
-          userId={detailsId}
-        />
-        */}
+      <UserDetailsModal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        userId={detailsId}
+      />
+      */}
     </>
   );
 }

@@ -1,15 +1,86 @@
 // src/pages/about/About.jsx
 import { useMemo } from "react";
-import { Stat } from "../../components/Stat";
-import { Badge } from "../../components/Badge";
-import { Feature } from "../../components/Feature";
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+} from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+
+
+
+function StatCardMini({ title, value, hint }) {
+  const theme = useTheme();
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: 3,
+        p: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: "blur(12px)",
+        boxShadow: theme.shadows[2],
+      }}
+    >
+      <Typography variant="overline" sx={{ fontWeight: 800, color: "text.secondary" }}>
+        {title}
+      </Typography>
+      <Typography sx={{ fontSize: 20, fontWeight: 900, color: "text.primary", lineHeight: 1.15 }}>
+        {value}
+      </Typography>
+      <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>
+        {hint}
+      </Typography>
+    </Paper>
+  );
+}
+
+function FeatureCard({ title, desc }) {
+  const theme = useTheme();
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: 3,
+        p: 2.5,
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: "blur(12px)",
+        boxShadow: theme.shadows[2],
+        transition: "all 0.25s ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+          boxShadow: theme.shadows[10],
+          borderColor: "secondary.main",
+        },
+      }}
+    >
+      <Typography sx={{ fontWeight: 900, color: "text.primary", mb: 0.5 }}>
+        {title}
+      </Typography>
+      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+        {desc}
+      </Typography>
+    </Paper>
+  );
+}
 
 export default function AboutPage() {
+  const theme = useTheme();
+
   const stack = useMemo(
     () => [
       { name: "React", desc: "UI moderne & composants réutilisables" },
       { name: "Vite", desc: "Dev server rapide + build optimisé" },
-      { name: "TailwindCSS", desc: "Styles rapides & cohérents" },
+      { name: "MUI", desc: "UI system + thème light/dark" },
       { name: "MUI DataGrid", desc: "Tables, pagination, tri, sélection" },
       { name: "Node/Express", desc: "API REST pour gérer les données" },
       { name: "MongoDB", desc: "Base NoSQL pour étudiants, notes, matières" },
@@ -18,135 +89,257 @@ export default function AboutPage() {
   );
 
   return (
-    <section className="w-full px-4 py-10 md:py-16">
+    <Box component="section" sx={{ width: "100%", px: 2, py: { xs: 6, md: 10 } }}>
       {/* Card principale */}
-      <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur">
+      <Paper
+        elevation={0}
+        sx={{
+          mx: "auto",
+          maxWidth: 1100,
+          overflow: "hidden",
+          borderRadius: 4,
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: alpha(theme.palette.background.paper, 0.72),
+          backdropFilter: "blur(14px)",
+          boxShadow: theme.palette.effects?.containerShadow ?? theme.shadows[8],
+        }}
+      >
         {/* Header */}
-        <div className="relative px-6 py-10 md:px-10 md:py-12">
-          {/* glow */}
-          <div className="pointer-events-none absolute -top-24 right-10 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+        <Box sx={{ position: "relative", px: { xs: 3, md: 5 }, py: { xs: 5, md: 6 } }}>
+          {/* glows */}
+          <Box
+            sx={{
+              pointerEvents: "none",
+              position: "absolute",
+              top: -96,
+              right: 40,
+              height: 220,
+              width: 220,
+              borderRadius: "50%",
+              backgroundColor: alpha(theme.palette.secondary.main, 0.22),
+              filter: "blur(48px)",
+            }}
+          />
+          <Box
+            sx={{
+              pointerEvents: "none",
+              position: "absolute",
+              bottom: -96,
+              left: 40,
+              height: 220,
+              width: 220,
+              borderRadius: "50%",
+              backgroundColor: alpha(theme.palette.primary.main, 0.18),
+              filter: "blur(48px)",
+            }}
+          />
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-widest text-white/60">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
+              alignItems: { md: "flex-end" },
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, color: "text.secondary" }}>
                 À PROPOS
-              </p>
-              <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">
-                Student Management
-                <span className="bg-linear-to-r from-fuchsia-400 to-cyan-300 bg-clip-text text-transparent">
-                  {" "}
-                  • React App
-                </span>
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">
-                Une application d’apprentissage pour gérer{" "}
-                <span className="text-white">étudiants</span>,{" "}
-                <span className="text-white">matières</span> et{" "}
-                <span className="text-white">notes</span>, avec une interface
-                claire, rapide et agréable.
-              </p>
-            </div>
+              </Typography>
 
-            <div className="flex gap-3">
-              <a
+              <Typography
+                sx={{
+                  mt: 1,
+                  fontSize: { xs: 30, md: 40 },
+                  fontWeight: 900,
+                  color: "text.primary",
+                  lineHeight: 1.1,
+                }}
+              >
+                Student Management{" "}
+                <Box
+                  component="span"
+                  sx={{
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    color: "transparent",
+                  }}
+                >
+                  • React App
+                </Box>
+              </Typography>
+
+              <Typography sx={{ mt: 2, maxWidth: 720, fontSize: 14, color: "text.secondary", lineHeight: 1.7 }}>
+                Une application d’apprentissage pour gérer{" "}
+                <Box component="span" sx={{ color: "text.primary", fontWeight: 800 }}>
+                  étudiants
+                </Box>
+                ,{" "}
+                <Box component="span" sx={{ color: "text.primary", fontWeight: 800 }}>
+                  matières
+                </Box>{" "}
+                et{" "}
+                <Box component="span" sx={{ color: "text.primary", fontWeight: 800 }}>
+                  notes
+                </Box>
+                , avec une interface claire, rapide et agréable.
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
+              <Button
                 href="#features"
-                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15 transition"
+                variant="outlined"
+                sx={{
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  borderColor: "divider",
+                  color: "text.primary",
+                  backgroundColor: alpha(theme.palette.background.paper, 0.6),
+                  backdropFilter: "blur(12px)",
+                  "&:hover": {
+                    borderColor: "divider",
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
               >
                 Fonctionnalités
-              </a>
-              <a
+              </Button>
+
+              <Button
                 href="#stack"
-                className="rounded-2xl bg-linear-to-r from-fuchsia-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90 transition"
+                variant="contained"
+                sx={{
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontWeight: 900,
+                  color: "#fff",
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  boxShadow: "none",
+                  "&:hover": {
+                    opacity: 0.92,
+                    boxShadow: "none",
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  },
+                }}
               >
                 Tech stack
-              </a>
-            </div>
-          </div>
+              </Button>
+            </Stack>
+          </Box>
 
           {/* Stats */}
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            <Stat title="Rapide" value="Vite" hint="Démarrage & refresh instantanés" />
-            <Stat title="Tables" value="MUI DataGrid" hint="Pagination, tri, sélection" />
-            <Stat title="API" value="REST" hint="Express + MongoDB (local/cloud)" />
-          </div>
-        </div>
+          <Box sx={{ mt: 4, display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" } }}>
+            <StatCardMini title="Rapide" value="Vite" hint="Démarrage & refresh instantanés" />
+            <StatCardMini title="Tables" value="MUI DataGrid" hint="Pagination, tri, sélection" />
+            <StatCardMini title="API" value="REST" hint="Express + MongoDB (local/cloud)" />
+          </Box>
+        </Box>
 
         {/* Body */}
-        <div className="border-t border-white/10 px-6 py-10 md:px-10">
+        <Box sx={{ borderTop: "1px solid", borderTopColor: "divider", px: { xs: 3, md: 5 }, py: { xs: 5, md: 6 } }}>
           {/* Features */}
-          <div id="features" className="scroll-mt-24">
-            <h2 className="text-xl font-bold text-white">Fonctionnalités</h2>
-            <p className="mt-2 text-sm text-white/70">
+          <Box id="features" sx={{ scrollMarginTop: 120 }}>
+            <Typography sx={{ fontSize: 20, fontWeight: 900, color: "text.primary" }}>
+              Fonctionnalités
+            </Typography>
+            <Typography sx={{ mt: 1, fontSize: 14, color: "text.secondary" }}>
               L’objectif : une app simple, lisible, et prête à évoluer.
-            </p>
+            </Typography>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <Feature
-                title="Gestion des notes"
-                desc="Lister, filtrer et parcourir les notes rapidement via DataGrid."
-              />
-              <Feature
-                title="Gestion des étudiants"
-                desc="Visualiser les étudiants avec une table responsive et claire."
-              />
-              <Feature
-                title="Gestion des matières"
-                desc="Affichage distinct des cours/matières (sans doublons)."
-              />
-              <Feature
-                title="Architecture propre"
-                desc="Composants réutilisables + pages lisibles + séparation UI/API."
-              />
-            </div>
-          </div>
+            <Box sx={{ mt: 3, display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
+              <FeatureCard title="Gestion des notes" desc="Lister, filtrer et parcourir les notes rapidement via DataGrid." />
+              <FeatureCard title="Gestion des étudiants" desc="Visualiser les étudiants avec une table responsive et claire." />
+              <FeatureCard title="Gestion des matières" desc="Affichage distinct des cours/matières (sans doublons)." />
+              <FeatureCard title="Architecture propre" desc="Composants réutilisables + pages lisibles + séparation UI/API." />
+            </Box>
+          </Box>
 
           {/* Stack */}
-          <div id="stack" className="mt-12 scroll-mt-24">
-            <h2 className="text-xl font-bold text-white">Tech stack</h2>
-            <p className="mt-2 text-sm text-white/70">
+          <Box id="stack" sx={{ mt: 6, scrollMarginTop: 120 }}>
+            <Typography sx={{ fontSize: 20, fontWeight: 900, color: "text.primary" }}>
+              Tech stack
+            </Typography>
+            <Typography sx={{ mt: 1, fontSize: 14, color: "text.secondary" }}>
               Les outils utilisés pour construire l’application.
-            </p>
+            </Typography>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <Box sx={{ mt: 3, display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
               {stack.map((s) => (
-                <div
+                <Paper
                   key={s.name}
-                  className="group rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
+                  elevation={0}
+                  sx={{
+                    borderRadius: 3,
+                    p: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: alpha(theme.palette.background.paper, 0.7),
+                    backdropFilter: "blur(12px)",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: theme.palette.action.hover,
+                      borderColor: "secondary.main",
+                    },
+                  }}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-white">{s.name}</p>
-                    <span className="text-xs text-white/50 group-hover:text-white/70 transition">
-                      ✔
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm text-white/70">{s.desc}</p>
-                </div>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <Typography sx={{ fontWeight: 900, color: "text.primary" }}>{s.name}</Typography>
+                    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>✔</Typography>
+                  </Box>
+                  <Typography sx={{ mt: 0.5, fontSize: 14, color: "text.secondary" }}>{s.desc}</Typography>
+                </Paper>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
 
           {/* Footer / Contact */}
-          <div className="mt-12 flex flex-col gap-4 rounded-2xl border border-white/10 bg-linear-to-r from-white/5 to-white/0 p-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-white">Auteur</p>
-              <p className="text-sm text-white/70">
-                Stanley • Projet “Introduction à React”
-              </p>
-            </div>
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 6,
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: "divider",
+              background: `linear-gradient(90deg, ${alpha(theme.palette.background.paper, 0.65)}, ${alpha(
+                theme.palette.background.paper,
+                0.25
+              )})`,
+              backdropFilter: "blur(12px)",
+              p: 2.5,
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
+              alignItems: { md: "center" },
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: 14, fontWeight: 900, color: "text.primary" }}>
+                Auteur
+              </Typography>
+              <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, color: "text.secondary", fontSize: 14 }}>
+                <li>REACT-TEAM:</li>
+                <li>Stanley LAFLEUR</li>
+                <li>Mackey Charles</li>
+                <li>Dawens H. PIERRE</li>
+                <li>Sachy E. BARREAU</li>
+              </Box>
+            </Box>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge>UI: Tailwind</Badge>
-              <Badge>Tables: DataGrid</Badge>
-              <Badge>DB: MongoDB</Badge>
-              <Badge>API: Express</Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </section>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+              <Chip label="UI: MUI" variant="outlined" sx={{ borderColor: "divider", color: "text.primary" }} />
+              <Chip label="Tables: DataGrid" variant="outlined" sx={{ borderColor: "divider", color: "text.primary" }} />
+              <Chip label="DB: MongoDB" variant="outlined" sx={{ borderColor: "divider", color: "text.primary" }} />
+              <Chip label="API: Express" variant="outlined" sx={{ borderColor: "divider", color: "text.primary" }} />
+            </Stack>
+          </Paper>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
-
-

@@ -42,7 +42,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   const resetIdleTimer = useCallback(() => {
-    console.log("reset");
     
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     
