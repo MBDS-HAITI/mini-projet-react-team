@@ -1,5 +1,4 @@
 // src/components/widgets/StatCard.jsx
-import * as React from "react";
 import { Box, Paper, Typography, alpha, useTheme } from "@mui/material";
 
 export default function StatCard({

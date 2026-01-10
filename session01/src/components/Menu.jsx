@@ -71,7 +71,7 @@ export default function Menu() {
     <header className="w-full sticky top-0 z-50">
       <nav className="bg-[#432866]/95 backdrop-blur border-b border-white/10 shadow-md">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="h-12 flex items-center justify-between gap-3">
+          <div className="h-8 flex items-center justify-between gap-3">
             {/* Left: Burger (mobile) + Desktop menu */}
             <div className="flex items-center gap-1 md:gap-3">
               {/* Burger button (mobile) */}

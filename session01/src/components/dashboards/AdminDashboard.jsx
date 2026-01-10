@@ -1,22 +1,16 @@
 // src/components/pages/AdminDashboard.jsx (ou ton chemin)
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DashboardHeader from "./DashboardHeader";
 import { ActionButton } from "../ActionButton";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
-
 import {
   Users,
-  AlertTriangle,
-  Lock,
+  GraduationCap,
+  Shield,
+  UserCog,
   CheckCircle,
   Edit,
   School,
@@ -27,6 +21,7 @@ import QuickActionsCard from "./QuickActionsCard";
 import Configuration from "./Configuration";
 import AlertSystem from "./Alertystem";
 import RecentActivity from "./recentActivity";
+import { useMemo } from "react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -42,7 +37,43 @@ export default function AdminDashboard() {
     p: 3,
   };
 
- 
+  const dashboards = useMemo(
+    () => [
+      {
+        key: "users",
+        title: "Utilisateurs",
+        value: 412,
+        subtitle: "Total",
+        icon: <Users size={18} />,
+        valueColor: "info.main",
+      },
+      {
+        key: "students",
+        title: "Étudiants",
+        value: 342,
+        subtitle: "Actifs",
+        icon: <GraduationCap size={18} />,
+        valueColor: "success.main",
+      },
+      {
+        key: "scolarite",
+        title: "Scolarité",
+        value: 4,
+        subtitle: "Comptes",
+        icon: <UserCog size={18} />,
+        valueColor: "primary.main",
+      },
+      {
+        key: "admins",
+        title: "Admins",
+        value: 2,
+        subtitle: "Actifs",
+        icon: <Shield size={18} />,
+        valueColor: "secondary.main",
+      },
+    ],
+    []
+  );
 
   const actions = [
     {
@@ -96,7 +127,7 @@ export default function AdminDashboard() {
       />
 
       {/* ================= KPI CARDS ================= */}
-      <KpiCards />
+      <KpiCards dashboards={dashboards} />
 
       {/* ================= CONTENU CENTRAL ================= */}
       <Box
