@@ -1,8 +1,26 @@
+// src/components/dashboards/ScolariteDashboard.jsx
+import * as React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import {
+  Box,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Stack,
+  alpha,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 import DashboardHeader from "./DashboardHeader";
-import StatCard from "../widgets/StatCard";
+import KpiCards from "./KpiCards";
 import { ActionButton } from "../ActionButton";
 import { SummaryItem } from "../SummaryItem";
 
@@ -21,6 +39,19 @@ import {
 
 export default function ScolariteDashboard() {
   const navigate = useNavigate();
+  const theme = useTheme();
+
+  const surfaceCardSx = React.useMemo(
+    () => ({
+      borderRadius: 3,
+      border: "1px solid",
+      borderColor: "divider",
+      backgroundColor: alpha(theme.palette.background.paper, 0.8),
+      backdropFilter: "blur(12px)",
+      boxShadow: theme.shadows[2],
+    }),
+    [theme]
+  );
 
   /* =======================
      KPI DASHBOARD (CARDS)
@@ -32,7 +63,7 @@ export default function ScolariteDashboard() {
       value: 342,
       subtitle: "Inscrits",
       icon: <GraduationCap />,
-      valueColor: "text-green-400",
+      valueColor: "success.main",
       hint: "+12 ce mois",
     },
     {
@@ -41,7 +72,7 @@ export default function ScolariteDashboard() {
       value: 58,
       subtitle: "Ce semestre",
       icon: <ClipboardList />,
-      valueColor: "text-cyan-400",
+      valueColor: "secondary.main",
     },
     {
       key: "courses",
@@ -49,7 +80,7 @@ export default function ScolariteDashboard() {
       value: 24,
       subtitle: "Toutes filières",
       icon: <BookOpen />,
-      valueColor: "text-indigo-400",
+      valueColor: "primary.main",
     },
     {
       key: "grades",
@@ -57,7 +88,7 @@ export default function ScolariteDashboard() {
       value: 1280,
       subtitle: "Saisies",
       icon: <FileText />,
-      valueColor: "text-fuchsia-400",
+      valueColor: "warning.main",
     },
   ]);
 
@@ -75,31 +106,24 @@ export default function ScolariteDashboard() {
      DERNIÈRES NOTES
      ======================= */
   const [recentNotes] = useState([
-    {
-      id: 1,
-      student: "Jean Pierre",
-      subject: "Mathématiques",
-      classLevel: "L2",
-      status: "Validée",
-    },
-    {
-      id: 2,
-      student: "Marie Louis",
-      subject: "Physique",
-      classLevel: "L1",
-      status: "En attente",
-    },
-    {
-      id: 3,
-      student: "David Jean",
-      subject: "Informatique",
-      classLevel: "L3",
-      status: "Validée",
-    },
+    { id: 1, student: "Jean Pierre", subject: "Mathématiques", classLevel: "L2", status: "Validée" },
+    { id: 2, student: "Marie Louis", subject: "Physique", classLevel: "L1", status: "En attente" },
+    { id: 3, student: "David Jean", subject: "Informatique", classLevel: "L3", status: "Validée" },
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <Box
+      sx={{
+        mx: "auto",
+        width: "100%",
+        maxWidth: 1200,
+        px: { xs: 2, sm: 3, lg: 4 },
+        py: { xs: 3, md: 4 },
+        display: "flex",
+        flexDirection: "column",
+        gap: 2.5,
+      }}
+    >
       {/* ================= HEADER ================= */}
       <DashboardHeader
         title="Dashboard Scolarité"
@@ -108,148 +132,203 @@ export default function ScolariteDashboard() {
       />
 
       {/* ================= KPI CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {dashboards.map((item) => (
-          <StatCard
-            key={item.key}
-            title={item.title}
-            value={item.value}
-            subtitle={item.subtitle}
-            hint={item.hint}
-            icon={item.icon}
-            valueColor={item.valueColor}
-          />
-        ))}
-      </div>
+      <KpiCards dashboards={dashboards} />
 
       {/* ================= CONTENU CENTRAL ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+          gap: 2,
+          alignItems: "start",
+        }}
+      >
         {/* ======== COLONNE PRINCIPALE ======== */}
-        <div className="lg:col-span-2 space-y-6">
+        <Stack spacing={2}>
           {/* Résumé académique */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
+            <Typography sx={{ fontSize: 18, fontWeight: 900, color: "text.primary", mb: 1.5 }}>
               Résumé académique
-            </h3>
+            </Typography>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, 1fr)" },
+                gap: 1.5,
+                textAlign: "center",
+              }}
+            >
               <SummaryItem label="Année" value={stats.academicYear} />
               <SummaryItem label="Semestre" value={stats.semester} />
-              <SummaryItem
-                label="Notes en attente"
-                value={stats.pendingNotes}
-                color="text-red-400"
-              />
-              <SummaryItem
-                label="Taux de saisie"
-                value={stats.entryRate}
-                color="text-green-400"
-              />
-            </div>
-          </div>
+              <SummaryItem label="Notes en attente" value={stats.pendingNotes} color="error.main" />
+              <SummaryItem label="Taux de saisie" value={stats.entryRate} color="success.main" />
+            </Box>
+          </Paper>
 
           {/* Dernières notes */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
+            <Typography sx={{ fontSize: 18, fontWeight: 900, color: "text.primary", mb: 1.5 }}>
               Dernières notes saisies
-            </h3>
+            </Typography>
 
-            <table className="w-full text-sm text-white/80">
-              <thead className="border-b border-white/10">
-                <tr>
-                  <th className="text-left py-2">Étudiant</th>
-                  <th className="text-center">Matière</th>
-                  <th className="text-center">Classe</th>
-                  <th className="text-center">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentNotes.map((n) => (
-                  <tr
-                    key={n.id}
-                    className={`border-b border-white/5 ${
-                      n.status === "En attente" ? "bg-white/5" : ""
-                    }`}
-                  >
-                    <td className="py-2">{n.student}</td>
-                    <td className="text-center">{n.subject}</td>
-                    <td className="text-center">{n.classLevel}</td>
-                    <td
-                      className={`text-center font-semibold ${
-                        n.status === "Validée"
-                          ? "text-green-400"
-                          : "text-amber-400"
-                      }`}
-                    >
-                      {n.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            <TableContainer sx={{ borderRadius: 2 }}>
+              <Table sx={{ minWidth: 680 }}>
+                <TableHead>
+                  <TableRow>
+                    {["Étudiant", "Matière", "Classe", "Statut"].map((h) => (
+                      <TableCell
+                        key={h}
+                        sx={{
+                          fontWeight: 900,
+                          color: "text.secondary",
+                          borderBottom: "1px solid",
+                          borderColor: "divider",
+                          whiteSpace: "nowrap",
+                        }}
+                        align={h === "Étudiant" ? "left" : "center"}
+                      >
+                        {h}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {recentNotes.map((n) => {
+                    const pending = n.status === "En attente";
+                    return (
+                      <TableRow
+                        key={n.id}
+                        hover
+                        sx={{
+                          "&:hover": { backgroundColor: "action.hover" },
+                          ...(pending && {
+                            backgroundColor: alpha(theme.palette.warning.main, 0.08),
+                          }),
+                        }}
+                      >
+                        <TableCell sx={{ color: "text.primary", borderColor: "divider" }}>
+                          {n.student}
+                        </TableCell>
+
+                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
+                          {n.subject}
+                        </TableCell>
+
+                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
+                          {n.classLevel}
+                        </TableCell>
+
+                        <TableCell align="center" sx={{ borderColor: "divider" }}>
+                          <Chip
+                            size="small"
+                            label={n.status}
+                            variant="outlined"
+                            sx={{
+                              fontWeight: 900,
+                              color: pending ? "warning.main" : "success.main",
+                              borderColor: alpha(
+                                pending ? theme.palette.warning.main : theme.palette.success.main,
+                                0.35
+                              ),
+                              backgroundColor: alpha(
+                                pending ? theme.palette.warning.main : theme.palette.success.main,
+                                0.10
+                              ),
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
 
           {/* Actions rapides */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+          <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
+            <Typography sx={{ fontSize: 18, fontWeight: 900, color: "text.primary", mb: 1.5 }}>
               Actions rapides
-            </h3>
+            </Typography>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <ActionButton
-                icon={<CheckCircle />}
-                label="Inscriptions"
-                onClick={() => navigate("/enrollments")}
-              />
-              <ActionButton
-                icon={<Edit />}
-                label="Saisie des notes"
-                onClick={() => navigate("/grades")}
-              />
-              <ActionButton
-                icon={<FileWarning />}
-                label="Notes manquantes"
-                onClick={() => navigate("/grades/missing")}
-              />
-              <ActionButton
-                icon={<Lock />}
-                label="Clôture semestre"
-                onClick={() => navigate("/semester")}
-              />
-            </div>
-          </div>
-        </div>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, 1fr)" },
+                gap: 1.5,
+              }}
+            >
+              <ActionButton icon={<CheckCircle size={18} />} label="Inscriptions" onClick={() => navigate("/enrollments")} />
+              <ActionButton icon={<Edit size={18} />} label="Saisie des notes" onClick={() => navigate("/grades")} />
+              <ActionButton icon={<FileWarning size={18} />} label="Notes manquantes" onClick={() => navigate("/grades/missing")} />
+              <ActionButton icon={<Lock size={18} />} label="Clôture semestre" onClick={() => navigate("/semester")} />
+            </Box>
+          </Paper>
+        </Stack>
 
         {/* ======== ASIDE DROIT ======== */}
-        <div className="space-y-6">
+        <Stack spacing={2}>
           {/* Calendrier */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <CalendarDays className="text-cyan-400" />
-              <h3 className="font-semibold text-white">Calendrier</h3>
-            </div>
-            <p className="text-sm text-white/60">
+          <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <CalendarDays size={18} color={theme.palette.secondary.main} />
+              <Typography sx={{ fontWeight: 900, color: "text.primary" }}>Calendrier</Typography>
+            </Box>
+
+            <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
               Examens, rattrapages et clôtures
-            </p>
-            <div className="mt-4 h-32 rounded-lg bg-white/10 flex items-center justify-center text-white/40">
+            </Typography>
+
+            <Box
+              sx={{
+                mt: 2,
+                height: 128,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                display: "grid",
+                placeItems: "center",
+                color: "text.secondary",
+              }}
+            >
               📅 Calendar UI à venir
-            </div>
-          </div>
+            </Box>
+          </Paper>
 
           {/* Alertes */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="text-red-400" />
-              <h3 className="font-semibold text-white">Alertes</h3>
-            </div>
-            <ul className="text-sm text-white/70 space-y-2">
-              <li>• {stats.pendingNotes} notes non validées</li>
-              <li>• Semestre bientôt clôturé</li>
-              <li>• 3 étudiants sans notes</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <AlertTriangle size={18} color={theme.palette.error.main} />
+              <Typography sx={{ fontWeight: 900, color: "text.primary" }}>Alertes</Typography>
+            </Box>
+
+            <Stack spacing={1}>
+              {[
+                `• ${stats.pendingNotes} notes non validées`,
+                "• Semestre bientôt clôturé",
+                "• 3 étudiants sans notes",
+              ].map((t, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    borderRadius: 2,
+                    px: 1.5,
+                    py: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>{t}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Paper>
+        </Stack>
+      </Box>
+    </Box>
   );
 }
