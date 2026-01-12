@@ -58,6 +58,8 @@ export default function EnrollmentsPage() {
 
     if (user.role === STUDENT_ROLE) {
       const studentId = user.student?._id ?? user.student;
+      console.log(studentId);
+      
       result = await getEnrollmentsByStudentId(studentId);
     } else {
       result = await getEnrollments();

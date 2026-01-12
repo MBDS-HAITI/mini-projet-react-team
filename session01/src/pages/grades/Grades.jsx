@@ -49,7 +49,7 @@ export default function GradesPage() {
   const fetchGrades = async () => {
     let result;
     if (user.role === STUDENT_ROLE) {
-      result = await getGradesByStudentId(user.student || user.student._id);
+      result = await getGradesByStudentId(user.student._id || user.student);
     } else {
       result = await getGrades();
     }

@@ -1,4 +1,5 @@
 // src/components/dashboards/StudentDashboard.jsx
+
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,9 +20,11 @@ import { useTheme } from "@mui/material/styles";
 import DashboardHeader from "./DashboardHeader";
 import KpiCards from "./KpiCards";
 import { ActionButton } from "../ActionButton";
+import { useAuth } from "../../auth/AuthProvider";
+
+import { getMyDashboardGrades } from "../../api/routes/statistic-student.api.js";
 
 import {
-  GraduationCap,
   BookOpen,
   AlertTriangle,
   CalendarDays,
@@ -31,8 +34,9 @@ import {
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { user } = useAuth();
 
-  // ✅ même surface "glass" partout
+  // même surface "glass" partout
   const surfaceCardSx = React.useMemo(
     () => ({
       borderRadius: 3,
@@ -45,53 +49,80 @@ export default function StudentDashboard() {
     [theme]
   );
 
-  // INFOS ÉTUDIANT
-  const student = {
-    name: "Sachy Edvaelle Barreau",
-    matricule: "STD-2025-001",
-    level: "L2",
-    program: "Informatique",
-    academicYear: "2024 - 2025",
-    status: "Actif",
-  };
+  // INFOS ÉTUDIANT (safe)
+  const student = React.useMemo(
+    () => ({
+      name: user?.student ? `${user.student.firstName} ${user.student.lastName}` : "-",
+      matricule: user?.student?.studentCode ?? "-",
+      status: "Actif",
+    }),
+    [user]
+  );
 
-  // KPI
-  const kpis = [
-    {
-      key: "average",
-      title: "Moyenne",
-      value: "14.2",
-      subtitle: "/20",
-      icon: <GraduationCap />,
-      valueColor: "success.main",
-    },
-    {
-      key: "validated",
-      title: "Matières",
-      value: "6/8",
-      subtitle: "Validées",
-      icon: <BookOpen />,
-      valueColor: "secondary.main",
-    },
-    {
-      key: "failures",
-      title: "Échecs",
-      value: 1,
-      subtitle: "Matière(s)",
-      icon: <AlertTriangle />,
-      valueColor: "error.main",
-    },
-  ];
+  // --- Data states depuis backend ---
+  const [stats, setStats] = React.useState({
+    validatedCount: 0,
+    totalSubjects: 0,
+    failuresCount: 0,
+  });
+  const [recentGrades, setRecentGrades] = React.useState([]);
+  const [alerts, setAlerts] = React.useState([]);
 
-  // DERNIÈRES NOTES
-  const recentGrades = [
-    { id: 1, subject: "Mathématiques", grade: 15, coef: 20, date: "12/11/2025", status: "Validé" },
-    { id: 2, subject: "Physique", grade: 9, coef: 20, date: "08/11/2025", status: "Échec" },
-    { id: 3, subject: "Informatique", grade: 16, coef: 20, date: "05/11/2025", status: "Validé" },
-  ];
+  // Load dashboard data
+  React.useEffect(() => {
+    let cancelled = false;
 
-  // ALERTES PERSONNELLES
-  const alerts = ["⚠️ 1 matière en échec (Physique)", "📅 Semestre bientôt clôturé"];
+    async function loadDashboard() {
+      try {
+        const data = await getMyDashboardGrades(); // ✅ GET /grades/me/dashboard
+        if (cancelled) return;
+
+        setStats(
+          data?.stats ?? { validatedCount: 0, totalSubjects: 0, failuresCount: 0 }
+        );
+        setRecentGrades(Array.isArray(data?.recentGrades) ? data.recentGrades : []);
+        setAlerts(Array.isArray(data?.alerts) ? data.alerts : []);
+      } catch (e) {
+        console.error("getMyDashboardGrades error:", e);
+        if (!cancelled) {
+          setStats({ validatedCount: 0, totalSubjects: 0, failuresCount: 0 });
+          setRecentGrades([]);
+          setAlerts([]);
+        }
+      }
+    }
+
+    if (user?.student) loadDashboard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // KPI (réel)
+  const kpis = React.useMemo(
+    () => [
+      {
+        key: "validated",
+        title: "Matières",
+        value: stats.totalSubjects
+          ? `${stats.validatedCount}/${stats.totalSubjects}`
+          : "0/0",
+        subtitle: "Validées",
+        icon: <BookOpen />,
+        valueColor: "secondary.main",
+      },
+      {
+        key: "failures",
+        title: "Échecs",
+        value: stats.failuresCount ?? 0,
+        subtitle: "Matière(s)",
+        icon: <AlertTriangle />,
+        valueColor: "error.main",
+      },
+    ],
+    [stats]
+  );
 
   return (
     <Box
@@ -135,10 +166,6 @@ export default function StudentDashboard() {
                 {student.matricule}
               </Box>
             </Typography>
-
-            <Typography sx={{ mt: 0.25, fontSize: 14, color: "text.secondary" }}>
-              {student.level} • {student.program} • {student.academicYear}
-            </Typography>
           </Box>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
@@ -174,30 +201,36 @@ export default function StudentDashboard() {
         </Box>
 
         {/* ALERTES */}
-        <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5}}>
+        <Paper elevation={0} sx={{ ...surfaceCardSx, p: 2.5 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
             <AlertTriangle size={18} color={theme.palette.error.main} />
             <Typography sx={{ fontWeight: 900, color: "text.primary" }}>Alertes</Typography>
           </Box>
 
           <Stack spacing={1}>
-            {alerts.map((a, index) => (
-              <Box
-                key={index}
-                sx={{
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 1,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  backgroundColor: alpha(theme.palette.background.paper, 0.55),
-                }}
-              >
-                <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-                  {a}
-                </Typography>
-              </Box>
-            ))}
+            {alerts.length === 0 ? (
+              <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                Aucune alerte pour le moment.
+              </Typography>
+            ) : (
+              alerts.map((a, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    borderRadius: 2,
+                    px: 1.5,
+                    py: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    {a}
+                  </Typography>
+                </Box>
+              ))
+            )}
           </Stack>
         </Paper>
       </Box>
@@ -235,50 +268,64 @@ export default function StudentDashboard() {
               </TableHead>
 
               <TableBody>
-                {recentGrades.map((g) => {
-                  const ok = g.status === "Validé";
-                  return (
-                    <TableRow
-                      key={g.id}
-                      hover
-                      sx={{
-                        "&:hover": {
-                          backgroundColor: "action.hover",
-                        },
-                      }}
-                    >
-                      <TableCell sx={{ color: "text.primary", borderColor: "divider" }}>
-                        {g.subject}
-                      </TableCell>
+                {recentGrades.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center" sx={{ color: "text.secondary" }}>
+                      Aucune note récente.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  recentGrades.map((g) => {
+                    const ok = g.status === "Validé";
+                    return (
+                      <TableRow
+                        key={g.id}
+                        hover
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                      >
+                        <TableCell sx={{ color: "text.primary", borderColor: "divider" }}>
+                          {g.subject}
+                        </TableCell>
 
-                      <TableCell align="center" sx={{ color: "text.primary", fontWeight: 900, borderColor: "divider" }}>
-                        {g.grade}
-                      </TableCell>
+                        <TableCell align="center" sx={{ color: "text.primary", fontWeight: 900, borderColor: "divider" }}>
+                          {g.grade}
+                        </TableCell>
 
-                      <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
-                        {g.coef}
-                      </TableCell>
+                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
+                          {g.coef}
+                        </TableCell>
 
-                      <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
-                        {g.date}
-                      </TableCell>
+                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
+                          {g.date}
+                        </TableCell>
 
-                      <TableCell align="center" sx={{ borderColor: "divider" }}>
-                        <Chip
-                          size="small"
-                          label={g.status}
-                          variant="outlined"
-                          sx={{
-                            fontWeight: 900,
-                            color: ok ? "success.main" : "error.main",
-                            borderColor: alpha(ok ? theme.palette.success.main : theme.palette.error.main, 0.35),
-                            backgroundColor: alpha(ok ? theme.palette.success.main : theme.palette.error.main, 0.10),
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        <TableCell align="center" sx={{ borderColor: "divider" }}>
+                          <Chip
+                            size="small"
+                            label={g.status}
+                            variant="outlined"
+                            sx={{
+                              fontWeight: 900,
+                              color: ok ? "success.main" : "error.main",
+                              borderColor: alpha(
+                                ok ? theme.palette.success.main : theme.palette.error.main,
+                                0.35
+                              ),
+                              backgroundColor: alpha(
+                                ok ? theme.palette.success.main : theme.palette.error.main,
+                                0.10
+                              ),
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </Box>

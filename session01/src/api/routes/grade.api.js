@@ -1,4 +1,4 @@
-// src/api/routes/grades.api.js
+// src/api/routes/grade.api.js
 import { apiClient } from "../client";
 
 /**
@@ -13,7 +13,6 @@ export async function getAllGrades() {
 /**
  * GET /api/v1/grades
  * Variante avec params (si ton backend supporte filtres/pagination)
- * Ex: /grades?page=1&pageSize=10&sortBy=createdAt&asc=true&search=
  */
 export async function getGrades(params = {}) {
   const res = await apiClient.get("/grades", { params });
@@ -53,7 +52,6 @@ export async function getGradesByStudentId(studentId) {
 /**
  * POST /api/v1/grades
  * Créer une note
- * payload: { enrollment, value, gradedAt?, gradedByUserId? }
  */
 export async function createGrade(payload) {
   if (!payload) throw new Error("createGrade: payload is required");
@@ -64,7 +62,6 @@ export async function createGrade(payload) {
 /**
  * PUT /api/v1/grades/:id
  * Mettre à jour une note
- * payload: { value?, gradedAt? }
  */
 export async function updateGrade(id, payload) {
   if (!id) throw new Error("updateGrade: id is required");
@@ -82,3 +79,4 @@ export async function deleteGrade(id) {
   const res = await apiClient.delete(`/grades/${id}`);
   return res.data;
 }
+

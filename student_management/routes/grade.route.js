@@ -7,12 +7,14 @@ import {
   getAllGradesByStudentId,
   getGrade,
   putGrade,
-  deleteGrade,
+  deleteGrade, 
 } from "../controllers/grade.controller.js";
+
 import { scolariteAuthorize } from "../middlewares/auth.middleware.js";
 
-const router = Router();
 
+
+const router = Router();
 /**
  * @swagger
  * tags:
