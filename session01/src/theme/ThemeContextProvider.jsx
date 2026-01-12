@@ -1,5 +1,7 @@
+// src/theme/Theme.ContextProvider.jsx
+
 import { createContext, useContext } from "react";
-import { useColorTheme } from "./use-color-theme";
+import { useColorTheme } from "./use-color-theme.jsx";
 
 const ThemeContext = createContext(null);
 

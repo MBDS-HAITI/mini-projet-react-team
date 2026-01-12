@@ -2,7 +2,7 @@ import Menu from "./Menu";
 import mbdsLogo from "/mbds_logo.png";
 
 function Header() {
-  const title = "Student Management System";
+  const title = "Student Management System by REACT-TEAM";
   const subTitle = "A la découverte des premières notions de React";
 
   return (

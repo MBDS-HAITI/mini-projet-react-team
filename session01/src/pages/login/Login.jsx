@@ -4,19 +4,31 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import { useAuth } from "../../auth/AuthProvider";
 import { API_BASE_URL } from "../../config/env";
+import ThemeModeToggle from "../../components/ThemeModeToggle";
+import {KeyRound} from "lucide-react"
+
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  TextField,
+  Divider,
+  Alert,
+} from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 
 export default function LoginPage() {
+  const theme = useTheme();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || "/home";
 
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,31 +40,23 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       await login(form);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(
-        err?.response?.data?.message || err?.message || "Erreur de connexion"
-      );
+      setError(err?.response?.data?.message || err?.message || "Erreur de connexion");
     } finally {
       setLoading(false);
     }
   };
 
-  
   const handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
     try {
       window.location.href = `${API_BASE_URL}/oauths/google/login`;
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Erreur de connexion Google"
-      );
+      setError(err?.response?.data?.message || err?.message || "Erreur de connexion Google");
     } finally {
       setLoading(false);
     }
@@ -68,166 +72,344 @@ export default function LoginPage() {
     );
   }
 
+  const glassBg =
+    theme.palette.background.paperGlass ?? alpha(theme.palette.background.paper, 0.75);
+
+  const accentGradient =
+    theme.palette.gradients?.accent ??
+    `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
+
+  const containerShadow =
+    theme.palette.effects?.containerShadow ?? theme.shadows[12];
+
   return (
-    <div className="w-full h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-4xl relative">
-        {/* glow */}
-        <div className="absolute -top-14 -left-10 w-72 h-72 bg-fuchsia-500/20 blur-3xl rounded-full" />
-        <div className="absolute -bottom-16 -right-12 w-72 h-72 bg-cyan-400/20 blur-3xl rounded-full" />
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 6,
+        bgcolor: "background.default",
+      }}
+    >
+      <Box sx={{ width: "100%", maxWidth: 980, position: "relative" }}>
+        {/* glow blobs */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: -56,
+            left: -40,
+            width: 300,
+            height: 300,
+            borderRadius: "50%",
+            bgcolor: alpha(theme.palette.primary.main, 0.22),
+            filter: "blur(48px)",
+            pointerEvents: "none",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: -64,
+            right: -48,
+            width: 300,
+            height: 300,
+            borderRadius: "50%",
+            bgcolor: alpha(theme.palette.secondary.main, 0.18),
+            filter: "blur(48px)",
+            pointerEvents: "none",
+          }}
+        />
 
         {/* card */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#2b1a55]/50 backdrop-blur shadow-2xl">
-          <div className="p-6 sm:p-10">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
-              <div>
-                <p className="text-white/60 text-sm tracking-wider uppercase">
+        <Paper
+          elevation={0}
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: "divider",
+            backgroundColor: glassBg,
+            backdropFilter: "blur(14px)",
+            boxShadow: containerShadow,
+          }}
+        >
+          <Box sx={{ p: { xs: 3, sm: 5 } }}>
+            {/* header row */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 3,
+                alignItems: { sm: "flex-start" },
+                justifyContent: "space-between",
+              }}
+            >
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    color: "text.secondary",
+                  }}
+                >
                   Espace sécurisé
-                </p>
+                </Typography>
 
-                <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
+                <Typography
+                  sx={{
+                    mt: 1,
+                    fontSize: { xs: 28, sm: 38 },
+                    fontWeight: 900,
+                    color: "text.primary",
+                    lineHeight: 1.1,
+                  }}
+                >
                   Connexion{" "}
-                  <span className="bg-linear-to-r from-fuchsia-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
+                  <Box
+                    component="span"
+                    sx={{
+                      background: accentGradient,
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                    }}
+                  >
                     Student Management
-                  </span>
-                </h1>
+                  </Box>
+                </Typography>
 
-                <p className="mt-3 text-white/70 max-w-xl leading-relaxed">
-                  Connecte-toi pour accéder à la gestion des étudiants, matières
-                  et notes.
-                </p>
+                <Typography sx={{ mt: 1.5, color: "text.secondary", maxWidth: 680, lineHeight: 1.7 }}>
+                  Connecte-toi pour accéder à la gestion des étudiants, matières et notes.
+                </Typography>
 
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 border border-white/15 text-white/80">
-                    Auth: JWT + Refresh
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 border border-white/15 text-white/80">
-                    UI: Glass + Gradient
-                  </span>
-                </div>
-              </div>
+                <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
+                  <Chip
+                    label="Auth: JWT + Refresh"
+                    variant="outlined"
+                    sx={{ borderColor: "divider", color: "text.primary", fontWeight: 800 }}
+                  />
+                  <Chip
+                    label="UI: Glass + Gradient + Tailwind"
+                    variant="outlined"
+                    sx={{ borderColor: "divider", color: "text.primary", fontWeight: 800 }}
+                  />
+                </Stack>
+              </Box>
 
               {/* icon bubble */}
-              <div className="shrink-0 self-start">
-                <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 grid place-items-center">
-                  <span className="text-2xl">🧑‍💻</span>
-                </div>
-              </div>
-            </div>
+              <Box sx={{ flexShrink: 0 }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 3,
+                    border: "0px solid",
+                    borderColor: "divider",
+                    backgroundColor: alpha(theme.palette.background.paper, 0.6),
+                    display: "flex",
+                    placeItems: "center",
+                  }}
+                >
+                  
+                  <Typography sx={{ fontSize: 22 }}><ThemeModeToggle/></Typography>
+                </Box>
+              </Box>
+            </Box>
 
-            {/* divider */}
-            <div className="mt-8 h-px bg-white/10" />
+            <Divider sx={{ my: 3, borderColor: "divider" }} />
 
             {/* Error */}
             {error && (
-              <div className="mt-6 rounded-xl bg-red-500/10 border border-red-500/30 px-4 py-3 text-sm text-red-200">
+              <Alert
+                severity="error"
+                sx={{
+                  mb: 2,
+                  borderRadius: 2,
+                  border: "1px solid",
+                  borderColor: alpha(theme.palette.error.main, 0.35),
+                  backgroundColor: alpha(theme.palette.error.main, 0.10),
+                }}
+              >
                 {error}
-              </div>
+              </Alert>
             )}
 
             {/* Google button */}
-            <div className="mt-6 w-full flex flex-col items-center">
-              <button
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                           px-5 py-2 rounded-md text-sm font-semibold transition
-                           bg-white/10 hover:bg-white/15 active:bg-white/20
-                           border border-white/15 hover:border-white/25
-                           text-white shadow-[0_0_18px_rgba(255,255,255,0.06)]"
+                variant="outlined"
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  borderRadius: 2,
+                  px: 2.5,
+                  py: 1,
+                  textTransform: "none",
+                  fontWeight: 900,
+                  borderColor: "divider",
+                  color: "text.primary",
+                  backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                  backdropFilter: "blur(12px)",
+                  "&:hover": {
+                    borderColor: "divider",
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
+                startIcon={
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 1.5,
+                      bgcolor: theme.palette.common.white,
+                      display: "grid",
+                      placeItems: "center",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img src="/google-logo.png" alt="Google" style={{ width: 18, height: 18 }} />
+                  </Box>
+                }
               >
-                <span className="grid place-items-center w-7 h-7 rounded-md bg-white">
-                  <img
-                    src="/google-logo.png"
-                    alt="Google"
-                    className="w-5 h-5"
-                  />
-                </span>
                 Se connecter avec Google
-              </button>
+              </Button>
 
-              {/* petit texte style “helper” */}
-              <p className="mt-3 text-white/50 text-sm">
+              <Typography sx={{ mt: 1.5, color: "text.secondary" }}>
                 Ou utilise tes identifiants ci-dessous.
-              </p>
-            </div>
+              </Typography>
+            </Box>
 
             {/* Form */}
-            <form
+            <Box
+              component="form"
               onSubmit={handleSubmit}
-              className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4"
+              sx={{
+                mt: 2,
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                gap: 2,
+              }}
             >
-              <div className="sm:col-span-1">
-                <label className="block text-sm mb-1 text-white/70">
-                  Nom d’utilisateur
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  required
-                  value={form.username}
-                  onChange={handleChange}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-white placeholder:text-white/30
-                             focus:outline-none focus:ring-2 focus:ring-fuchsia-400/40 focus:border-white/20 transition"
-                  placeholder="ex: stanley"
-                  autoComplete="username"
-                />
-              </div>
+              <TextField
+                name="username"
+                label="Nom d’utilisateur"
+                placeholder="ex: stanley"
+                required
+                value={form.username}
+                onChange={handleChange}
+                autoComplete="username"
+                fullWidth
+                InputLabelProps={{ sx: { color: "text.secondary" } }}
+                sx={{
+                  "& .MuiInputBase-root": {
+                    borderRadius: 2.5,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.45),
+                    backdropFilter: "blur(12px)",
+                  },
+                }}
+              />
 
-              <div className="sm:col-span-1">
-                <label className="block text-sm mb-1 text-white/70">
-                  Mot de passe
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  value={form.password}
-                  onChange={handleChange}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-white placeholder:text-white/30
-                             focus:outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-white/20 transition"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                />
-              </div>
+              <TextField
+                name="password"
+                type="password"
+                label="Mot de passe"
+                placeholder="••••••••"
+                required
+                value={form.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                fullWidth
+                InputLabelProps={{ sx: { color: "text.secondary" } }}
+                sx={{
+                  "& .MuiInputBase-root": {
+                    borderRadius: 2.5,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.45),
+                    backdropFilter: "blur(12px)",
+                  },
+                }}
+              />
 
-              {/* helper row */}
-              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mt-1">
-                <p className="text-white/55 text-sm">
+              {/* helper */}
+              <Box sx={{ gridColumn: { sm: "1 / -1" } }}>
+                <Typography sx={{ color: theme.palette.text.muted ?? "text.secondary" }}>
                   Astuce: utilise ton compte{" "}
-                  <span className="text-white/80 font-medium">admin</span> pour
-                  tester.
-                </p>
-              </div>
+                  <Box component="span" sx={{ color: "text.primary", fontWeight: 900 }}>
+                    admin
+                  </Box>{" "}
+                  pour tester.
+                </Typography>
+              </Box>
 
               {/* actions */}
-              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end mt-2">
-                <button
+              <Box
+                sx={{
+                  gridColumn: { sm: "1 / -1" },
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 1.5,
+                  alignItems: { sm: "center" },
+                  justifyContent: { sm: "flex-end" },
+                  mt: 0.5,
+                }}
+              >
+                <Button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="px-4 py-2 rounded-md text-sm font-semibold
-                             bg-white/10 hover:bg-white/15 active:bg-white/20
-                             border border-white/15 hover:border-white/25
-                             text-white transition"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 900,
+                    borderColor: "divider",
+                    color: "text.primary",
+                    backgroundColor: alpha(theme.palette.background.paper, 0.45),
+                    "&:hover": {
+                      borderColor: "divider",
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                  }}
                 >
                   ← Retour
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="submit"
-                  className="px-5 py-2 rounded-md text-sm font-semibold text-white transition
-                             bg-[#432866]/60 hover:bg-[#432866]/80
-                             border border-white/15 shadow-[0_0_18px_rgba(234,0,255,0.18),0_0_18px_rgba(3,213,255,0.12)]"
+                  variant="contained"
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 900,
+                    color: "#fff",
+                    px: 2.5,
+                    background: accentGradient,
+                    boxShadow: "none",
+                    display: "flex",
+                    gap:1,
+                    "&:hover": {
+                      opacity: 0.92,
+                      boxShadow: "none",
+                      background: accentGradient,
+                    },
+                  }}
                 >
-                  🔐 Se connecter
-                </button>
-              </div>
-            </form>
-          </div>
+                  <KeyRound/> Se connecter
+                </Button>
+              </Box>
+            </Box>
+          </Box>
 
           {/* bottom gradient line */}
-          <div className="h-1 bg-linear-to-r from-fuchsia-500/60 via-purple-500/60 to-cyan-400/60" />
-        </div>
-      </div>
-    </div>
+          <Box sx={{ height: 4, background: accentGradient, opacity: 0.75 }} />
+        </Paper>
+      </Box>
+    </Box>
   );
 }

@@ -7,7 +7,7 @@ const ThemeModeToggle = () => {
   const { mode, toggleColorMode } = useThemeContext();
 
   return (
-    <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
+    <IconButton sx={{ m: 0 }} onClick={toggleColorMode} color="inherit">
       {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
     </IconButton>
   );

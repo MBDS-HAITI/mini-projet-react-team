@@ -11,6 +11,7 @@ import {
   TablePagination,
   IconButton,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { formatDate } from "../../utils/fdate";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip";
 import { Pencil, Trash2 } from "lucide-react";
@@ -21,6 +22,7 @@ import { ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE } from "../../utils/roles-type
 import { useAuth } from "../../auth/AuthProvider.jsx";
 
 export default function GradesPage() {
+  const theme = useTheme(0)
   const { user } = useAuth();
   const canManage = [ADMIN_ROLE, SCOLARITE_ROLE].includes(user.role);
 
@@ -144,7 +146,7 @@ export default function GradesPage() {
         {/* ===== TABLE ===== */}
         <Paper
           elevation={0}
-          sx={{ backgroundColor: "transparent", color: "white" }}
+          sx={{ backgroundColor: "transparent"}}
         >
           <TableContainer>
             <Table>
@@ -154,9 +156,11 @@ export default function GradesPage() {
                     <TableCell
                       key={head}
                       sx={{
-                        color: "#cbd5f5",
-                        fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        color: theme.palette.table?.headText ?? "text.secondary",
+                        fontWeight: 800,
+                        borderBottom: "1px solid",
+                        borderBottomColor: "divider",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {head}
@@ -173,47 +177,48 @@ export default function GradesPage() {
                       key={grade._id}
                       hover
                       sx={{
-                        "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
-                        },
-                      }}
+                          "&:hover": {
+                            backgroundColor:
+                              theme.palette.table?.rowHover ?? theme.palette.action.hover,
+                          },
+                        }}
                     >
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.student?.lastName?.toUpperCase() +
                           " " +
                           grade.enrollment?.student?.firstName || "—"}
                       </TableCell>
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.student.studentCode}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.course?.name}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.course?.code}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.semester?.name || "—"}
                       </TableCell>
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.enrollment?.semester?.academicYear?.name || "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.value || "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.isPublished ? "Oui" : "Non"}
                       </TableCell>
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {grade.user?.username || "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(grade.updatedAt)}
                       </TableCell>
 
@@ -269,13 +274,13 @@ export default function GradesPage() {
               setPage(0);
             }}
             sx={{
-              color: "white",
-              ".MuiTablePagination-selectIcon": {
-                color: "white",
-              },
-              ".MuiTablePagination-actions button": {
-                color: "white",
-              },
+              color: "text.secondary",
+              borderTop: "1px solid",
+              borderTopColor: "divider",
+              ".MuiTablePagination-selectIcon": { color: "text.secondary" },
+              ".MuiTablePagination-actions button": { color: "text.secondary" },
+              ".MuiTablePagination-select": { color: "text.secondary" },
+              ".MuiTablePagination-displayedRows": { color: "text.secondary" },
             }}
           />
         </Paper>

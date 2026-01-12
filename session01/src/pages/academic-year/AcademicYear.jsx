@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteAcademicYear,
   getAcademicYears,
@@ -14,21 +14,21 @@ import {
   TablePagination,
   IconButton,
 } from "@mui/material";
-import { Pencil, Eye, Trash2, Plus } from "lucide-react";
+import { useTheme } from "@mui/material/styles";
+import { Pencil, Eye, Trash2 } from "lucide-react";
 import { formatDate } from "../../utils/fdate";
-import SortButton from "../../components/widgets/SortButton.jsx";
-import SearchInput from "../../components/widgets/SearchInput.jsx";
 import { StyledTooltip } from "../../components/widgets/StyledTooltip.jsx";
 import UpsertAcademicYearModal from "./UpsertAcademicYearModal";
-import AddButton from "../../components/widgets/AddButton.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import AcademicYearDetailsModal from "./AcademiYeardetailsModal.jsx";
 import Container from "../../components/layout/Container.jsx";
 
 export default function AcademicYearPage() {
+  const theme = useTheme();
+
   const [academicYears, setAcademicYears] = useState([]);
 
-  //upsert modal state
+  // upsert modal state
   const [openUpsert, setOpenUpsert] = useState(false);
   const [selectedYear, setSelectedYear] = useState(null);
 
@@ -58,12 +58,23 @@ export default function AcademicYearPage() {
     fetchAcademicYears();
   }, []);
 
-  // Filtrage + tri
-  const filteredAcademicYears = academicYears
-    .filter((year) => year.name.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) =>
-      sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    );
+  const filteredAcademicYears = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return (academicYears ?? [])
+      .filter((year) => {
+        if (!q) return true;
+
+        const name = (year.name ?? "").toLowerCase();
+        const active = year.isActive ? "oui" : "non";
+        return name.includes(q) || active.includes(q);
+      })
+      .sort((a, b) => {
+        const aName = (a.name ?? "").toLowerCase();
+        const bName = (b.name ?? "").toLowerCase();
+        return sortAsc ? aName.localeCompare(bName) : bName.localeCompare(aName);
+      });
+  }, [academicYears, search, sortAsc]);
 
   const onEdit = (row) => {
     setSelectedYear(row);
@@ -101,6 +112,16 @@ export default function AcademicYearPage() {
 
   const title = "Liste des Années Académiques";
 
+  const headers = [
+    "Nom",
+    "Date Début",
+    "Date Fin",
+    "Active",
+    "Création",
+    "Modification",
+    "Actions",
+  ];
+
   return (
     <>
       <Container
@@ -112,33 +133,20 @@ export default function AcademicYearPage() {
         onAdd={onAdd}
         setPage={setPage}
       >
-        {/* ===== TABLE ===== */}
-        <Paper
-          elevation={0}
-          sx={{
-            backgroundColor: "transparent",
-            color: "white",
-          }}
-        >
+        <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
           <TableContainer>
-            <Table>
+            <Table sx={{ minWidth: 1000 }}>
               <TableHead>
                 <TableRow>
-                  {[
-                    "Nom",
-                    "Date Début",
-                    "Date Fin",
-                    "Active",
-                    "Création",
-                    "Modification",
-                    "Actions",
-                  ].map((head) => (
+                  {headers.map((head) => (
                     <TableCell
                       key={head}
                       sx={{
-                        color: "#cbd5f5",
-                        fontWeight: "bold",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        color: theme.palette.table?.headText ?? "text.secondary",
+                        fontWeight: 800,
+                        borderBottom: "1px solid",
+                        borderBottomColor: "divider",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {head}
@@ -156,71 +164,66 @@ export default function AcademicYearPage() {
                       hover
                       sx={{
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          backgroundColor:
+                            theme.palette.table?.rowHover ?? theme.palette.action.hover,
                         },
                       }}
                     >
-                      <TableCell sx={{ color: "white" }}>
-                        {academicYear.name}
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
+                        {academicYear.name ?? "—"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(academicYear.startDate)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(academicYear.endDate)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {academicYear.isActive ? "Oui" : "Non"}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(academicYear.createdAt, true)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "white" }}>
+                      <TableCell sx={{ color: "text.primary", whiteSpace: "nowrap" }}>
                         {formatDate(academicYear.updatedAt, true)}
                       </TableCell>
 
-                      <TableCell sx={{ color: "#a78bfa" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                          }}
-                        >
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <StyledTooltip title="Modifier" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => onEdit(academicYear)}
-                              sx={{ color: "#a78bfa" }}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                             >
                               <Pencil size={18} />
                             </IconButton>
                           </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
                           <StyledTooltip title="Détails" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => onDetails(academicYear)}
-                              sx={{ color: "#a78bfa" }}
+                              sx={{ color: theme.palette.actions?.primary ?? "primary.main" }}
                             >
                               <Eye size={18} />
                             </IconButton>
                           </StyledTooltip>
 
-                          <span style={{ opacity: 0.3 }}>|</span>
+                          <span style={{ opacity: 0.35, color: theme.palette.text.disabled }}>|</span>
 
                           <StyledTooltip title="Supprimer" placement="top">
                             <IconButton
                               size="small"
                               onClick={() => askDelete(academicYear)}
-                              sx={{ color: "#f87171" }} // red-400
+                              sx={{ color: theme.palette.actions?.danger ?? "error.main" }}
                             >
                               <Trash2 size={18} />
                             </IconButton>
@@ -233,7 +236,6 @@ export default function AcademicYearPage() {
             </Table>
           </TableContainer>
 
-          {/* ===== PAGINATION ===== */}
           <TablePagination
             component="div"
             count={filteredAcademicYears.length}
@@ -246,14 +248,18 @@ export default function AcademicYearPage() {
               setPage(0);
             }}
             sx={{
-              color: "white",
-              ".MuiTablePagination-selectIcon": { color: "white" },
-              ".MuiTablePagination-actions button": { color: "white" },
+              color: "text.secondary",
+              borderTop: "1px solid",
+              borderTopColor: "divider",
+              ".MuiTablePagination-selectIcon": { color: "text.secondary" },
+              ".MuiTablePagination-actions button": { color: "text.secondary" },
+              ".MuiTablePagination-select": { color: "text.secondary" },
+              ".MuiTablePagination-displayedRows": { color: "text.secondary" },
             }}
           />
         </Paper>
       </Container>
-      {/* Modal Section */}
+
       <UpsertAcademicYearModal
         open={openUpsert}
         onClose={() => setOpenUpsert(false)}
@@ -261,6 +267,7 @@ export default function AcademicYearPage() {
         data={selectedYear}
         onSuccess={fetchAcademicYears}
       />
+
       <ConfirmDialog
         open={confirmOpen}
         title="Confirmer la suppression"
@@ -274,6 +281,7 @@ export default function AcademicYearPage() {
         onConfirm={confirmDelete}
         loading={isDeleting}
       />
+
       <AcademicYearDetailsModal
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}

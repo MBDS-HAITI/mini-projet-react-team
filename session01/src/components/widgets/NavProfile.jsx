@@ -1,20 +1,19 @@
+// src/components/widgets/MyAccount.jsx
+import * as React from "react";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
-import { useState } from "react";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useAuth } from "../../auth/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
 
 export default function MyAccount() {
+  const theme = useTheme();
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
 
-  const isLight = theme.palette.mode === "light";
-
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
@@ -25,106 +24,84 @@ export default function MyAccount() {
     navigate("/profile");
   };
 
+
+  const triggerSx = {
+    borderRadius: 2,
+    px: 1.5,
+    py: 0.4,
+    fontSize: 13,
+    fontWeight: 900,
+    textTransform: "none",
+    border: "1px solid",
+    borderColor: "divider",
+    color: "text.primary",
+    backgroundColor: alpha(theme.palette.background.paper, 0.3),
+    backdropFilter: "blur(12px)",
+    boxShadow: "none",
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+      boxShadow: "none",
+    },
+    "&:active": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.75),
+    },
+  };
+
+  const menuPaperSx = {
+    mt: 1,
+    minWidth: 220,
+    borderRadius: 2,
+    border: "1px solid",
+    borderColor: "divider",
+    backgroundColor: alpha(theme.palette.background.paper, 0.72),
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
+    boxShadow: theme.shadows[12],
+    color: theme.palette.text.primary,
+    overflow: "hidden",
+  };
+
+  const itemSx = {
+    fontSize: 14,
+    px: 2,
+    py: 1,
+    color: "text.primary",
+    "&:hover": { backgroundColor: "action.hover" },
+  };
+
   return (
     <div>
       <Button
-        id="basic-button"
-        aria-controls={open ? "basic-menu" : undefined}
+        id="my-account-button"
+        aria-controls={open ? "my-account-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition"
-        sx={{
-          fontWeight: "bold",
-
-          color: isLight ? "#0F172A" : "#fff",
-          backgroundColor: isLight ? "#FFFFFF" : "rgba(255,255,255,0.10)",
-          border: isLight
-            ? "1px solid rgba(15,23,42,0.10)"
-            : "1px solid rgba(255,255,255,0.15)",
-          boxShadow: isLight ? "0 10px 25px rgba(15,23,42,0.06)" : "none",
-
-          "&:hover": {
-            backgroundColor: isLight ? "#FFFFFF" : "rgba(255,255,255,0.15)",
-            border: isLight
-              ? "1px solid rgba(15,23,42,0.18)"
-              : "1px solid rgba(255,255,255,0.25)",
-          },
-        }}
+        sx={triggerSx}
       >
         Mon compte
       </Button>
 
       <Menu
-        id="basic-menu"
+        id="my-account-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
-          paper: {
-            sx: {
-              mt: 1,
-              minWidth: 200,
-              borderRadius: 2,
-              overflow: "hidden",
-
-              backgroundColor: isLight
-                ? "#FFFFFF"
-                : "rgba(255,255,255,0.08)",
-
-              color: isLight ? "#0F172A" : "white",
-
-              border: isLight
-                ? "1px solid rgba(15,23,42,0.10)"
-                : "1px solid rgba(255,255,255,0.18)",
-
-              boxShadow: isLight
-                ? "0 18px 45px rgba(15,23,42,0.12)"
-                : "0 16px 40px rgba(0,0,0,0.35)",
-
-              backdropFilter: isLight ? "none" : "blur(14px)",
-              WebkitBackdropFilter: isLight ? "none" : "blur(14px)",
-            },
-          },
+          paper: { sx: menuPaperSx },
         }}
         MenuListProps={{
-          "aria-labelledby": "basic-button",
-          sx: {
-            py: 0.5,
-          },
+          "aria-labelledby": "my-account-button",
+          sx: { py: 0.5 },
         }}
       >
-        <MenuItem
-          onClick={goToProfile}
-          sx={{
-            fontSize: 14,
-            px: 2,
-            py: 1.2,
-
-            color: isLight
-              ? "rgba(15,23,42,0.88)"
-              : "rgba(255,255,255,0.92)",
-
-            "&:hover": {
-              backgroundColor: isLight
-                ? "rgba(15,23,42,0.06)"
-                : "rgba(255,255,255,0.10)",
-            },
-          }}
-        >
+        <MenuItem onClick={goToProfile} sx={itemSx}>
           Profil
         </MenuItem>
 
-        <Divider
-          sx={{
-            my: 0.2,
-            borderColor: isLight
-              ? "rgba(15,23,42,0.10)"
-              : "rgba(255,255,255,0.12)",
-          }}
-        />
+        <Divider sx={{ borderColor: "divider", my: 0.25 }} />
 
         <MenuItem
           onClick={() => {
@@ -132,18 +109,10 @@ export default function MyAccount() {
             logout();
           }}
           sx={{
-            fontSize: 14,
-            px: 2,
-            py: 1.2,
-
-            color: isLight
-              ? "rgba(239,68,68,0.95)"
-              : "rgba(248,113,113,0.95)",
-
+            ...itemSx,
+            color: "error.main",
             "&:hover": {
-              backgroundColor: isLight
-                ? "rgba(239,68,68,0.10)"
-                : "rgba(248,113,113,0.12)",
+              backgroundColor: alpha(theme.palette.error.main, 0.12),
             },
           }}
         >
