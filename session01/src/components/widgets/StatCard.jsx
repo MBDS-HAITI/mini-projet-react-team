@@ -1,30 +1,28 @@
 // src/components/widgets/StatCard.jsx
+import React from "react";
 import { Box, Paper, Typography, alpha, useTheme } from "@mui/material";
 
 export default function StatCard({
   title,
-  value = 100,
+  value = 0,
   subtitle,
   icon,
   hint,
-  valueColor, // Si non défini, utilisera la couleur primaire du thème
+  valueColor,
 }) {
   const theme = useTheme();
+  const Icon = icon; // 👈 clé du fix
 
   return (
     <Paper
       elevation={0}
       sx={{
         width: "100%",
-        m: 1,
         borderRadius: 3,
         overflow: "hidden",
-        maxWidth: { md: 448 },
         transition: "all 0.3s ease-in-out",
         border: "1px solid",
-        // Utilisation de la couleur 'divider' automatique du thème
-        borderColor: "divider", 
-        // Utilisation de 'background.paper' avec une légère opacité pour l'effet verre
+        borderColor: "divider",
         backgroundColor: alpha(theme.palette.background.paper, 0.8),
         backdropFilter: "blur(12px)",
         boxShadow: theme.shadows[2],
@@ -36,7 +34,7 @@ export default function StatCard({
       }}
     >
       <Box sx={{ p: 3 }}>
-        {/* Header */}
+        {/* ================= HEADER ================= */}
         <Box
           sx={{
             display: "flex",
@@ -52,14 +50,15 @@ export default function StatCard({
             variant="overline"
             sx={{
               fontWeight: 800,
-              color: "text.secondary", // Couleur grise adaptative
+              color: "text.secondary",
               letterSpacing: 1.2,
             }}
           >
             {title}
           </Typography>
 
-          {icon && (
+          {/* ===== ICÔNE (FIX DÉFINITIF) ===== */}
+          {Icon && (
             <Box
               sx={{
                 height: 40,
@@ -67,22 +66,27 @@ export default function StatCard({
                 borderRadius: 2,
                 display: "grid",
                 placeItems: "center",
-                backgroundColor: alpha(theme.palette.secondary.main, 0.1),
+                backgroundColor: alpha(theme.palette.secondary.main, 0.12),
                 color: "secondary.main",
               }}
             >
-              {icon}
+              <Icon size={22} strokeWidth={2} />
             </Box>
           )}
         </Box>
 
-        {/* Value Area */}
-        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+        {/* ================= VALUE ================= */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+          }}
+        >
           <Typography
             variant="h3"
             sx={{
               fontWeight: 900,
-              // Utilise valueColor si fourni, sinon la couleur primaire du thème
               color: valueColor || "primary.main",
             }}
           >
@@ -91,11 +95,16 @@ export default function StatCard({
 
           {(subtitle || hint) && (
             <Box sx={{ textAlign: "right" }}>
-              <Typography variant="body2" color="text.secondary">
-                {subtitle}
-              </Typography>
+              {subtitle && (
+                <Typography variant="body2" color="text.secondary">
+                  {subtitle}
+                </Typography>
+              )}
               {hint && (
-                <Typography variant="caption" sx={{ color: "success.main", fontWeight: "bold" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "success.main", fontWeight: 700 }}
+                >
                   {hint}
                 </Typography>
               )}
@@ -103,14 +112,14 @@ export default function StatCard({
           )}
         </Box>
 
-        {/* Progress bar décorative */}
+        {/* ================= PROGRESS ================= */}
         <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 1 }}>
           <Box
             sx={{
               height: 4,
               flexGrow: 1,
               borderRadius: 1,
-              bgcolor: "action.hover", // Couleur neutre automatique
+              bgcolor: "action.hover",
               overflow: "hidden",
             }}
           >
@@ -122,7 +131,12 @@ export default function StatCard({
               }}
             />
           </Box>
-          <Typography variant="caption" color="text.disabled" sx={{ fontSize: 9 }}>
+
+          <Typography
+            variant="caption"
+            color="text.disabled"
+            sx={{ fontSize: 9 }}
+          >
             STATS
           </Typography>
         </Box>

@@ -2,7 +2,7 @@
 import * as React from "react";
 import { Paper, Typography, Box, alpha, useTheme } from "@mui/material";
 
-export function ActionButton({ icon, label, onClick }) {
+export function ActionButton({ icon, label, onClick, color = "primary",}) {
   const theme = useTheme();
 
   return (

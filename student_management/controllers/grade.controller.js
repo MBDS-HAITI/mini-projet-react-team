@@ -120,8 +120,13 @@ export const getAllGradesByStudentId = async (req, res) => {
         const { studentId } = req.params;
 
 
-        if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
-            return res.status(403).json({ message: "Forbidden" })
+
+        if (req.user.role === "STUDENT") {
+            const currUserId = req.user.student._id || req.user.student;
+            if (String(currUserId) !== String(studentId)) {
+                return res.status(403).json({ message: "Forbidden" })
+            }
+
         }
 
         if (!mongoose.Types.ObjectId.isValid(studentId)) {
@@ -131,7 +136,15 @@ export const getAllGradesByStudentId = async (req, res) => {
         const enrollments = await Enrollment.find({ student: studentId });
         const enrollmentIds = enrollments.map((s) => s._id);
 
-        const grades = await Grade.find({ enrollment: { $in: enrollmentIds } })
+        const gradeQuery = {
+            enrollment: { $in: enrollmentIds },
+        };
+
+        if (req.user.role === "STUDENT") {
+            gradeQuery.isPublished = true;
+        }
+
+        const grades = await Grade.find(gradeQuery)
             .populate({
                 path: "enrollment",
                 populate: [
@@ -143,6 +156,7 @@ export const getAllGradesByStudentId = async (req, res) => {
                     }
                 ],
             });
+
         res.status(200).json(grades);
     } catch (error) {
         res.status(500).json({ message: error.message });
