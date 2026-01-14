@@ -23,6 +23,8 @@ import DashboardHeader from "./DashboardHeader";
 import KpiCards from "./KpiCards";
 import { ActionButton } from "../ActionButton";
 import { SummaryItem } from "../SummaryItem";
+import SimpleCalendar from "../Calendar/SimpleCalendar";
+
 
 import {
   GraduationCap,
@@ -35,7 +37,19 @@ import {
   Edit,
   FileWarning,
   Lock,
+  Users,
 } from "lucide-react";
+import { useEffect } from "react";
+import { fetchScolariteDashboard } from "../../api/routes/statistic-scolarite.api";
+import {formatDate}  from "../../utils/fdate";
+
+const iconMap = {
+  GraduationCap,
+  ClipboardList,
+  BookOpen,
+  FileText,
+  Users,
+};
 
 export default function ScolariteDashboard() {
   const navigate = useNavigate();
@@ -53,63 +67,46 @@ export default function ScolariteDashboard() {
     [theme]
   );
 
-  /* =======================
-     KPI DASHBOARD (CARDS)
-     ======================= */
-  const [dashboards] = useState([
-    {
-      key: "students",
-      title: "Étudiants",
-      value: 342,
-      subtitle: "Inscrits",
-      icon: <GraduationCap />,
-      valueColor: "success.main",
-      hint: "+12 ce mois",
-    },
-    {
-      key: "inscriptions",
-      title: "Inscriptions",
-      value: 58,
-      subtitle: "Ce semestre",
-      icon: <ClipboardList />,
-      valueColor: "secondary.main",
-    },
-    {
-      key: "courses",
-      title: "Cours actifs",
-      value: 24,
-      subtitle: "Toutes filières",
-      icon: <BookOpen />,
-      valueColor: "primary.main",
-    },
-    {
-      key: "grades",
-      title: "Notes",
-      value: 1280,
-      subtitle: "Saisies",
-      icon: <FileText />,
-      valueColor: "warning.main",
-    },
-  ]);
 
-  /* =======================
-     RÉSUMÉ ACADÉMIQUE
-     ======================= */
-  const stats = {
-    pendingNotes: 6,
-    semester: "Semestre 1",
-    academicYear: "2024 - 2025",
-    entryRate: "92 %",
-  };
+  //  ================= States ================= 
+  const [dashboards, setDashboards] = useState([]);
+  const [stats, setStats] = useState({
+    academicYear: "",
+    semester: "",
+    pendingNotes: 0,
+    entryRate: "",
+  });
+  const [recentNotes, setRecentNotes] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
-  /* =======================
-     DERNIÈRES NOTES
-     ======================= */
-  const [recentNotes] = useState([
-    { id: 1, student: "Jean Pierre", subject: "Mathématiques", classLevel: "L2", status: "Validée" },
-    { id: 2, student: "Marie Louis", subject: "Physique", classLevel: "L1", status: "En attente" },
-    { id: 3, student: "David Jean", subject: "Informatique", classLevel: "L3", status: "Validée" },
-  ]);
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      const data = await fetchScolariteDashboard();
+
+      setDashboards(
+        (data.kpis || []).map((kpi) => ({
+          ...kpi,
+          icon: iconMap[kpi.icon] || GraduationCap,
+        }))
+      );
+
+      setStats(data.summary || {
+        academicYear: "",
+        semester: "",
+        pendingNotes: 0,
+        entryRate: "",
+      });
+
+
+      setRecentNotes(data.recentNotes || []);
+
+      setAlerts(data.alerts || []);
+    };
+
+    loadDashboard();
+  }, []);
+
 
   return (
     <Box
@@ -176,7 +173,7 @@ export default function ScolariteDashboard() {
               <Table sx={{ minWidth: 680 }}>
                 <TableHead>
                   <TableRow>
-                    {["Étudiant", "Matière", "Classe", "Statut"].map((h) => (
+                    {["Étudiant", "Matière", "Statut", "Dernière Modification"].map((h) => (
                       <TableCell
                         key={h}
                         sx={{
@@ -216,10 +213,6 @@ export default function ScolariteDashboard() {
                           {n.subject}
                         </TableCell>
 
-                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
-                          {n.classLevel}
-                        </TableCell>
-
                         <TableCell align="center" sx={{ borderColor: "divider" }}>
                           <Chip
                             size="small"
@@ -239,6 +232,11 @@ export default function ScolariteDashboard() {
                             }}
                           />
                         </TableCell>
+
+                        <TableCell align="center" sx={{ color: "text.secondary", borderColor: "divider" }}>
+                          {formatDate(n.dateModif, true)}
+                        </TableCell>
+
                       </TableRow>
                     );
                   })}
@@ -260,10 +258,33 @@ export default function ScolariteDashboard() {
                 gap: 1.5,
               }}
             >
-              <ActionButton icon={<CheckCircle size={18} />} label="Inscriptions" onClick={() => navigate("/enrollments")} />
-              <ActionButton icon={<Edit size={18} />} label="Saisie des notes" onClick={() => navigate("/grades")} />
-              <ActionButton icon={<FileWarning size={18} />} label="Notes manquantes" onClick={() => navigate("/grades/missing")} />
-              <ActionButton icon={<Lock size={18} />} label="Clôture semestre" onClick={() => navigate("/semester")} />
+                      <ActionButton
+                icon={<CheckCircle size={18} />}
+                label="Inscriptions"
+                color="success"
+                onClick={() => navigate("/enrollments")}
+              />
+
+              <ActionButton
+                icon={<Edit size={18} />}
+                label="Saisie des notes"
+                color="primary"
+                onClick={() => navigate("/grades")}
+              />
+
+              <ActionButton
+                icon={<FileWarning size={18} />}
+                label="Notes manquantes"
+                color="warning"
+                onClick={() => navigate("/grades/missing")}
+              />
+
+              <ActionButton
+                icon={<Lock size={18} />}
+                label="Clôture semestre"
+                color="error"
+                onClick={() => navigate("/semester")}
+              />
             </Box>
           </Paper>
         </Stack>
@@ -277,25 +298,13 @@ export default function ScolariteDashboard() {
               <Typography sx={{ fontWeight: 900, color: "text.primary" }}>Calendrier</Typography>
             </Box>
 
-            <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+            {/* <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
               Examens, rattrapages et clôtures
-            </Typography>
-
-            <Box
-              sx={{
-                mt: 2,
-                height: 128,
-                borderRadius: 2,
-                border: "1px solid",
-                borderColor: "divider",
-                backgroundColor: alpha(theme.palette.background.paper, 0.55),
-                display: "grid",
-                placeItems: "center",
-                color: "text.secondary",
-              }}
-            >
-              📅 Calendar UI à venir
+            </Typography> */}
+            <Box sx={{ mt: 2 }}>
+              <SimpleCalendar />
             </Box>
+
           </Paper>
 
           {/* Alertes */}
@@ -306,11 +315,7 @@ export default function ScolariteDashboard() {
             </Box>
 
             <Stack spacing={1}>
-              {[
-                `• ${stats.pendingNotes} notes non validées`,
-                "• Semestre bientôt clôturé",
-                "• 3 étudiants sans notes",
-              ].map((t, i) => (
+              {alerts.map((alert, i) => (
                 <Box
                   key={i}
                   sx={{
@@ -322,10 +327,13 @@ export default function ScolariteDashboard() {
                     backgroundColor: alpha(theme.palette.background.paper, 0.55),
                   }}
                 >
-                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>{t}</Typography>
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    • {alert}
+                  </Typography>
                 </Box>
               ))}
             </Stack>
+
           </Paper>
         </Stack>
       </Box>

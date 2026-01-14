@@ -10,6 +10,8 @@ import Box from "@mui/material/Box";
 
 
 export default function KpiCards({dashboards}) {
+  console.log({dashboards});
+  
 
   return (
     <Box
@@ -26,7 +28,8 @@ export default function KpiCards({dashboards}) {
           title={item.title}
           value={item.value}
           subtitle={item.subtitle}
-          icon={item.icon}
+           hint={item.hint}
+          icon={typeof item.icon === "function" ? item.icon : null}
           valueColor={item.valueColor}
         />
       ))}

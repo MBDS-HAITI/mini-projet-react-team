@@ -145,19 +145,22 @@ export const getAllGradesByStudentId = async (req, res) => {
     const enrollments = await Enrollment.find({ student: studentId }).select("_id");
     const enrollmentIds = enrollments.map((s) => s._id);
 
-    const grades = await Grade.find({ enrollment: { $in: enrollmentIds } }).populate({
-      path: "enrollment",
-      populate: [
-        { path: "student" },
-        { path: "course" },
-        { path: "semester", populate: { path: "academicYear" } },
-      ],
-    });
-
-    return res.status(200).json(grades);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
+        const grades = await Grade.find({ enrollment: { $in: enrollmentIds } })
+            .populate({
+                path: "enrollment",
+                populate: [
+                    { path: "student" },
+                    { path: "course" },
+                    {
+                        path: "semester",
+                        populate: { path: "academicYear" }
+                    }
+                ],
+            });
+        res.status(200).json(grades);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 /**
