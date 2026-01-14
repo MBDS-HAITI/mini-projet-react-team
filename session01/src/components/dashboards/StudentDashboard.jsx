@@ -1,5 +1,4 @@
 // src/components/dashboards/StudentDashboard.jsx
-import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -19,6 +18,7 @@ import { useTheme } from "@mui/material/styles";
 import DashboardHeader from "./DashboardHeader";
 import KpiCards from "./KpiCards";
 import { ActionButton } from "../ActionButton";
+import { useAuth } from "../../auth/AuthProvider";
 
 import {
   GraduationCap,
@@ -27,13 +27,15 @@ import {
   CalendarDays,
   UserCheck,
 } from "lucide-react";
+import { useMemo } from "react";
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { user } = useAuth();
 
-  // ✅ même surface "glass" partout
-  const surfaceCardSx = React.useMemo(
+
+  const surfaceCardSx = useMemo(
     () => ({
       borderRadius: 3,
       border: "1px solid",
@@ -45,15 +47,17 @@ export default function StudentDashboard() {
     [theme]
   );
 
+  console.log({user});
+  
   // INFOS ÉTUDIANT
-  const student = {
-    name: "Sachy Edvaelle Barreau",
-    matricule: "STD-2025-001",
-    level: "L2",
-    program: "Informatique",
-    academicYear: "2024 - 2025",
-    status: "Actif",
-  };
+  const student = useMemo(
+    () => ({
+      name: user?.student ? `${user.student.firstName} ${user.student.lastName}` : "-",
+      matricule: user?.student?.studentCode ?? "-",
+      status: "Actif",
+    }),
+    [user]
+  );
 
   // KPI
   const kpis = [
@@ -135,10 +139,6 @@ export default function StudentDashboard() {
                 {student.matricule}
               </Box>
             </Typography>
-
-            <Typography sx={{ mt: 0.25, fontSize: 14, color: "text.secondary" }}>
-              {student.level} • {student.program} • {student.academicYear}
-            </Typography>
           </Box>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
@@ -156,6 +156,7 @@ export default function StudentDashboard() {
               variant="outlined"
             />
           </Stack>
+          
         </Box>
       </Paper>
 

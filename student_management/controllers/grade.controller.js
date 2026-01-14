@@ -122,11 +122,10 @@ export const getAllGradesByStudentId = async (req, res) => {
 
 
         if (req.user.role === "STUDENT") {
-            const currUserId = req.user.student._id || req.user.student;
-            if (String(currUserId) !== String(studentId)) {
+            const currentStudentId = req.user.student._id || req.user.student
+            if (String(currentStudentId) !== String(studentId)) {
                 return res.status(403).json({ message: "Forbidden" })
             }
-
         }
 
         if (!mongoose.Types.ObjectId.isValid(studentId)) {

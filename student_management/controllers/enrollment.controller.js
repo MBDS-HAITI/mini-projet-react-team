@@ -60,7 +60,7 @@ export const postEnrollment = async (req, res, next) => {
         throw err;
       }
 
-      
+
 
       // 4) Create enrollment inside transaction
       const [created] = await Enrollment.create([req.body], { session });
@@ -160,8 +160,11 @@ export const getAllEnrollmentsByStudentId = async (req, res) => {
       return res.status(400).json({ message: "Student invalide" });
     }
 
-    if (req.user.role === "STUDENT" && String(req.user.student) !== String(studentId)) {
-      return res.status(403).json({ message: "Forbidden" })
+    if (req.user.role === "STUDENT") {
+      const currentStudentId = req.user.student._id || req.user.student
+      if (String(currentStudentId) !== String(studentId)) {
+        return res.status(403).json({ message: "Forbidden" })
+      }
     }
 
     // récupérer les enrollments liés 
