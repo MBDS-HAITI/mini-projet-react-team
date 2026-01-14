@@ -14,6 +14,8 @@ import courseRoutes from './routes/course.route.js';
 import enrollmentRoutes from './routes/enrollment.route.js';
 import gradeRoutes from './routes/grade.route.js';
 import scolariteDashboardRoutes from './routes/statistic-scolarite.route.js';
+import statisticStudentRoutes from './routes/statistic-student.route.js';
+
 
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from './config/swagger.js';
@@ -57,6 +59,8 @@ app.use("/api/v1/courses",authorize, courseRoutes);
 app.use("/api/v1/enrollments", authorize, enrollmentRoutes);
 app.use('/api/v1/grades', authorize, gradeRoutes);
 app.use('/api/v1/dashboard/scolarite', scolariteDashboardRoutes);
+app.use('/api/v1/studentdashboard', authorize, statisticStudentRoutes);
+
 // add routes statistics here
 
 

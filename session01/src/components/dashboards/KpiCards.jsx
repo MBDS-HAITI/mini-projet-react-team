@@ -1,5 +1,4 @@
 // src/components/pages/AdminDashboard.jsx (ou ton chemin)
-import { useMemo } from "react";
 
 import StatCard from "../widgets/StatCard";
 
@@ -9,17 +8,19 @@ import Box from "@mui/material/Box";
 
 
 
-export default function KpiCards({dashboards}) {
-  console.log({dashboards});
-  
+export default function KpiCards({ dashboards }) {
+  const total = dashboards?.length ?? 0;
 
   return (
     <Box
       sx={{
         display: "grid",
-        width:"100%",
-        gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" },
+        width: "100%",
         gap: 2,
+        gridTemplateColumns: {
+          xs: "repeat(2, 1fr)",
+          sm: total <= 2 ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+        },
       }}
     >
       {dashboards.map((item) => (
@@ -28,7 +29,7 @@ export default function KpiCards({dashboards}) {
           title={item.title}
           value={item.value}
           subtitle={item.subtitle}
-           hint={item.hint}
+          hint={item.hint}
           icon={typeof item.icon === "function" ? item.icon : null}
           valueColor={item.valueColor}
         />
@@ -36,3 +37,4 @@ export default function KpiCards({dashboards}) {
     </Box>
   );
 }
+
