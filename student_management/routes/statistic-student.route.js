@@ -2,7 +2,7 @@
 import { Router } from "express";
 import {
   getMyDashboardGrades, 
-} from "../controllers/grade.controller.js";
+} from "../controllers/statistic-student.controller.js";
 
 
 
