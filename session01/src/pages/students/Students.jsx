@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { deleteStudent, getAllStudents } from "../../api/routes/student.api.js";
+import { useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +9,8 @@ import {
   TablePagination,
   IconButton,
   TableContainer,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { formatDate } from "../../utils/fdate";
@@ -18,11 +19,17 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import UpsertStudentModal from "./UpsertStudentModal.jsx";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import Container from "../../components/layout/Container.jsx";
+import { useStudents, useDeleteStudent, STUDENTS_QUERY_KEY } from "../../api/hooks/useStudents.js";
+import { useQueryClient } from "@tanstack/react-query";
+import Loading from "../../components/common/Loading.jsx";
 
 export default function StudentsPage() {
   const theme = useTheme();
+  const queryClient = useQueryClient();
 
-  const [students, setStudents] = useState([]);
+  // React Query hooks
+  const { data: students = [], isLoading, error } = useStudents();
+  const deleteStudentMutation = useDeleteStudent();
 
   const [openUpsert, setOpenUpsert] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -32,7 +39,6 @@ export default function StudentsPage() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -40,14 +46,12 @@ export default function StudentsPage() {
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-  const fetchStudents = async () => {
-    const result = await getAllStudents();
-    setStudents(result);
+  // Fonction pour rafraîchir manuellement les données
+  const refetchStudents = () => {
+    queryClient.invalidateQueries({
+      queryKey: STUDENTS_QUERY_KEY,
+    });
   };
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   const filteredStudents = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -105,14 +109,12 @@ export default function StudentsPage() {
 
   const confirmDelete = async () => {
     if (!toDelete?._id) return;
-    setIsDeleting(true);
     try {
-      await deleteStudent(toDelete._id);
-      await fetchStudents();
+      await deleteStudentMutation.mutateAsync(toDelete._id);
       setConfirmOpen(false);
       setToDelete(null);
-    } finally {
-      setIsDeleting(false);
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err);
     }
   };
 
@@ -141,9 +143,24 @@ export default function StudentsPage() {
         onAdd={onAdd}
         setPage={setPage}
       >
-        {/* wrapper transparent OK, mais couleurs = thème */}
-        <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
-          <TableContainer>
+        {/* Affichage du loading */}
+        {isLoading && (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+            <Loading />
+          </Box>
+        )}
+
+        {/* Affichage de l'erreur */}
+        {error && (
+          <Box sx={{ color: "error.main", p: 2 }}>
+            Erreur lors du chargement des données: {error.message}
+          </Box>
+        )}
+
+        {/* Tableau */}
+        {!isLoading && !error && (
+          <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
+            <TableContainer>
             <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow>
@@ -275,6 +292,7 @@ export default function StudentsPage() {
             }}
           />
         </Paper>
+        )}
       </Container>
 
       <UpsertStudentModal
@@ -282,7 +300,7 @@ export default function StudentsPage() {
         onClose={() => setOpenUpsert(false)}
         mode={selectedStudent ? "edit" : "create"}
         data={selectedStudent}
-        onSuccess={fetchStudents}
+        onSuccess={refetchStudents}
       />
 
       <ConfirmDialog
@@ -297,10 +315,10 @@ export default function StudentsPage() {
             ?
           </>
         }
-        visible={!isDeleting}
-        onClose={() => !isDeleting && setConfirmOpen(false)}
+        visible={!deleteStudentMutation.isPending}
+        onClose={() => !deleteStudentMutation.isPending && setConfirmOpen(false)}
         onConfirm={confirmDelete}
-        loading={isDeleting}
+        loading={deleteStudentMutation.isPending}
       />
     </>
   );

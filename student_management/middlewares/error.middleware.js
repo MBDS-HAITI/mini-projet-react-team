@@ -1,7 +1,5 @@
 const errorMiddleware = (err, req, res, next) => {
   try {
-    console.error(err);
-
     let error = {
       statusCode: err.statusCode || 500,
       message: err.message || "Server Error",

@@ -1,15 +1,109 @@
-import { useMemo } from "react";
+// src/pages/profile/ProfilePage.jsx
+import * as React from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthProvider";
 import { formatDate } from "../../utils/fdate";
 import { API_BASE_URL } from "../../config/env";
+import PasswordChangeModal from "./PasswordChangeModal";
+
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Divider,
+  Skeleton,
+} from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+
+function SurfaceCard({ sx, children }) {
+  const theme = useTheme();
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: "blur(12px)",
+        boxShadow: theme.shadows[2],
+        ...sx,
+      }}
+    >
+      {children}
+    </Paper>
+  );
+}
+
+function InfoTile({ label, value, valueColor }) {
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: alpha(theme.palette.background.paper, 0.55),
+        p: 1.5,
+      }}
+    >
+      <Typography
+        sx={{ fontSize: 12, fontWeight: 800, color: "text.secondary" }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        sx={{
+          mt: 0.5,
+          fontSize: 14,
+          fontWeight: 900,
+          color: valueColor || "text.primary",
+          lineHeight: 1.2,
+          wordBreak: "break-word",
+        }}
+      >
+        {value}
+      </Typography>
+    </Box>
+  );
+}
 
 export default function ProfilePage() {
+  const theme = useTheme();
   const { user, loading } = useAuth();
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
+  const pageShellSx = {
+    px: { xs: 2, md: 4 },
+    py: { xs: 3, md: 4 },
+  };
+
+  const mainCardSx = {
+    mx: "auto",
+    maxWidth: 1100,
+    p: { xs: 2.5, md: 3 },
+    boxShadow: theme.palette.effects?.containerShadow ?? theme.shadows[10],
+  };
 
   const meta = useMemo(() => {
     if (!user) return null;
-    const providerNames =
-      user.providers?.length ? user.providers.map((p) => p.provider || p.name || p).join(", ") : "Aucun";
+    console.log(user.providers);
+
+    // provider info  {type: 'google', providerId: '116916889216238166341', email: 'stanleylafleur32@gmail.com'}
+
+    const providerNames = user.providers?.length
+      ? user.providers.map((p) => p.type).join(", ")
+      : "Aucun";
+
+    const hasGoogle = (user.providers || []).some((p) => p?.type === "google");
+    const mailGoogleProvider =
+      (user.providers || []).find((p) => p?.type === "google")?.email || "";
+
     return {
       id: user._id,
       username: user.username,
@@ -21,291 +115,628 @@ export default function ProfilePage() {
       createdAt: user.createdAt ? formatDate(user.createdAt) : "-",
       updatedAt: user.updatedAt ? formatDate(user.updatedAt) : "-",
       providers: providerNames,
-      hasGoogle: (user.providers || []).some((p) => p?.type === "google"),
+      hasGoogle,
+      mailGoogleProvider,
     };
   }, [user]);
-  
-  if (loading) {
-    return (
-      <div className="p-4 md:p-8">
-        <div className="w-full max-w-5xl mx-auto backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-7 w-48 bg-white/10 rounded" />
-            <div className="h-4 w-72 bg-white/10 rounded" />
-            <div className="h-40 bg-white/10 rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  if (!user || !meta) {
-    return (
-      <div className="p-4 md:p-8">
-        <div className="w-full max-w-5xl mx-auto backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6 text-white">
-          <h1 className="text-2xl font-bold">Profil</h1>
-          <p className="text-white/70 mt-2">Aucun utilisateur connecté.</p>
-        </div>
-      </div>
-    );
-  }
+  // Password modal handlers
+  const handleOpenPasswordModal = () => {
+    setOpenPasswordModal(true);
+  };
 
-  const handleEditEmail = () => console.log("Edit email (autorisé)");
-  const handleToggleActive = () => console.log("Toggle active (admin?)");
-  const handleVerifyEmail = () => console.log("Send verify email");
-  const handleResetPassword = () => console.log("Reset password");
+  const handleClosePasswordModal = () => {
+    setOpenPasswordModal(false);
+  };
+
+  // Actions (tu peux brancher tes vraies fonctions)
+  const handleEditEmail = () => alert("Edit email non disponible");
+  // const handleToggleActive = () => console.log("Toggle active (admin?)");
+  // const handleVerifyEmail = () => console.log("Send verify email");
+  const handleResetPassword = () => handleOpenPasswordModal();
   const handleLinkGoogle = () => {
     window.location.href = `${API_BASE_URL}/oauths/google/link`;
   };
   const handleUnlinkGoogle = () => console.log("Unlink Google provider");
 
-  return (
-    <div className="p-4 md:p-8">
-      <div className="w-full max-w-5xl mx-auto backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="text-white">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Mon profil
-            </h1>
-            <p className="text-white/70 mt-1">
-              Gérez vos informations et vos méthodes de connexion.
-            </p>
-          </div>
+  if (loading) {
+    return (
+      <Box sx={pageShellSx}>
+        <SurfaceCard sx={mainCardSx}>
+          <Stack spacing={2}>
+            <Box>
+              <Skeleton variant="text" width={220} height={34} />
+              <Skeleton variant="text" width={420} height={20} />
+            </Box>
+            <Skeleton variant="rounded" height={220} />
+            <Skeleton variant="rounded" height={160} />
+          </Stack>
+        </SurfaceCard>
+      </Box>
+    );
+  }
 
-          {/* Actions principales */}
-          <div className="flex flex-wrap gap-2">
-            <button
+  if (!user || !meta) {
+    return (
+      <Box sx={pageShellSx}>
+        <SurfaceCard sx={mainCardSx}>
+          <Typography
+            sx={{ fontSize: 26, fontWeight: 900, color: "text.primary" }}
+          >
+            Profil
+          </Typography>
+          <Typography sx={{ mt: 1, color: "text.secondary" }}>
+            Aucun utilisateur connecté.
+          </Typography>
+        </SurfaceCard>
+      </Box>
+    );
+  }
+
+  const initial = (meta.username?.[0] || meta.email?.[0] || "U").toUpperCase();
+
+  return (
+    <Box sx={pageShellSx}>
+      <SurfaceCard sx={mainCardSx}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { md: "center" },
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              sx={{
+                fontSize: { xs: 24, md: 30 },
+                fontWeight: 950,
+                color: "text.primary",
+              }}
+            >
+              Mon profil
+            </Typography>
+            <Typography sx={{ mt: 0.5, fontSize: 14, color: "text.secondary" }}>
+              Gérez vos informations et vos méthodes de connexion.
+            </Typography>
+          </Box>
+
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Button
               onClick={handleResetPassword}
-              className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                         border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 900,
+                borderColor: "divider",
+                color: "text.primary",
+                backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                backdropFilter: "blur(12px)",
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  borderColor: "divider",
+                },
+              }}
             >
               Changer mot de passe
-            </button>
+            </Button>
 
-            <button
+            {/* <Button
               onClick={handleVerifyEmail}
-              className="px-4 py-2 rounded-lg bg-linear-to-r from-purple-500 to-indigo-500
-                         hover:opacity-90 text-white text-sm font-semibold transition"
+              variant="contained"
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 950,
+                color: "#fff",
+                boxShadow: "none",
+                background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                "&:hover": {
+                  opacity: 0.92,
+                  boxShadow: "none",
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                },
+              }}
             >
               Vérifier email
-            </button>
-          </div>
-        </div>
+            </Button> */}
+          </Stack>
+        </Box>
+
+        <Divider sx={{ my: 2.5, borderColor: "divider" }} />
 
         {/* Content */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: identity card */}
-          <div className="lg:col-span-1">
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-5 text-white">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-linear-to-r from-purple-500/60 to-indigo-500/60 border border-white/20 flex items-center justify-center font-bold">
-                  {(meta.username?.[0] || meta.email?.[0] || "U").toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-lg font-bold">{meta.username}</div>
-                  <div className="text-white/70 text-sm">{meta.email}</div>
-                </div>
-              </div>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 2fr" },
+            gap: 2,
+            alignItems: "start",
+          }}
+        >
+          {/* Left column */}
+          <Stack spacing={2}>
+            {/* Identity */}
+            <SurfaceCard sx={{ p: 2.5 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    height: 48,
+                    width: 48,
+                    borderRadius: 2.5,
+                    display: "grid",
+                    placeItems: "center",
+                    fontWeight: 950,
+                    color: "#fff",
+                    border: "1px solid",
+                    borderColor: alpha(theme.palette.common.white, 0.18),
+                    background: `linear-gradient(90deg, ${alpha(
+                      theme.palette.primary.main,
+                      0.75
+                    )}, ${alpha(theme.palette.secondary.main, 0.75)})`,
+                  }}
+                >
+                  {initial}
+                </Box>
 
-              <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                  <div className="text-white/60">Rôle</div>
-                  <div className="font-semibold">{meta.role}</div>
-                </div>
-                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                  <div className="text-white/60">Statut</div>
-                  <div className="font-semibold">{meta.isActive}</div>
-                </div>
-                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                  <div className="text-white/60">Email</div>
-                  <div className="font-semibold">{meta.mailVerified}</div>
-                </div>
-                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                  <div className="text-white/60">Dernière connexion</div>
-                  <div className="font-semibold">{meta.lastLoginAt}</div>
-                </div>
-              </div>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 16,
+                      fontWeight: 950,
+                      color: "text.primary",
+                    }}
+                    noWrap
+                  >
+                    {meta.username}
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: 13, color: "text.secondary" }}
+                    noWrap
+                  >
+                    {meta.email}
+                  </Typography>
+                </Box>
+              </Box>
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 1.2,
+                }}
+              >
+                <InfoTile label="Rôle" value={meta.role} />
+                <InfoTile
+                  label="Statut"
+                  value={meta.isActive}
+                  valueColor={
+                    meta.isActive === "Actif" ? "success.main" : "text.primary"
+                  }
+                />
+                <InfoTile
+                  label="Email"
+                  value={meta.mailVerified}
+                  valueColor={
+                    meta.mailVerified === "Vérifié"
+                      ? "success.main"
+                      : "warning.main"
+                  }
+                />
+                <InfoTile label="Dernière connexion" value={meta.lastLoginAt} />
+              </Box>
+
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 2, flexWrap: "wrap" }}
+              >
+                <Button
                   onClick={handleEditEmail}
-                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                             border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 900,
+                    borderColor: "divider",
+                    color: "text.primary",
+                    backgroundColor: alpha(
+                      theme.palette.background.paper,
+                      0.55
+                    ),
+                    backdropFilter: "blur(12px)",
+                    "&:hover": {
+                      backgroundColor: theme.palette.action.hover,
+                      borderColor: "divider",
+                    },
+                  }}
                 >
                   Modifier email
-                </button>
-
-              </div>
-            </div>
+                </Button>
+              </Stack>
+            </SurfaceCard>
 
             {/* Audit */}
-            <div className="mt-4 rounded-2xl border border-white/15 bg-white/5 p-5 text-white">
-              <div className="text-sm font-bold">Informations</div>
-              <div className="mt-3 text-sm text-white/80 space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-white/60">Créé le</span>
-                  <span>{meta.createdAt}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-white/60">Modifié le</span>
-                  <span>{meta.updatedAt}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+            <SurfaceCard sx={{ p: 2.5 }}>
+              <Typography
+                sx={{ fontSize: 14, fontWeight: 950, color: "text.primary" }}
+              >
+                Informations
+              </Typography>
 
-          {/* Right: providers + security */}
-          <div className="lg:col-span-2 space-y-6">
+              <Stack spacing={1.2} sx={{ mt: 1.5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    Créé le
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: "text.primary",
+                    }}
+                  >
+                    {meta.createdAt}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    Modifié le
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: "text.primary",
+                    }}
+                  >
+                    {meta.updatedAt}
+                  </Typography>
+                </Box>
+              </Stack>
+            </SurfaceCard>
+          </Stack>
+
+          {/* Right column */}
+          <Stack spacing={2}>
             {/* Providers */}
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-5 text-white">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-lg font-bold">Méthodes de connexion</div>
-                  <div className="text-white/70 text-sm mt-1">
+            <SurfaceCard sx={{ p: 2.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  alignItems: { md: "flex-start" },
+                  justifyContent: "space-between",
+                  gap: 1,
+                }}
+              >
+                <Box>
+                  <Typography
+                    sx={{
+                      fontSize: 18,
+                      fontWeight: 950,
+                      color: "text.primary",
+                    }}
+                  >
+                    Méthodes de connexion
+                  </Typography>
+                  <Typography
+                    sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+                  >
                     Ajoutez Google pour vous connecter plus facilement.
-                  </div>
-                </div>
+                  </Typography>
+                </Box>
 
-                <div className="text-xs text-white/60">
-                  Providers: <span className="text-white/80">{meta.providers}</span>
-                </div>
-              </div>
+                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                  Providers:{" "}
+                  <Box
+                    component="span"
+                    sx={{ color: "text.primary", fontWeight: 900 }}
+                  >
+                    {meta.providers}
+                  </Box>
+                </Typography>
+              </Box>
 
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Google card */}
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold">Google</div>
-                      <div className="text-white/70 text-sm">
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 1.5,
+                }}
+              >
+                {/* Google */}
+                <SurfaceCard sx={{ p: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 1,
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        sx={{ fontWeight: 950, color: "text.primary" }}
+                      >
+                        Google
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13, color: "text.secondary" }}
+                      >
                         {meta.hasGoogle ? "Connecté" : "Non connecté"}
-                      </div>
-                    </div>
+                      </Typography>
+                    </Box>
 
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full border ${
-                        meta.hasGoogle
-                          ? "border-emerald-400/30 text-emerald-200 bg-emerald-400/10"
-                          : "border-white/20 text-white/70 bg-white/5"
-                      }`}
-                    >
-                      {meta.hasGoogle ? "Actif" : "Inactif"}
-                    </span>
-                  </div>
+                    <Chip
+                      size="small"
+                      label={meta.hasGoogle ? "Actif" : "Inactif"}
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 950,
+                        color: meta.hasGoogle
+                          ? "success.main"
+                          : "text.secondary",
+                        borderColor: meta.hasGoogle
+                          ? alpha(theme.palette.success.main, 0.35)
+                          : "divider",
+                        backgroundColor: meta.hasGoogle
+                          ? alpha(theme.palette.success.main, 0.1)
+                          : alpha(theme.palette.background.paper, 0.25),
+                      }}
+                    />
+                  </Box>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {!meta.hasGoogle ? (
-                      <button
+                  {meta.hasGoogle && (
+                    <Box sx={{pt:2}}>
+                      <Typography
+                        sx={{ fontWeight: 950, color: "text.primary" }}
+                      >
+                        Compte Google utilisé
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13, color: "text.secondary" }}
+                      >
+                        {meta.mailGoogleProvider}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 2, flexWrap: "wrap" }}
+                  >
+                    {!meta.hasGoogle && (
+                      <Button
                         onClick={handleLinkGoogle}
-                        className="px-4 py-2 rounded-lg bg-linear-to-r from-purple-500 to-indigo-500
-                                   hover:opacity-90 text-white text-sm font-semibold transition"
+                        variant="contained"
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: "none",
+                          fontWeight: 950,
+                          color: "#fff",
+                          boxShadow: "none",
+                          background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          "&:hover": {
+                            opacity: 0.92,
+                            boxShadow: "none",
+                            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          },
+                        }}
                       >
                         + Ajouter Google
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleUnlinkGoogle}
-                        className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                                   border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
-                      >
-                        Retirer Google
-                      </button>
+                      </Button>
                     )}
-                  </div>
+                  </Stack>
 
-                  <p className="mt-3 text-xs text-white/60">
-                    Clique sur “Ajouter Google” pour lier ton compte via OAuth (redirection backend).
-                  </p>
-                </div>
+                  {!meta.hasGoogle && <Typography
+                    sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}
+                  >
+                    Clique sur “Ajouter Google” pour lier ton compte via OAuth .
+                  </Typography>}
+                </SurfaceCard>
 
-                {/* Email/Password card */}
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <div className="font-semibold">Email & mot de passe</div>
-                  <div className="text-white/70 text-sm mt-1">
+                {/* Email / password */}
+                <SurfaceCard sx={{ p: 2 }}>
+                  <Typography sx={{ fontWeight: 950, color: "text.primary" }}>
+                    Email & mot de passe
+                  </Typography>
+                  <Typography
+                    sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+                  >
                     Gérez votre mot de passe et la vérification email.
-                  </div>
+                  </Typography>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 2, flexWrap: "wrap" }}
+                  >
+                    <Button
                       onClick={handleResetPassword}
-                      className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                                 border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 900,
+                        borderColor: "divider",
+                        color: "text.primary",
+                        backgroundColor: alpha(
+                          theme.palette.background.paper,
+                          0.55
+                        ),
+                        backdropFilter: "blur(12px)",
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                          borderColor: "divider",
+                        },
+                      }}
                     >
                       Changer mot de passe
-                    </button>
+                    </Button>
 
-                    <button
+                    {/* <Button
                       onClick={handleVerifyEmail}
-                      className="px-4 py-2 rounded-lg bg-linear-to-r from-purple-500 to-indigo-500
-                                 hover:opacity-90 text-white text-sm font-semibold transition"
+                      variant="contained"
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: "none",
+                        fontWeight: 950,
+                        color: "#fff",
+                        boxShadow: "none",
+                        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        "&:hover": {
+                          opacity: 0.92,
+                          boxShadow: "none",
+                          background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        },
+                      }}
                     >
                       Vérifier email
-                    </button>
-                  </div>
+                    </Button> */}
+                  </Stack>
 
-                  <p className="mt-3 text-xs text-white/60">
-                    Une fois l’email vérifié, tu peux renforcer la sécurité et récupérer ton compte plus facilement.
-                  </p>
-                </div>
-              </div>
-            </div>
+                  {/* <Typography
+                    sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}
+                  >
+                    Une fois l’email vérifié, tu peux renforcer la sécurité et
+                    récupérer ton compte plus facilement.
+                  </Typography> */}
+                </SurfaceCard>
+              </Box>
+            </SurfaceCard>
 
             {/* Editable fields */}
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-5 text-white">
-              <div className="text-lg font-bold">Modifier le profil</div>
-              <div className="text-white/70 text-sm mt-1">
-                Actions autorisées (selon ton backend : username non modifiable).
-              </div>
+            <SurfaceCard sx={{ p: 2.5 }}>
+              <Typography
+                sx={{ fontSize: 18, fontWeight: 950, color: "text.primary" }}
+              >
+                Modifier le profil
+              </Typography>
+              <Typography
+                sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+              >
+                Actions autorisées (selon ton backend : username non
+                modifiable).
+              </Typography>
 
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <div className="text-sm text-white/60">Email</div>
-                  <div className="font-semibold">{meta.email}</div>
-                  <button
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 1.5,
+                }}
+              >
+                <SurfaceCard sx={{ p: 2 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "text.secondary",
+                    }}
+                  >
+                    Email
+                  </Typography>
+                  <Typography
+                    sx={{ mt: 0.5, fontWeight: 950, color: "text.primary" }}
+                  >
+                    {meta.email}
+                  </Typography>
+
+                  <Button
                     onClick={handleEditEmail}
-                    className="mt-3 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                               border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
+                    variant="outlined"
+                    sx={{
+                      mt: 1.5,
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 900,
+                      borderColor: "divider",
+                      color: "text.primary",
+                      backgroundColor: alpha(
+                        theme.palette.background.paper,
+                        0.55
+                      ),
+                      backdropFilter: "blur(12px)",
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                        borderColor: "divider",
+                      },
+                    }}
                   >
                     Modifier email
-                  </button>
-                </div>
+                  </Button>
+                </SurfaceCard>
 
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <div className="text-sm text-white/60">Compte</div>
-                  <div className="text-white/80 text-sm mt-1">
-                    Username: <span className="font-semibold">{meta.username}</span> (non modifiable)
-                  </div>
-                  <div className="text-white/80 text-sm mt-1">
-                    Statut: <span className="font-semibold">{meta.isActive}</span>
-                  </div>
+                <SurfaceCard sx={{ p: 2 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "text.secondary",
+                    }}
+                  >
+                    Compte
+                  </Typography>
 
-                  {meta.role === "ADMIN" ? (
-                    <button
-                      onClick={handleToggleActive}
-                      className="mt-3 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 active:bg-white/20
-                                 border border-white/15 hover:border-white/25 text-white text-sm font-semibold transition"
+                  <Typography
+                    sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}
+                  >
+                    Username:{" "}
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 950 }}
                     >
-                      Activer/Désactiver
-                    </button>
-                  ) : (
-                    <div className="mt-3 text-xs text-white/60">
-                      Seul un admin peut activer/désactiver un compte.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+                      {meta.username}
+                    </Box>{" "}
+                    (non modifiable)
+                  </Typography>
 
-          </div>
-        </div>
+                  <Typography
+                    sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}
+                  >
+                    Statut:{" "}
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 950 }}
+                    >
+                      {meta.isActive}
+                    </Box>
+                  </Typography>
 
-        {/* Footer helper */}
-        <div className="mt-6 text-center text-xs text-white/60">
-          Astuce: pour lier Google, crée côté backend une route OAuth (ex: <span className="font-mono">/auth/google</span>)
-          puis redirige l’utilisateur depuis “Ajouter Google”.
-        </div>
-      </div>
-    </div>
+                  
+                </SurfaceCard>
+              </Box>
+            </SurfaceCard>
+          </Stack>
+        </Box>
+      </SurfaceCard>
+
+      {/* Password Change Modal Component */}
+      <PasswordChangeModal
+        open={openPasswordModal}
+        onClose={handleClosePasswordModal}
+      />
+    </Box>
   );
 }

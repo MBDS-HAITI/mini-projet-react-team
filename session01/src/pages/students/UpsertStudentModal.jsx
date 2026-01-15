@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { validateStudent } from "../../utils/validate-student";
 import {
   Dialog,
@@ -21,7 +21,7 @@ import {
 } from "../../utils/fieldStylesSx";
 import { toDateInputValue, toISOStartOfDay } from "../../utils/helpers";
 import { FormField } from "../../components/widgets/CustomFormField";
-import { createStudent, updateStudent } from "../../api/routes/student.api";
+import { useCreateStudent, useUpdateStudent } from "../../api/hooks/useStudents";
 
 export default function UpsertStudentModal({
   open,
@@ -31,8 +31,10 @@ export default function UpsertStudentModal({
   onSuccess, // callback après save (refresh liste)
 }) {
   const isEdit = mode === "edit";
-  const [serverError, setServerError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createMutation = useCreateStudent();
+  const updateMutation = useUpdateStudent();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const serverError = createMutation.error?.message || updateMutation.error?.message || "";
 
   const id = data?._id || data?.id;
 
@@ -56,8 +58,6 @@ export default function UpsertStudentModal({
     initialValues,
     validate: validateStudent,
     onSubmit: async (values) => {
-      setServerError("");
-      setIsSubmitting(true);
       try {
         const payload = {
           firstName: values.firstName,
@@ -70,21 +70,22 @@ export default function UpsertStudentModal({
           haveAccount: values.haveAccount,
         };
 
-        if (isEdit) await updateStudent(id, payload);
-        else await createStudent(payload);
+        if (isEdit) {
+          await updateMutation.mutateAsync({ id, data: payload });
+        } else {
+          await createMutation.mutateAsync(payload);
+        }
+        
         onSuccess?.();
         onClose();
       } catch (e) {
-        setServerError(e?.message || "Erreur lors de l’enregistrement");
-      } finally {
-        setIsSubmitting(false);
+        console.error("Erreur lors de l'enregistrement:", e);
       }
     },
   });
 
   useEffect(() => {
     if (!open) {
-      setServerError("");
       formik.resetForm();
     }
   }, [open]);
