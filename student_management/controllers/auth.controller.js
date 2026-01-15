@@ -22,7 +22,7 @@ export const signIn = async (req, res, next) => {
       throw error;
     }
 
-    // (Optionnel) bloquer comptes inactifs
+    // bloquer comptes inactifs
     if (user.isActive === false) {
       const error = new Error("Account is disabled");
       error.statusCode = 403;
