@@ -1,9 +1,10 @@
 // src/pages/profile/ProfilePage.jsx
 import * as React from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthProvider";
 import { formatDate } from "../../utils/fdate";
 import { API_BASE_URL } from "../../config/env";
+import PasswordChangeModal from "./PasswordChangeModal";
 
 import {
   Box,
@@ -51,7 +52,9 @@ function InfoTile({ label, value, valueColor }) {
         p: 1.5,
       }}
     >
-      <Typography sx={{ fontSize: 12, fontWeight: 800, color: "text.secondary" }}>
+      <Typography
+        sx={{ fontSize: 12, fontWeight: 800, color: "text.secondary" }}
+      >
         {label}
       </Typography>
       <Typography
@@ -73,6 +76,7 @@ function InfoTile({ label, value, valueColor }) {
 export default function ProfilePage() {
   const theme = useTheme();
   const { user, loading } = useAuth();
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
   const pageShellSx = {
     px: { xs: 2, md: 4 },
@@ -88,12 +92,17 @@ export default function ProfilePage() {
 
   const meta = useMemo(() => {
     if (!user) return null;
+    console.log(user.providers);
+
+    // provider info  {type: 'google', providerId: '116916889216238166341', email: 'stanleylafleur32@gmail.com'}
 
     const providerNames = user.providers?.length
-      ? user.providers.map((p) => p.provider || p.name || p).join(", ")
+      ? user.providers.map((p) => p.type).join(", ")
       : "Aucun";
 
     const hasGoogle = (user.providers || []).some((p) => p?.type === "google");
+    const mailGoogleProvider =
+      (user.providers || []).find((p) => p?.type === "google")?.email || "";
 
     return {
       id: user._id,
@@ -107,14 +116,24 @@ export default function ProfilePage() {
       updatedAt: user.updatedAt ? formatDate(user.updatedAt) : "-",
       providers: providerNames,
       hasGoogle,
+      mailGoogleProvider,
     };
   }, [user]);
 
+  // Password modal handlers
+  const handleOpenPasswordModal = () => {
+    setOpenPasswordModal(true);
+  };
+
+  const handleClosePasswordModal = () => {
+    setOpenPasswordModal(false);
+  };
+
   // Actions (tu peux brancher tes vraies fonctions)
-  const handleEditEmail = () => console.log("Edit email (autorisé)");
-  const handleToggleActive = () => console.log("Toggle active (admin?)");
-  const handleVerifyEmail = () => console.log("Send verify email");
-  const handleResetPassword = () => console.log("Reset password");
+  const handleEditEmail = () => alert("Edit email non disponible");
+  // const handleToggleActive = () => console.log("Toggle active (admin?)");
+  // const handleVerifyEmail = () => console.log("Send verify email");
+  const handleResetPassword = () => handleOpenPasswordModal();
   const handleLinkGoogle = () => {
     window.location.href = `${API_BASE_URL}/oauths/google/link`;
   };
@@ -141,7 +160,9 @@ export default function ProfilePage() {
     return (
       <Box sx={pageShellSx}>
         <SurfaceCard sx={mainCardSx}>
-          <Typography sx={{ fontSize: 26, fontWeight: 900, color: "text.primary" }}>
+          <Typography
+            sx={{ fontSize: 26, fontWeight: 900, color: "text.primary" }}
+          >
             Profil
           </Typography>
           <Typography sx={{ mt: 1, color: "text.secondary" }}>
@@ -168,7 +189,13 @@ export default function ProfilePage() {
           }}
         >
           <Box>
-            <Typography sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 950, color: "text.primary" }}>
+            <Typography
+              sx={{
+                fontSize: { xs: 24, md: 30 },
+                fontWeight: 950,
+                color: "text.primary",
+              }}
+            >
               Mon profil
             </Typography>
             <Typography sx={{ mt: 0.5, fontSize: 14, color: "text.secondary" }}>
@@ -188,13 +215,16 @@ export default function ProfilePage() {
                 color: "text.primary",
                 backgroundColor: alpha(theme.palette.background.paper, 0.55),
                 backdropFilter: "blur(12px)",
-                "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  borderColor: "divider",
+                },
               }}
             >
               Changer mot de passe
             </Button>
 
-            <Button
+            {/* <Button
               onClick={handleVerifyEmail}
               variant="contained"
               sx={{
@@ -212,7 +242,7 @@ export default function ProfilePage() {
               }}
             >
               Vérifier email
-            </Button>
+            </Button> */}
           </Stack>
         </Box>
 
@@ -243,20 +273,30 @@ export default function ProfilePage() {
                     color: "#fff",
                     border: "1px solid",
                     borderColor: alpha(theme.palette.common.white, 0.18),
-                    background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.75)}, ${alpha(
-                      theme.palette.secondary.main,
+                    background: `linear-gradient(90deg, ${alpha(
+                      theme.palette.primary.main,
                       0.75
-                    )})`,
+                    )}, ${alpha(theme.palette.secondary.main, 0.75)})`,
                   }}
                 >
                   {initial}
                 </Box>
 
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 16, fontWeight: 950, color: "text.primary" }} noWrap>
+                  <Typography
+                    sx={{
+                      fontSize: 16,
+                      fontWeight: 950,
+                      color: "text.primary",
+                    }}
+                    noWrap
+                  >
                     {meta.username}
                   </Typography>
-                  <Typography sx={{ fontSize: 13, color: "text.secondary" }} noWrap>
+                  <Typography
+                    sx={{ fontSize: 13, color: "text.secondary" }}
+                    noWrap
+                  >
                     {meta.email}
                   </Typography>
                 </Box>
@@ -274,17 +314,27 @@ export default function ProfilePage() {
                 <InfoTile
                   label="Statut"
                   value={meta.isActive}
-                  valueColor={meta.isActive === "Actif" ? "success.main" : "text.primary"}
+                  valueColor={
+                    meta.isActive === "Actif" ? "success.main" : "text.primary"
+                  }
                 />
                 <InfoTile
                   label="Email"
                   value={meta.mailVerified}
-                  valueColor={meta.mailVerified === "Vérifié" ? "success.main" : "warning.main"}
+                  valueColor={
+                    meta.mailVerified === "Vérifié"
+                      ? "success.main"
+                      : "warning.main"
+                  }
                 />
                 <InfoTile label="Dernière connexion" value={meta.lastLoginAt} />
               </Box>
 
-              <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 2, flexWrap: "wrap" }}
+              >
                 <Button
                   onClick={handleEditEmail}
                   variant="outlined"
@@ -294,9 +344,15 @@ export default function ProfilePage() {
                     fontWeight: 900,
                     borderColor: "divider",
                     color: "text.primary",
-                    backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                    backgroundColor: alpha(
+                      theme.palette.background.paper,
+                      0.55
+                    ),
                     backdropFilter: "blur(12px)",
-                    "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
+                    "&:hover": {
+                      backgroundColor: theme.palette.action.hover,
+                      borderColor: "divider",
+                    },
                   }}
                 >
                   Modifier email
@@ -306,21 +362,51 @@ export default function ProfilePage() {
 
             {/* Audit */}
             <SurfaceCard sx={{ p: 2.5 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 950, color: "text.primary" }}>
+              <Typography
+                sx={{ fontSize: 14, fontWeight: 950, color: "text.primary" }}
+              >
                 Informations
               </Typography>
 
               <Stack spacing={1.2} sx={{ mt: 1.5 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
-                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>Créé le</Typography>
-                  <Typography sx={{ fontSize: 13, fontWeight: 800, color: "text.primary" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    Créé le
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: "text.primary",
+                    }}
+                  >
                     {meta.createdAt}
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
-                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>Modifié le</Typography>
-                  <Typography sx={{ fontSize: 13, fontWeight: 800, color: "text.primary" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    Modifié le
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: "text.primary",
+                    }}
+                  >
                     {meta.updatedAt}
                   </Typography>
                 </Box>
@@ -342,16 +428,30 @@ export default function ProfilePage() {
                 }}
               >
                 <Box>
-                  <Typography sx={{ fontSize: 18, fontWeight: 950, color: "text.primary" }}>
+                  <Typography
+                    sx={{
+                      fontSize: 18,
+                      fontWeight: 950,
+                      color: "text.primary",
+                    }}
+                  >
                     Méthodes de connexion
                   </Typography>
-                  <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>
+                  <Typography
+                    sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+                  >
                     Ajoutez Google pour vous connecter plus facilement.
                   </Typography>
                 </Box>
 
                 <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                  Providers: <Box component="span" sx={{ color: "text.primary", fontWeight: 900 }}>{meta.providers}</Box>
+                  Providers:{" "}
+                  <Box
+                    component="span"
+                    sx={{ color: "text.primary", fontWeight: 900 }}
+                  >
+                    {meta.providers}
+                  </Box>
                 </Typography>
               </Box>
 
@@ -365,10 +465,23 @@ export default function ProfilePage() {
               >
                 {/* Google */}
                 <SurfaceCard sx={{ p: 2 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 1,
+                    }}
+                  >
                     <Box>
-                      <Typography sx={{ fontWeight: 950, color: "text.primary" }}>Google</Typography>
-                      <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                      <Typography
+                        sx={{ fontWeight: 950, color: "text.primary" }}
+                      >
+                        Google
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13, color: "text.secondary" }}
+                      >
                         {meta.hasGoogle ? "Connecté" : "Non connecté"}
                       </Typography>
                     </Box>
@@ -379,19 +492,40 @@ export default function ProfilePage() {
                       variant="outlined"
                       sx={{
                         fontWeight: 950,
-                        color: meta.hasGoogle ? "success.main" : "text.secondary",
+                        color: meta.hasGoogle
+                          ? "success.main"
+                          : "text.secondary",
                         borderColor: meta.hasGoogle
                           ? alpha(theme.palette.success.main, 0.35)
                           : "divider",
                         backgroundColor: meta.hasGoogle
-                          ? alpha(theme.palette.success.main, 0.10)
+                          ? alpha(theme.palette.success.main, 0.1)
                           : alpha(theme.palette.background.paper, 0.25),
                       }}
                     />
                   </Box>
 
-                  <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
-                    {!meta.hasGoogle ? (
+                  {meta.hasGoogle && (
+                    <Box sx={{pt:2}}>
+                      <Typography
+                        sx={{ fontWeight: 950, color: "text.primary" }}
+                      >
+                        Compte Google utilisé
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13, color: "text.secondary" }}
+                      >
+                        {meta.mailGoogleProvider}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 2, flexWrap: "wrap" }}
+                  >
+                    {!meta.hasGoogle && (
                       <Button
                         onClick={handleLinkGoogle}
                         variant="contained"
@@ -411,29 +545,14 @@ export default function ProfilePage() {
                       >
                         + Ajouter Google
                       </Button>
-                    ) : (
-                      <Button
-                        onClick={handleUnlinkGoogle}
-                        variant="outlined"
-                        sx={{
-                          borderRadius: 2,
-                          textTransform: "none",
-                          fontWeight: 900,
-                          borderColor: "divider",
-                          color: "text.primary",
-                          backgroundColor: alpha(theme.palette.background.paper, 0.55),
-                          backdropFilter: "blur(12px)",
-                          "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
-                        }}
-                      >
-                        Retirer Google
-                      </Button>
                     )}
                   </Stack>
 
-                  <Typography sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}>
-                    Clique sur “Ajouter Google” pour lier ton compte via OAuth (redirection backend).
-                  </Typography>
+                  {!meta.hasGoogle && <Typography
+                    sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}
+                  >
+                    Clique sur “Ajouter Google” pour lier ton compte via OAuth .
+                  </Typography>}
                 </SurfaceCard>
 
                 {/* Email / password */}
@@ -441,11 +560,17 @@ export default function ProfilePage() {
                   <Typography sx={{ fontWeight: 950, color: "text.primary" }}>
                     Email & mot de passe
                   </Typography>
-                  <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>
+                  <Typography
+                    sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+                  >
                     Gérez votre mot de passe et la vérification email.
                   </Typography>
 
-                  <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 2, flexWrap: "wrap" }}
+                  >
                     <Button
                       onClick={handleResetPassword}
                       variant="outlined"
@@ -455,15 +580,21 @@ export default function ProfilePage() {
                         fontWeight: 900,
                         borderColor: "divider",
                         color: "text.primary",
-                        backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                        backgroundColor: alpha(
+                          theme.palette.background.paper,
+                          0.55
+                        ),
                         backdropFilter: "blur(12px)",
-                        "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                          borderColor: "divider",
+                        },
                       }}
                     >
                       Changer mot de passe
                     </Button>
 
-                    <Button
+                    {/* <Button
                       onClick={handleVerifyEmail}
                       variant="contained"
                       sx={{
@@ -481,23 +612,31 @@ export default function ProfilePage() {
                       }}
                     >
                       Vérifier email
-                    </Button>
+                    </Button> */}
                   </Stack>
 
-                  <Typography sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}>
-                    Une fois l’email vérifié, tu peux renforcer la sécurité et récupérer ton compte plus facilement.
-                  </Typography>
+                  {/* <Typography
+                    sx={{ mt: 1.5, fontSize: 12, color: "text.secondary" }}
+                  >
+                    Une fois l’email vérifié, tu peux renforcer la sécurité et
+                    récupérer ton compte plus facilement.
+                  </Typography> */}
                 </SurfaceCard>
               </Box>
             </SurfaceCard>
 
             {/* Editable fields */}
             <SurfaceCard sx={{ p: 2.5 }}>
-              <Typography sx={{ fontSize: 18, fontWeight: 950, color: "text.primary" }}>
+              <Typography
+                sx={{ fontSize: 18, fontWeight: 950, color: "text.primary" }}
+              >
                 Modifier le profil
               </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}>
-                Actions autorisées (selon ton backend : username non modifiable).
+              <Typography
+                sx={{ mt: 0.5, fontSize: 13, color: "text.secondary" }}
+              >
+                Actions autorisées (selon ton backend : username non
+                modifiable).
               </Typography>
 
               <Box
@@ -509,10 +648,18 @@ export default function ProfilePage() {
                 }}
               >
                 <SurfaceCard sx={{ p: 2 }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 800, color: "text.secondary" }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "text.secondary",
+                    }}
+                  >
                     Email
                   </Typography>
-                  <Typography sx={{ mt: 0.5, fontWeight: 950, color: "text.primary" }}>
+                  <Typography
+                    sx={{ mt: 0.5, fontWeight: 950, color: "text.primary" }}
+                  >
                     {meta.email}
                   </Typography>
 
@@ -526,9 +673,15 @@ export default function ProfilePage() {
                       fontWeight: 900,
                       borderColor: "divider",
                       color: "text.primary",
-                      backgroundColor: alpha(theme.palette.background.paper, 0.55),
+                      backgroundColor: alpha(
+                        theme.palette.background.paper,
+                        0.55
+                      ),
                       backdropFilter: "blur(12px)",
-                      "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                        borderColor: "divider",
+                      },
                     }}
                   >
                     Modifier email
@@ -536,54 +689,54 @@ export default function ProfilePage() {
                 </SurfaceCard>
 
                 <SurfaceCard sx={{ p: 2 }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 800, color: "text.secondary" }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "text.secondary",
+                    }}
+                  >
                     Compte
                   </Typography>
 
-                  <Typography sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}>
+                  <Typography
+                    sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}
+                  >
                     Username:{" "}
-                    <Box component="span" sx={{ color: "text.primary", fontWeight: 950 }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 950 }}
+                    >
                       {meta.username}
                     </Box>{" "}
                     (non modifiable)
                   </Typography>
 
-                  <Typography sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}>
+                  <Typography
+                    sx={{ mt: 0.8, fontSize: 13, color: "text.secondary" }}
+                  >
                     Statut:{" "}
-                    <Box component="span" sx={{ color: "text.primary", fontWeight: 950 }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 950 }}
+                    >
                       {meta.isActive}
                     </Box>
                   </Typography>
 
-                  {meta.role === "ADMIN" ? (
-                    <Button
-                      onClick={handleToggleActive}
-                      variant="outlined"
-                      sx={{
-                        mt: 1.5,
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 900,
-                        borderColor: "divider",
-                        color: "text.primary",
-                        backgroundColor: alpha(theme.palette.background.paper, 0.55),
-                        backdropFilter: "blur(12px)",
-                        "&:hover": { backgroundColor: theme.palette.action.hover, borderColor: "divider" },
-                      }}
-                    >
-                      Activer/Désactiver
-                    </Button>
-                  ) : (
-                    <Typography sx={{ mt: 1.6, fontSize: 12, color: "text.secondary" }}>
-                      Seul un admin peut activer/désactiver un compte.
-                    </Typography>
-                  )}
+                  
                 </SurfaceCard>
               </Box>
             </SurfaceCard>
           </Stack>
         </Box>
       </SurfaceCard>
+
+      {/* Password Change Modal Component */}
+      <PasswordChangeModal
+        open={openPasswordModal}
+        onClose={handleClosePasswordModal}
+      />
     </Box>
   );
 }

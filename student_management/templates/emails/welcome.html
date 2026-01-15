@@ -1,13 +1,166 @@
 <!doctype html>
-<html>
-  <body style="font-family: Arial, sans-serif;">
-    <h2>Bienvenue 🎉</h2>
-    <p>Bonjour {{name}},</p>
-    <p>Votre compte a été créé avec succès. Sur Student Management, vous pourrez gérer vos informations personnelles.</p>
-    <p> nom d'utiliateur: {{username}}</p>
-    <p> mot de passe: {{password}}</p>
-    <p> nous vous recommandons de changer votre mot de passe après votre première connexion.</p>
-    <p>Nous sommes ravis de vous avoir parmi nous !</p>
-    <p>Connexion : <a href="{{loginLink}}">Se connecter</a></p>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bienvenue - Student Management</title>
+
+    <style>
+      /* Quelques règles safe (les clients email supportent partiellement) */
+      @media (max-width: 600px) {
+        .container { width: 100% !important; }
+        .px { padding-left: 16px !important; padding-right: 16px !important; }
+        .stack { display: block !important; width: 100% !important; }
+        .btn { display: block !important; width: 100% !important; }
+        .muted { font-size: 12px !important; }
+      }
+    </style>
+  </head>
+
+  <body style="margin:0; padding:0; background:#0B1020;">
+    <!-- Preheader (texte caché, aide Gmail) -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+      Votre compte Student Management est prêt. Connectez-vous pour commencer.
+    </div>
+
+    <!-- Background wrapper -->
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0B1020; padding:24px 12px;">
+      <tr>
+        <td align="center">
+
+          <!-- Container -->
+          <table role="presentation" class="container" width="640" cellspacing="0" cellpadding="0" border="0"
+            style="width:640px; max-width:640px; border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,0.12);
+                   background:rgba(17,26,51,0.88);">
+
+            <!-- Top gradient bar -->
+            <tr>
+              <td style="height:6px; background:linear-gradient(90deg, #7C3AED, #06B6D4);"></td>
+            </tr>
+
+            <!-- Header -->
+            <tr>
+              <td class="px" style="padding:22px 26px 10px 26px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <div style="font-size:12px; letter-spacing:2px; font-weight:700; color:rgba(229,231,235,0.65); text-transform:uppercase;">
+                        Student Management
+                      </div>
+                      <div style="margin-top:6px; font-size:22px; font-weight:800; color:#E5E7EB;">
+                        Bienvenue 🎉
+                      </div>
+                    </td>
+
+                    <td align="right" style="vertical-align:middle;">
+                      <!-- petit badge -->
+                      <div style="display:inline-block; padding:8px 10px; border-radius:999px;
+                                  border:1px solid rgba(255,255,255,0.14);
+                                  background:rgba(255,255,255,0.06);
+                                  color:rgba(229,231,235,0.80); font-size:12px; font-weight:700;">
+                        Accès sécurisé
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="margin-top:14px; height:1px; background:rgba(255,255,255,0.10);"></div>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td class="px" style="padding:16px 26px 6px 26px;">
+                <p style="margin:0; font-size:14px; line-height:1.7; color:rgba(229,231,235,0.85);">
+                  Bonjour <strong style="color:#FFFFFF;">{{name}}</strong>,
+                </p>
+
+                <p style="margin:10px 0 0 0; font-size:14px; line-height:1.7; color:rgba(229,231,235,0.78);">
+                  Votre compte a été créé avec succès. Sur <strong style="color:#FFFFFF;">Student Management</strong>, vous pourrez gérer vos étudiants, cours, inscriptions et notes avec une interface claire et rapide.
+                </p>
+
+                <!-- Credentials Card -->
+                <div style="margin-top:16px; border-radius:14px; overflow:hidden;
+                            border:1px solid rgba(255,255,255,0.12);
+                            background:rgba(255,255,255,0.06);">
+
+                  <div style="padding:14px 14px 10px 14px;">
+                    <div style="font-size:12px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase; color:rgba(229,231,235,0.65);">
+                      Vos identifiants
+                    </div>
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:10px;">
+                      <tr>
+                        <td class="stack" style="padding:8px 0; width:50%;">
+                          <div style="font-size:12px; color:rgba(229,231,235,0.65);">Nom d’utilisateur</div>
+                          <div style="margin-top:4px; font-size:14px; font-weight:800; color:#FFFFFF;">
+                            {{username}}
+                          </div>
+                        </td>
+
+                        <td class="stack" style="padding:8px 0; width:50%;">
+                          <div style="font-size:12px; color:rgba(229,231,235,0.65);">Mot de passe</div>
+                          <div style="margin-top:4px; font-size:14px; font-weight:800; color:#FFFFFF;">
+                            {{password}}
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div class="muted" style="margin-top:10px; font-size:13px; line-height:1.6; color:rgba(229,231,235,0.70);">
+                      🔐 Nous vous recommandons de <strong style="color:#FFFFFF;">changer votre mot de passe</strong> après votre première connexion.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CTA Button -->
+                <div style="margin-top:18px;">
+                  <a class="btn"
+                     href="{{loginLink}}"
+                     style="display:inline-block; text-decoration:none;
+                            padding:12px 16px; border-radius:12px;
+                            font-weight:900; font-size:14px; color:#0B1020;
+                            background:linear-gradient(90deg, #7C3AED, #06B6D4);
+                            box-shadow:0 18px 40px rgba(0,0,0,0.35);">
+                    Se connecter →
+                  </a>
+
+                  <div style="margin-top:10px; font-size:12px; color:rgba(229,231,235,0.55); line-height:1.6;">
+                    Si le bouton ne fonctionne pas, copiez-collez ce lien :
+                    <br />
+                    <span style="word-break:break-all; color:rgba(229,231,235,0.78);">{{loginLink}}</span>
+                  </div>
+                </div>
+
+                <p style="margin:16px 0 0 0; font-size:14px; line-height:1.7; color:rgba(229,231,235,0.75);">
+                  Nous sommes ravis de vous avoir parmi nous !
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td class="px" style="padding:18px 26px 22px 26px;">
+                <div style="height:1px; background:rgba(255,255,255,0.10); margin-bottom:14px;"></div>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="font-size:12px; color:rgba(229,231,235,0.55); line-height:1.6;">
+                      © {{year}} Student Management • REACT-TEAM<br />
+                      Ce message a été envoyé automatiquement, merci de ne pas répondre.
+                    </td>
+                    <td align="right" style="font-size:12px; color:rgba(229,231,235,0.55);">
+                      Support : {{supportEmail}}
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
