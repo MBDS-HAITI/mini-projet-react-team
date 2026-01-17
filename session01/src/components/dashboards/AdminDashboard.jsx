@@ -23,7 +23,7 @@ import QuickActionsCard from "./QuickActionsCard";
 import SectionSystemState from "./SectionSystemState";
 import RecentActivity from "./RecentActivity";
 import Configuration from "./Configuration";
-import AlertSystem from "./AlertSystem"
+import AlertSystem from "./Alertsystem";
 
 import { fetchAdminKpis, 
          fetchSystemStatus,
