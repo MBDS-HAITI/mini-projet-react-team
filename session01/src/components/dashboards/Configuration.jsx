@@ -13,7 +13,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function Configuration({configurations, surfaceCardSx, theme}) {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
+    if (!configurations.length) return null;
+
   return (
     <Paper elevation={0} sx={surfaceCardSx}>
             <Stack

@@ -2,36 +2,12 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-
-import { useState } from "react";
+import {formatDate}  from "../../utils/fdate";
 
 export default function RecentActivity({
-  surfaceCardSx,
-}) {
-   /* =======================
-       ACTIVITÉS RÉCENTES
-       ======================= */
-    const [activities] = useState([
-      {
-        id: 1,
-        action: "Création compte étudiant",
-        user: "admin@system",
-        date: "12/11/2025",
-      },
-      {
-        id: 2,
-        action: "Réinitialisation mot de passe",
-        user: "scolarite@system",
-        date: "11/11/2025",
-      },
-      {
-        id: 3,
-        action: "Blocage compte utilisateur",
-        user: "admin@system",
-        date: "10/11/2025",
-      },
-    ]);
-
+  surfaceCardSx, recentActivities
+})
+{
   return (
     <Paper elevation={0} sx={surfaceCardSx}>
       <Typography
@@ -49,7 +25,7 @@ export default function RecentActivity({
         disablePadding
         sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
       >
-        {activities.map((a) => (
+        {recentActivities.map((a) => (
           <ListItem
             key={a.id}
             disableGutters
@@ -65,7 +41,7 @@ export default function RecentActivity({
               {a.action}
             </Typography>
             <Typography sx={{ fontSize: 12, color: "text.muted" }}>
-              {a.user} • {a.date}
+              {a.user} • {formatDate(a.date)}
             </Typography>
           </ListItem>
         ))}

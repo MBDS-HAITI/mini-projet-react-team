@@ -6,15 +6,16 @@ import Paper from "@mui/material/Paper";
 import { useState } from "react";
 
   
-export default function SectionSytemState({surfaceCardSx}) {
-
+export default function SectionSystemState({surfaceCardSx, systemStats}) {
   
-  const [systemStats, setSystemStats] = useState({
-    activeUsers: 398,
-    blockedAccounts: 3,
-    failedLogins: 7,
-    academicYear: "2024 - 2025",
-  });
+  if (!systemStats) {
+  return (
+    <Paper elevation={0} sx={surfaceCardSx}>
+      Chargement de l’état du système...
+    </Paper>
+  );
+}
+
 
   return (
     <Paper elevation={0} sx={surfaceCardSx}>
@@ -38,14 +39,14 @@ export default function SectionSytemState({surfaceCardSx}) {
           color="success.main"
         />
         <SummaryItem
-          label="Comptes bloqués"
-          value={systemStats.blockedAccounts}
-          color="error.main"
-        />
-        <SummaryItem
           label="Connexions échouées"
           value={systemStats.failedLogins}
           color="warning.main"
+        />
+       <SummaryItem
+          label="Cours sans inscrits"
+          value={systemStats.coursesWithoutEnrollment}
+          color="error.main"
         />
         <SummaryItem
           label="Année académique"
