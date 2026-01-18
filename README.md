@@ -30,7 +30,7 @@ Notre groupe est formé par :
 ### Liens utils
 - Liens projet : [https://react-team.mbds2026.com/](https://react-team.mbds2026.com/)
 - Liens Youtube : []()
-- Liens Swagger : []()
+- Liens Swagger : [swagger-docs](https://api.react-team.mbds2026.com/api/v1/swagger/api-docs)
 
 ---
 ## Description
