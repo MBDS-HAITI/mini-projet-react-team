@@ -2,6 +2,37 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=21965272&assignment_repo_type=AssignmentRepo)
 # Project Final React
 
+## React-Team
+Notre groupe est formé par :
+- Stanley LAFLEUR
+- Mackey CHARLES
+- Dawens PIERRE
+- Sachy Edvaëlle BARREAU
+
+
+### Fonctionnalités de base notre projet
+
+- [x] Fonctionnalités de base du TP précédent
+- [x] Gestion des entités
+- [x] Api node.js
+- [x] Gestion des rôles
+- [x] Authentification et Sessions
+- [x] Dashboard statistique
+- [x] Containerisation avec Docker
+
+### Fonctionnalités Bonus
+- [x] Pipeline de déploiement CI/CD sur Hostinger
+- [x] Dark mode
+- [x] Envois d'email à l'enregistrement
+- [x] SSO Google
+- [x] Api Swagger pour la documentation
+
+### Liens utils
+- Liens projet : [https://react-team.mbds2026.com/](https://react-team.mbds2026.com/)
+- Liens Youtube : []()
+- Liens Swagger : []()
+
+---
 ## Description
 
 Dans ce projet, vous allez finaliser l'application de gestion des
