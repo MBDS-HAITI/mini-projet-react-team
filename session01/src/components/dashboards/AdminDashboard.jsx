@@ -1,9 +1,9 @@
 // src/components/pages/AdminDashboard.jsx (ou ton chemin)
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import DashboardHeader from "./DashboardHeader";
 import { ActionButton } from "../ActionButton";
-
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
 import {
@@ -11,23 +11,40 @@ import {
   GraduationCap,
   Shield,
   UserCog,
+  ClipboardList,
+  BookOpen,
+  FileText,
   CheckCircle,
   Edit,
   School,
 } from "lucide-react";
-import SectionSytemState from "./SectionSytemState";
 import KpiCards from "./KpiCards";
 import QuickActionsCard from "./QuickActionsCard";
+import SectionSystemState from "./SectionSystemState";
+import RecentActivity from "./RecentActivity";
 import Configuration from "./Configuration";
-import AlertSystem from "./Alertystem";
-import RecentActivity from "./recentActivity";
-import { useMemo } from "react";
+import AlertSystem from "./Alertsystem";
+
+import { fetchAdminKpis, 
+         fetchSystemStatus,
+         fetchAdminActivities,
+         fetchSystemConfiguration,
+         fetchSystemAlerts,
+       } from "../../api/routes/statistic-admin.api";
+
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const surfaceCardSx = {
+  // ============= States ============
+   const [kpis, setKpis] = useState([]);
+   const [systemStats, setSystemStats] = useState(null);
+   const [recentActivities, setRecentActivities] = useState([]);
+   const [configurations, setConfigurations] = useState([]);
+   const [alerts, setAlerts] = useState([]);
+
+   const surfaceCardSx = {
     borderRadius: 3,
     border: "1px solid",
     borderColor: "divider",
@@ -37,43 +54,49 @@ export default function AdminDashboard() {
     p: 3,
   };
 
-  const dashboards = useMemo(
-    () => [
-      {
-        key: "users",
-        title: "Utilisateurs",
-        value: 412,
-        subtitle: "Total",
-        icon: <Users size={18} />,
-        valueColor: "info.main",
-      },
-      {
-        key: "students",
-        title: "Étudiants",
-        value: 342,
-        subtitle: "Actifs",
-        icon: <GraduationCap size={18} />,
-        valueColor: "success.main",
-      },
-      {
-        key: "scolarite",
-        title: "Scolarité",
-        value: 4,
-        subtitle: "Comptes",
-        icon: <UserCog size={18} />,
-        valueColor: "primary.main",
-      },
-      {
-        key: "admins",
-        title: "Admins",
-        value: 2,
-        subtitle: "Actifs",
-        icon: <Shield size={18} />,
-        valueColor: "secondary.main",
-      },
-    ],
-    []
-  );
+  const iconMap = {
+  GraduationCap,
+  ClipboardList,
+  BookOpen,
+  FileText,
+  Users,
+};
+
+ useEffect(() => {
+  const load = async () => {
+    try {
+      const [kpisData, 
+             stats,
+             activitiesData,
+             configurationData,
+             alertsData,
+          ] = await Promise.all([
+        fetchAdminKpis(),
+        fetchSystemStatus(),
+        fetchAdminActivities(),
+        fetchSystemConfiguration(),
+        fetchSystemAlerts(),
+      ]);
+
+      setKpis(
+        (kpisData || []).map(kpi => ({
+          ...kpi,
+          icon: iconMap[kpi.icon] || iconMap.Users,
+        }))
+      );
+
+      setSystemStats(stats || []);
+      setRecentActivities(activitiesData || []);
+      setConfigurations(configurationData || []);
+      setAlerts(Array.isArray(alertsData) ? alertsData : []);
+
+    } catch (error) {
+      console.error("Erreur chargement dashboard admin :", error);
+    }
+  };
+
+  load();
+}, []);
 
   const actions = [
     {
@@ -101,68 +124,60 @@ export default function AdminDashboard() {
       onClick: () => navigate("/students"),
     },
   ];
-  const configurations = [
-    { label: "Années académiques", to: "/academicyears" },
-    { label: "Semestres", to: "/semester" },
-    { label: "Liste des Cours", to: "/courses" },
-  ];
 
-  return (
+ return (
+  <Box sx={{ maxWidth: 1280, mx: "auto", px: 2, py: 4 }}>
+    <DashboardHeader
+      title="Dashboard Administrateur"
+      description="Supervision et gestion du système"
+      level="ADMIN"
+    />
+
+    {/* ================= KPI ================= */}
+    <KpiCards dashboards={kpis} />
+
+    {/* ================= CONTENU CENTRAL ================= */}
     <Box
       sx={{
-        maxWidth: 1280,
-        mx: "auto",
-        px: 2,
-        py: 4,
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+        gap: 3,
+        mt: 3,
       }}
     >
-      {/* ================= HEADER ================= */}
-      <DashboardHeader
-        title="Dashboard Administrateur"
-        description="Supervision et gestion du système"
-        level="ADMIN"
-      />
+      {/* ======== COLONNE PRINCIPALE ======== */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        
+        {/* État du système */}
+        <SectionSystemState
+          surfaceCardSx={surfaceCardSx}
+          systemStats={systemStats}
+        />
 
-      {/* ================= KPI CARDS ================= */}
-      <KpiCards dashboards={dashboards} />
+        {/* Activités récentes */}
+        <RecentActivity
+          surfaceCardSx={surfaceCardSx}
+          recentActivities={recentActivities}
+        />
 
-      {/* ================= CONTENU CENTRAL ================= */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
-          gap: 3,
-        }}
-      >
-        {/* ======== COLONNE PRINCIPALE ======== */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {/* État du système */}
-          <SectionSytemState surfaceCardSx={surfaceCardSx} />
-
-          {/* Activités récentes */}
-          <RecentActivity surfaceCardSx={surfaceCardSx}/>
-
-          {/* ================= ACTIONS RAPIDES ================= */}
-          <QuickActionsCard
-            surfaceCardSx={surfaceCardSx}
-            ActionButtonComponent={ActionButton}
-            actions={actions}
-          />
-        </Box>
+        {/* Actions rapides */}
+        <QuickActionsCard
+          surfaceCardSx={surfaceCardSx}
+          ActionButtonComponent={ActionButton}
+          actions={actions}
+        />
+      </Box>
 
         {/* ======== ASIDE DROIT ======== */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {/* Configuration */}
-          <Configuration configurations={configurations} surfaceCardSx={surfaceCardSx} theme={theme}/>
+          <Configuration configurations={configurations} surfaceCardSx={surfaceCardSx}  theme={theme} />
 
           {/* Alertes système */}
-          <AlertSystem theme={theme} surfaceCardSx={surfaceCardSx}/>
-          
-        </Box>
+          <AlertSystem surfaceCardSx={surfaceCardSx} theme={theme} alerts={alerts} />
+
       </Box>
     </Box>
-  );
+  </Box>
+);
 }

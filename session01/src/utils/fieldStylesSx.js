@@ -31,3 +31,14 @@ export const fieldSx = {
 export const checkboxSx = { color: "white", "&.Mui-checked": { color: "#a78bfa" } };
 export const btnCancelSx = { bgcolor: "#1e3a8a" };
 export const btnSaveSx = { bgcolor: "#701a75" };
+
+export const surfaceCardSx = (theme) => ({
+  borderRadius: 3,
+  border: "1px solid",
+  borderColor: "divider",
+  backgroundColor: theme.palette.background.paperGlass,
+  boxShadow: theme.palette.effects?.containerShadow,
+  backdropFilter: "blur(14px)",
+  p: 3,
+});
+
