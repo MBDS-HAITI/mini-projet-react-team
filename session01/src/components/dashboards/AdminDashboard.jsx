@@ -21,7 +21,7 @@ import {
 import KpiCards from "./KpiCards";
 import QuickActionsCard from "./QuickActionsCard";
 import SectionSystemState from "./SectionSystemState";
-import RecentActivity from "./RecentActivity";
+import RecentActivity from "./RecentActivityDash";
 import Configuration from "./Configuration";
 import AlertSystem from "./Alertsystem";
 

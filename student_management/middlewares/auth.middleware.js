@@ -17,7 +17,7 @@ export const authorize = async (req, res, next)=>{
         }
 
         const decoded = jwt.verify(token, JWT_SECRET)
-        const user = await User.findById(decoded.id).select('-password').populate("student");;
+        const user = await User.findById(decoded.id).select('-password').populate("student");
         
         if(!user || !user.isActive){
             return res.status(401).json({message: "Unauthorized"})

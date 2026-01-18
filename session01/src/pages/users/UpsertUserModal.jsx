@@ -177,7 +177,7 @@ export default function UpsertUserModal({
           {/* Student (si role STUDENT) */}
           {formik.values.role === "STUDENT" && (
             <FormField formik={formik} name="student" label="Étudiant" select>
-              {students.map((s) => (
+              {students.filter((s) => !s.haveAccount).map((s) => (
                 <MenuItem key={s._id} value={s._id}>
                   {s.studentCode ? `${s.studentCode} - ` : ""}
                   {s.firstName} {s.lastName}
