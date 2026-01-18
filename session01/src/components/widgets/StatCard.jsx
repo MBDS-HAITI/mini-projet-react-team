@@ -11,7 +11,9 @@ export default function StatCard({
   valueColor,
 }) {
   const theme = useTheme();
-  const Icon = icon; // 👈 clé du fix
+  // const Icon = typeof icon === "function" ? icon : null;
+
+  const Icon = icon; 
 
   return (
     <Paper

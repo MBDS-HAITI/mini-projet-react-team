@@ -28,8 +28,8 @@ export default function RecentActivity({
       >
         {recentActivities.map((a) => (
           <ListItem
-            key={a.id}
-            disableGutters
+            key={`${a.user}-${a.action}-${a.date}`}
+            // disableGutters
             sx={{
               display: "flex",
               justifyContent: "space-between",

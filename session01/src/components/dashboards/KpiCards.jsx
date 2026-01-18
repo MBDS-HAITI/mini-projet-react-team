@@ -30,7 +30,8 @@ export default function KpiCards({ dashboards }) {
           value={item.value}
           subtitle={item.subtitle}
           hint={item.hint}
-          icon={typeof item.icon === "function" ? item.icon : null}
+          icon={item.icon}
+          // icon={typeof item.icon === "function" ? item.icon : null}
           valueColor={item.valueColor}
         />
       ))}

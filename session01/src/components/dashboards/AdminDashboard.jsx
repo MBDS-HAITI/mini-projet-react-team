@@ -25,12 +25,13 @@ import RecentActivity from "./RecentActivity";
 import Configuration from "./Configuration";
 import AlertSystem from "./Alertsystem";
 
-import { fetchAdminKpis, 
-         fetchSystemStatus,
-         fetchAdminActivities,
-         fetchSystemConfiguration,
-         fetchSystemAlerts,
-       } from "../../api/routes/statistic-admin.api";
+import {
+  fetchAdminKpis,
+  fetchSystemStatus,
+  fetchAdminActivities,
+  fetchSystemConfiguration,
+  fetchSystemAlerts,
+} from "../../api/routes/statistic-admin.api";
 
 
 export default function AdminDashboard() {
@@ -38,13 +39,13 @@ export default function AdminDashboard() {
   const theme = useTheme();
 
   // ============= States ============
-   const [kpis, setKpis] = useState([]);
-   const [systemStats, setSystemStats] = useState(null);
-   const [recentActivities, setRecentActivities] = useState([]);
-   const [configurations, setConfigurations] = useState([]);
-   const [alerts, setAlerts] = useState([]);
+  const [kpis, setKpis] = useState([]);
+  const [systemStats, setSystemStats] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [configurations, setConfigurations] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
-   const surfaceCardSx = {
+  const surfaceCardSx = {
     borderRadius: 3,
     border: "1px solid",
     borderColor: "divider",
@@ -55,48 +56,62 @@ export default function AdminDashboard() {
   };
 
   const iconMap = {
-  GraduationCap,
-  ClipboardList,
-  BookOpen,
-  FileText,
-  Users,
-};
-
- useEffect(() => {
-  const load = async () => {
-    try {
-      const [kpisData, 
-             stats,
-             activitiesData,
-             configurationData,
-             alertsData,
-          ] = await Promise.all([
-        fetchAdminKpis(),
-        fetchSystemStatus(),
-        fetchAdminActivities(),
-        fetchSystemConfiguration(),
-        fetchSystemAlerts(),
-      ]);
-
-      setKpis(
-        (kpisData || []).map(kpi => ({
-          ...kpi,
-          icon: iconMap[kpi.icon] || iconMap.Users,
-        }))
-      );
-
-      setSystemStats(stats || []);
-      setRecentActivities(activitiesData || []);
-      setConfigurations(configurationData || []);
-      setAlerts(Array.isArray(alertsData) ? alertsData : []);
-
-    } catch (error) {
-      console.error("Erreur chargement dashboard admin :", error);
-    }
+    GraduationCap,
+    ClipboardList,
+    Shield,
+    BookOpen,
+    FileText,
+    Users,
   };
 
-  load();
-}, []);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [kpisData,
+          stats,
+          activitiesData,
+          configurationData,
+          alertsData,
+        ] = await Promise.all([
+          fetchAdminKpis(),
+          fetchSystemStatus(),
+          fetchAdminActivities(),
+          fetchSystemConfiguration(),
+          fetchSystemAlerts(),
+        ]);
+
+        setKpis(
+          (kpisData || []).map(kpi => {
+            const iconComponent = iconMap[kpi.icon];
+
+            console.log("KPI:", kpi.title, "icon:", kpi.icon, "mapped:", iconComponent);
+
+            return {
+              ...kpi,
+              icon: iconComponent ?? Users, // fallback sûr
+            };
+          })
+        );
+
+        // setKpis(
+        //   (kpisData || []).map(kpi => ({
+        //     ...kpi,
+        //     icon: iconMap[kpi.icon] || iconMap.Users,
+        //   }))
+        // );
+
+        setSystemStats(stats || []);
+        setRecentActivities(activitiesData || []);
+        setConfigurations(configurationData || []);
+        setAlerts(Array.isArray(alertsData) ? alertsData : []);
+
+      } catch (error) {
+        console.error("Erreur chargement dashboard admin :", error);
+      }
+    };
+
+    load();
+  }, []);
 
   const actions = [
     {
@@ -125,59 +140,59 @@ export default function AdminDashboard() {
     },
   ];
 
- return (
-  <Box sx={{ maxWidth: 1280, mx: "auto", px: 2, py: 4 }}>
-    <DashboardHeader
-      title="Dashboard Administrateur"
-      description="Supervision et gestion du système"
-      level="ADMIN"
-    />
+  return (
+    <Box sx={{ maxWidth: 1280, mx: "auto", px: 2, py: 4 }}>
+      <DashboardHeader
+        title="Dashboard Administrateur"
+        description="Supervision et gestion du système"
+        level="ADMIN"
+      />
 
-    {/* ================= KPI ================= */}
-    <KpiCards dashboards={kpis} />
+      {/* ================= KPI ================= */}
+      <KpiCards dashboards={kpis} />
 
-    {/* ================= CONTENU CENTRAL ================= */}
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
-        gap: 3,
-        mt: 3,
-      }}
-    >
-      {/* ======== COLONNE PRINCIPALE ======== */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        
-        {/* État du système */}
-        <SectionSystemState
-          surfaceCardSx={surfaceCardSx}
-          systemStats={systemStats}
-        />
+      {/* ================= CONTENU CENTRAL ================= */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+          gap: 3,
+          mt: 3,
+        }}
+      >
+        {/* ======== COLONNE PRINCIPALE ======== */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
 
-        {/* Activités récentes */}
-        <RecentActivity
-          surfaceCardSx={surfaceCardSx}
-          recentActivities={recentActivities}
-        />
+          {/* État du système */}
+          <SectionSystemState
+            surfaceCardSx={surfaceCardSx}
+            systemStats={systemStats}
+          />
 
-        {/* Actions rapides */}
-        <QuickActionsCard
-          surfaceCardSx={surfaceCardSx}
-          ActionButtonComponent={ActionButton}
-          actions={actions}
-        />
-      </Box>
+          {/* Activités récentes */}
+          <RecentActivity
+            surfaceCardSx={surfaceCardSx}
+            recentActivities={recentActivities}
+          />
+
+          {/* Actions rapides */}
+          <QuickActionsCard
+            surfaceCardSx={surfaceCardSx}
+            ActionButtonComponent={ActionButton}
+            actions={actions}
+          />
+        </Box>
 
         {/* ======== ASIDE DROIT ======== */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {/* Configuration */}
-          <Configuration configurations={configurations} surfaceCardSx={surfaceCardSx}  theme={theme} />
+          <Configuration configurations={configurations} surfaceCardSx={surfaceCardSx} theme={theme} />
 
           {/* Alertes système */}
           <AlertSystem surfaceCardSx={surfaceCardSx} theme={theme} alerts={alerts} />
 
+        </Box>
       </Box>
     </Box>
-  </Box>
-);
+  );
 }
