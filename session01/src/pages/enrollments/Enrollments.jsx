@@ -139,7 +139,7 @@ export default function EnrollmentsPage() {
     }
   };
 
-  const title = canManage ? "Liste des Inscriptions" : "Mes Inscriptions";
+  const title = canManage ? "Liste des Enrôlements" : "Mes Enrôlements";
 
   const tableHeaders = [
     "Étudiant",

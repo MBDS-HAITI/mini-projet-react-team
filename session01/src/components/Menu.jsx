@@ -18,7 +18,7 @@ const menuItems = [
     roles: [ADMIN_ROLE, SCOLARITE_ROLE],
   },
   {
-    label: "Inscriptions",
+    label: "Enrôlements",
     link: "/enrollments",
     roles: [ADMIN_ROLE, SCOLARITE_ROLE, STUDENT_ROLE],
   },

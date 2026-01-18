@@ -107,6 +107,7 @@ export default function UpsertGradeModal({
     },
   });
 
+
   //  Reset quand on ferme le modal
   useEffect(() => {
     if (!open) {
@@ -115,7 +116,7 @@ export default function UpsertGradeModal({
     }
   }, [open]);
 
-  const title = isEdit ? "Modifier un Semestre" : "Ajouter un Semestre";
+  const title = isEdit ? "Modifier une note" : "Ajouter une note";
 
   return (
     <Dialog
